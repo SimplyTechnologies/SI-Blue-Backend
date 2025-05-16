@@ -1,9 +1,9 @@
-const usersRouter = require("./user")
-const vehiclesRouter = require("./vehicle")
-const customersRouter = require("./customer")
+const usersRouter = require('./user');
+const vehiclesRouter = require('./vehicle');
+const customersRouter = require('./customer');
 
 module.exports = {
-    usersRouter,
-    vehiclesRouter,
-    customersRouter
-}
+  usersRouter,
+  vehiclesRouter,
+  customersRouter,
+};

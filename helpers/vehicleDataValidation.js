@@ -1,0 +1,1 @@
+const checkVehicleVin = data => {};
