@@ -1,9 +1,9 @@
-const User = require("./User")
-const Vehicle = require("./Vehicle")
-const Customer = require("./Customer")
+const User = require('./User');
+const Vehicle = require('./Vehicle');
+const Customer = require('./Customer');
 
 module.exports = {
-    User,
-    Vehicle,
-    Customer
-}
+  User,
+  Vehicle,
+  Customer,
+};
