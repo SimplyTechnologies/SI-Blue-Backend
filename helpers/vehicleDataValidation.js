@@ -1,4 +1,1 @@
-const checkVehicleVin = ( data ) => {
-  
-
-}
+const checkVehicleVin = data => {};

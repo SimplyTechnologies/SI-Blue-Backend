@@ -1,27 +1,17 @@
-const createVehicle = async (vehicleData) => {
+const createVehicle = async vehicleData => {};
 
-}
+const getVehicleById = async id => {};
 
-const getVehicleById = async (id) => {
+const getAllVehicles = async () => {};
 
-}
+const deleteVehicleById = async () => {};
 
-const getAllVehicles = async () => {
-
-}
-
-const deleteVehicleById = async () => {
-
-}
-
-const updateVehicleById = async (updatedData) => {
-
-}
+const updateVehicleById = async updatedData => {};
 
 module.exports = {
-    createVehicle,
-    getAllVehicles,
-    getVehicleById,
-    deleteVehicleById,
-    updateVehicleById
-}
+  createVehicle,
+  getAllVehicles,
+  getVehicleById,
+  deleteVehicleById,
+  updateVehicleById,
+};

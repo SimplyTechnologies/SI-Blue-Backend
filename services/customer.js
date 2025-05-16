@@ -1,7 +1,5 @@
-const createCustomer = async (customerData) => {
-
-}
+const createCustomer = async customerData => {};
 
 module.exports = {
-    createCustomer
-}
+  createCustomer,
+};

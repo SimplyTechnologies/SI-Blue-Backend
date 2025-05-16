@@ -1,27 +1,17 @@
-const createUser = async (userData) => {
+const createUser = async userData => {};
 
-}
+const getUserById = async id => {};
 
-const getUserById = async (id) => {
+const deleteUserById = async id => {};
 
-}
+const getAllUsers = async () => {};
 
-const deleteUserById = async (id) => {
-
-}
-
-const getAllUsers = async () => {
-
-}
-
-const updateUser = async (updatedData) => {
-
-}
+const updateUser = async updatedData => {};
 
 module.exports = {
-    createUser,
-    getAllUsers,
-    getUserById,
-    updateUser,
-    deleteUserById
-}
+  createUser,
+  getAllUsers,
+  getUserById,
+  updateUser,
+  deleteUserById,
+};
