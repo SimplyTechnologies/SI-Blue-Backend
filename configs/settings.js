@@ -1,5 +1,5 @@
 const settings = {
-    APP_PORT: process.env.APP_PORT
-}
+  APP_PORT: process.env.APP_PORT,
+};
 
-module.exports = settings
+module.exports = settings;
