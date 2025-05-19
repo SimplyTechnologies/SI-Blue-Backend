@@ -34,6 +34,7 @@ const loginUser = async (req, res) => {
         return res.status(401).json({message: "Email or password invalid"})
     }
     const loginUser = { email, password }
+    console.log(loginUser)
     const token = jwt.sign(loginUser, process.env.JWT_SECRET, {expiresIn:"120s"})
     return res.status(200).json({token,message: "User login successfully"})
 
@@ -45,6 +46,10 @@ const loginUser = async (req, res) => {
 
    }
 
+}
+
+const  resetPassword = async () => {
+    
 }
 
 const getAllUsers = async (req, res) => {

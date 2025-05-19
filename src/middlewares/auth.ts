@@ -1,4 +1,4 @@
-import auth from"../helpers/auth"
+import auth from"../helpers/auth.js"
 import bcrypt from "bcrypt"
 
 const registerUser = async (req, res, next) => {
@@ -16,7 +16,6 @@ const registerUser = async (req, res, next) => {
             name,
             hashedPassword
         }
-        console.log(registeredUser)
 
         req.user = registeredUser
         next()
@@ -24,10 +23,10 @@ const registerUser = async (req, res, next) => {
 
     } catch(err) {
         console.error(err)
-        res.status(400).json({message: "Please provide us email, name, password and confirmedPassword"})
+        res.status(400).json({ message: "Please provide us email, name, password and confirmedPassword"})
     }
 }
 
-export default {
+export  {
     registerUser
 }

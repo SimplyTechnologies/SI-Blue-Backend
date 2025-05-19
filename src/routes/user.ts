@@ -1,10 +1,10 @@
 import {Router} from "express"
-import { userController } from "../controllers"
-import registerUser from "../middlewares/auth"
+import { userController } from "../controllers/index.js"
+import {registerUser} from "../middlewares/auth.js"
 
 const router = Router()
 
-router.post("/register", userController.registerUser)
+router.post("/register",registerUser, userController.registerUser)
 
 router.post("/login", userController.loginUser)
 
