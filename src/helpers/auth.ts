@@ -1,0 +1,68 @@
+const checkFirstName = (firstName) => {
+    if (typeof firstName !== "string") {
+      throw Error("Firstname must be a string")
+    }
+    if (firstName.length < 3) {
+      throw Error("Firstname length must be at least 3 characters")
+    }
+    return firstName
+  }
+  
+  const checkLastName = (lastName) => {
+    if (typeof lastName !== "string") {
+      throw Error("Lastname must be a string")
+    }
+    if (lastName.length < 3) {
+      throw Error("Lastname length must be at least 3 characters")
+    }
+    return lastName
+  }
+  
+  const checkPhoneNumber = (phoneNumber) => {
+    if (typeof phoneNumber !== "string") {
+      throw Error("Phone number must be a string")
+    }
+    
+    const trimmedNumber = phoneNumber.trim()
+    
+    if (trimmedNumber.length === 0) {
+      throw Error("Phone number cannot be empty")
+    }
+  
+   
+    const phoneRegex = /^\+?\d{10,15}$/
+    if (!phoneRegex.test(trimmedNumber)) {
+      throw Error("Please provide a valid phone number")
+    }
+    
+    return trimmedNumber
+  }
+  
+  const checkEmail = (email) => {
+    if (typeof email !== "string") {
+      throw Error("Email must be a string")
+    }
+    const trimmedEmail = email.trim()
+    if (trimmedEmail.length === 0) {
+      throw Error("Email cannot be empty")
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+    if (!emailRegex.test(trimmedEmail)) {
+      throw Error("Please provide a valid email address")
+    }
+    
+    return trimmedEmail
+  }
+
+  const checkPassword = (password) => {
+    return password
+  }
+  
+ export default {
+    checkFirstName,
+    checkLastName,
+    checkPhoneNumber,
+    checkEmail,
+    checkPassword
+  }
+  
