@@ -1,17 +1,17 @@
-import { Sequelize } from "sequelize"
-import config  from "./config"
+import { Sequelize } from 'sequelize';
+import config from './config';
 
 const sequelizeRoot = new Sequelize(
-    process.env.DEFAULT_DB  as string,
-    config.database.username,
-    config.database.password,
-    {
-        host: config.database.host,
-        port: config.database.port,
-        logging: false,
-        dialect: "postgres"
-    },
-)
+  process.env.DEFAULT_DB as string,
+  config.database.username,
+  config.database.password,
+  {
+    host: config.database.host,
+    port: config.database.port,
+    logging: false,
+    dialect: 'postgres',
+  },
+);
 
 const ensureDatabaseExists = async () => {
   try {
@@ -54,4 +54,4 @@ const connectToDB = async () => {
   return sequelize;
 };
 
-export default connectToDB
+export default connectToDB;

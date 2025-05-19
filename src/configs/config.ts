@@ -1,5 +1,5 @@
-import dotenv from "dotenv"
-dotenv.config()
+import dotenv from 'dotenv';
+dotenv.config();
 
 const ENV = process.env.NODE_ENV || 'development';
 
@@ -32,5 +32,5 @@ const envConfig = {
   },
 };
 
-const config =  { ...baseConfig, ...envConfig[ENV] }
-export default config
+const config = { ...baseConfig, ...envConfig[ENV] };
+export default config;

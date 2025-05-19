@@ -9,9 +9,9 @@ const deleteVehicleById = async () => {};
 const updateVehicleById = async updatedData => {};
 
 export default {
-    createVehicle,
-    getAllVehicles,
-    getVehicleById,
-    deleteVehicleById,
-    updateVehicleById
-}
+  createVehicle,
+  getAllVehicles,
+  getVehicleById,
+  deleteVehicleById,
+  updateVehicleById,
+};

@@ -1,5 +1,5 @@
-import { Model, DataTypes } from "sequelize"
-const { Vehicle } = require("./vehiclesModel")
+import { Model, DataTypes } from 'sequelize';
+const { Vehicle } = require('./vehiclesModel');
 
 class User extends Model {
   static initModel(sequelize) {
@@ -63,6 +63,4 @@ class User extends Model {
   }
 }
 
-export {
-  User
-}
+export { User };

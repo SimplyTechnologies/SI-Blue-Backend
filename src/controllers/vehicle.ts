@@ -6,9 +6,9 @@ const deleteVehicleById = async (req, res) => {};
 
 const gerAllVehicles = async (req, res) => {};
 
-export default{
-    createVehicle,
-    gerAllVehicles,
-    deleteVehicleById,
-    getVehicleById
-}
+export default {
+  createVehicle,
+  gerAllVehicles,
+  deleteVehicleById,
+  getVehicleById,
+};
