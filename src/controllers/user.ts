@@ -1,51 +1,47 @@
-import { userService } from '../services';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { userService } from '../services';
 
-const registerUser = async (req, res) => {
+const getUserById = async (req, res) => {
   try {
-    const registerUser = req.user;
-    await userService.createUser(registerUser);
-    res.status(201).json({ message: 'User registered succesfully' });
+    const accessToken = req.cookies.accessToken;
+    if (!accessToken) {
+      return res.status(401).json({ message: 'Access token not found' });
+    }
+
+    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+    const user = await userService.getUserById(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    const { password, ...userWithoutPassword } = user;
+    res.status(200).json({ user: userWithoutPassword.dataValues });
+
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-const getUserById = async (req, res) => {};
+const forgetPassword = async (req, res) => {
 
-const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password required' });
-    }
-    const founded = await userService.getUserByEmail(email);
-    if (!founded) {
-      return res.status(401).json({ message: 'Email or password are invalid' });
-    }
-    const compared = await bcrypt.compare(password, founded.password);
-    if (!compared) {
-      return res.status(401).json({ message: 'Email or password invalid' });
-    }
-    const loginUser = { email, password };
-    console.log(loginUser);
-    const token = jwt.sign(loginUser, process.env.JWT_SECRET, { expiresIn: '120s' });
-    return res.status(200).json({ token, message: 'User login successfully' });
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ message: 'Internal server error' });
-  }
 };
 
-const resetPassword = async () => {};
+const requestPasswordReset = async (res, req) => {
+
+}
+
+const refreshToken = async (req, res) => {
+
+}
 
 const getAllUsers = async (req, res) => {};
 
 export default {
-  registerUser,
   getAllUsers,
   getUserById,
-  loginUser,
+  forgetPassword,
+  requestPasswordReset,
+  refreshToken
 };

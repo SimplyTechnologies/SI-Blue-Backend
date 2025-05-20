@@ -5,7 +5,7 @@ const customerDataValidate = (req, res, next) => {
   try {
     const email = auth.checkEmail(req.body.email);
     const founded = customerService.getCustomerByEmail(email);
-    if (founded) {
+    if (!founded) {
       throw new Error('Customer already exists');
     }
 

@@ -1,4 +1,5 @@
 const checkFirstName = firstName => {
+  console.log(firstName)
   if (typeof firstName !== 'string') {
     throw Error('Firstname must be a string');
   }
@@ -53,9 +54,25 @@ const checkEmail = email => {
   return trimmedEmail;
 };
 
-const checkPassword = password => {
+const checkPassword = (password) => {
+  if (typeof password != "string") {
+      throw Error("Password must be a string");
+  }
+  if (password.length < 8){
+      throw Error("Password must be at least 8 characters");
+  }
+  if (!/[a-zA-Z]/.test(password)) {
+      throw Error("Password must include at least one letter");
+    }
+  if (!/[0-9]/.test(password)) {
+      throw Error("Password must include at least one digit");
+  }
+  if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      throw Error("Password must include at least one symbol");
+  }
+  
   return password;
-};
+}
 
 export default {
   checkFirstName,
