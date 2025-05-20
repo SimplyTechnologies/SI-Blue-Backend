@@ -12,7 +12,7 @@ const sequelizeRoot = new Sequelize(
     dialect: 'postgres',
   },
 );
-console.log(sequelizeRoot)
+
 
 const ensureDatabaseExists = async () => {
   try {

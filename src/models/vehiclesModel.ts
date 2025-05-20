@@ -49,6 +49,10 @@ const defineVehicleModel =  (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false
       },
+      sold: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false
+      },
       makeId: {
         type: DataTypes.INTEGER,
         allowNull: false,
