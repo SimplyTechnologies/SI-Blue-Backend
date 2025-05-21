@@ -53,46 +53,46 @@ const defineVehicleModel =  (sequelize) => {
         type: DataTypes.BOOLEAN,
         allowNull: false
       },
-      makeId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-        model: Make,
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-      },
-    userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: User, 
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
-      },
-    customerId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: Customer,
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
-      },
-      modelId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: CarModel,
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'CASCADE',
-      },
+      // makeId: {
+      //   type: DataTypes.INTEGER,
+      //   allowNull: false,
+      //   references: {
+      //   model: Make,
+      //   key: 'id',
+      // },
+      // onDelete: 'CASCADE',
+      // onUpdate: 'CASCADE',
+      // },
+    // userId: {
+    //     type: DataTypes.INTEGER,
+    //     allowNull: false,
+    //     references: {
+    //       model: User, 
+    //       key: 'id',
+    //     },
+    //     onUpdate: 'CASCADE',
+    //     onDelete: 'CASCADE',
+    //   },
+    // customerId: {
+    //     type: DataTypes.INTEGER,
+    //     allowNull: false,
+    //     references: {
+    //       model: Customer,
+    //       key: 'id',
+    //     },
+    //     onUpdate: 'CASCADE',
+    //     onDelete: 'CASCADE',
+    //   },
+    //   modelId: {
+    //     type: DataTypes.INTEGER,
+    //     allowNull: false,
+    //     references: {
+    //       model: CarModel,
+    //       key: 'id',
+    //     },
+    //     onUpdate: 'CASCADE',
+    //     onDelete: 'CASCADE',
+    //   },
     },
     {
       tableName: 'vehicle',
