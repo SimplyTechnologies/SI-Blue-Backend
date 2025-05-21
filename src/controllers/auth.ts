@@ -115,8 +115,23 @@ const refreshAccessToken = async (req, res) => {
   }
 };
 
+const logoutUser = async (req, res) => {
+  try {
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+
+    return res.status(200).json({
+      message: 'Successfully logged out',
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export default {
   registerUser,
   loginUser,
   refreshAccessToken,
+  logoutUser,
 };

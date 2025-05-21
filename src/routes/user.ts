@@ -17,6 +17,7 @@ router.get('/users', checkRole('admin'), userController.getAllUsers)
 
 router.get('/profile', userController.getUserById)
 
+router.post('/logout', authController.logoutUser);
 
 
 export default router;
