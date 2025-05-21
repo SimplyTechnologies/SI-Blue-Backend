@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import customerDataValidate from '../middlewares/customerDataValidator.js';
-import { customerController } from '../controllers/index.js';
+import customerController from '../controllers/customer.js'
+
 
 const router = Router();
 

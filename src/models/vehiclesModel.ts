@@ -63,7 +63,7 @@ const defineVehicleModel =  (sequelize) => {
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE',
       },
-      userId: {
+    userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -73,7 +73,7 @@ const defineVehicleModel =  (sequelize) => {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       },
-      customerId: {
+    customerId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {

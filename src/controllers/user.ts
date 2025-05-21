@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { userService } from '../services';
 
-const getUserById = async (req, res) => {
+ const getUserById = async (req, res) => {
   try {
     const accessToken = req.cookies.accessToken;
     if (!accessToken) {
@@ -17,31 +17,20 @@ const getUserById = async (req, res) => {
 
     const { password, ...userWithoutPassword } = user;
     res.status(200).json({ user: userWithoutPassword.dataValues });
-
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-const forgetPassword = async (req, res) => {
+ const forgetPassword = async (req, res) => {};
 
-};
+ const requestPasswordReset = async (res, req) => {};
 
-const requestPasswordReset = async (res, req) => {
+ const refreshToken = async (req, res) => {};
 
-}
-
-const refreshToken = async (req, res) => {
-
-}
-
-const getAllUsers = async (req, res) => {};
-
-export default {
-  getAllUsers,
-  getUserById,
-  forgetPassword,
-  requestPasswordReset,
-  refreshToken
-};
+ const getAllUsers = async (req, res) => {};
+ 
+ export default {
+  getUserById
+ }

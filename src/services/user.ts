@@ -1,20 +1,17 @@
-import { User } from "../models/usersModel";
+import { User } from '../models/usersModel';
 
-const createUser = async (userData) => {
- 
-  const user = await User.create({ 
+const createUser = async userData => {
+  const user = await User.create({
     first_name: userData.firstname,
     last_name: userData.lastname,
     phone_number: userData.phonenumber,
     password: userData.password,
-    email: userData.email
-   });
- 
+    email: userData.email,
+  });
 };
 
-
 const getUserById = async id => {
-  return await User.findByPk(id, { attributes: { exclude: ['password'] } })
+  return await User.findByPk(id, { attributes: { exclude: ['password'] } });
 };
 
 const deleteUserById = async id => {};
@@ -29,11 +26,9 @@ const getUserByEmail = async email => {
   const user = await User.findOne({ where: { email } });
   if (!user) return null;
   return user;
-
-    
 };
 
-const getUserProfile = async () => {}
+const getUserProfile = async () => {};
 
 export default {
   createUser,

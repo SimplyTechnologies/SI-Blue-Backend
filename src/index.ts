@@ -1,26 +1,34 @@
 import express from 'express';
+import passport from 'passport';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import config from './configs/config.js';
-import { initModels } from './models/index.js';
 import { usersRouter, vehiclesRouter } from './routes/index.js';
 import { customersRouter } from './routes/index.js';
-import cookieParser from "cookie-parser"
-import cors from "cors"
 import { syncDatabase } from './configs/sync.js';
+import { configurePassport } from './configs/passport.js';
+import autRoutes from './routes/auth.js';
 
 const app = express();
 
 app.use(express.json());
-app.use(cookieParser())
-app.use(cors({
-    credentials:true,
-    origin:["http://localhost:5173", "http://localhost:5174"]
-  }))
+app.use(cookieParser());
+app.use(
+  cors({
+    credentials: true,
+    origin: ['http://localhost:5173', 'http://localhost:5174'],
+  }),
+);
+configurePassport();
+
+app.use(passport.initialize());
 
 const port: number = config.port;
 
 app.use('/api/users', usersRouter);
 app.use('/api/vehicles', vehiclesRouter);
 app.use('/api/customers', customersRouter);
+app.use('/api/auth', autRoutes);
 
 syncDatabase()
   .then(() => {

@@ -1,5 +1,5 @@
-const checkFirstName = firstName => {
-  console.log(firstName)
+export const checkFirstName = firstName => {
+  console.log(firstName);
   if (typeof firstName !== 'string') {
     throw Error('Firstname must be a string');
   }
@@ -9,7 +9,7 @@ const checkFirstName = firstName => {
   return firstName;
 };
 
-const checkLastName = lastName => {
+export const checkLastName = lastName => {
   if (typeof lastName !== 'string') {
     throw Error('Lastname must be a string');
   }
@@ -19,7 +19,7 @@ const checkLastName = lastName => {
   return lastName;
 };
 
-const checkPhoneNumber = phoneNumber => {
+export const checkPhoneNumber = phoneNumber => {
   if (typeof phoneNumber !== 'string') {
     throw Error('Phone number must be a string');
   }
@@ -38,7 +38,7 @@ const checkPhoneNumber = phoneNumber => {
   return trimmedNumber;
 };
 
-const checkEmail = email => {
+export const checkEmail = email => {
   if (typeof email !== 'string') {
     throw Error('Email must be a string');
   }
@@ -54,30 +54,22 @@ const checkEmail = email => {
   return trimmedEmail;
 };
 
-const checkPassword = (password) => {
-  if (typeof password != "string") {
-      throw Error("Password must be a string");
+export const checkPassword = password => {
+  if (typeof password != 'string') {
+    throw Error('Password must be a string');
   }
-  if (password.length < 8){
-      throw Error("Password must be at least 8 characters");
+  if (password.length < 8) {
+    throw Error('Password must be at least 8 characters');
   }
   if (!/[a-zA-Z]/.test(password)) {
-      throw Error("Password must include at least one letter");
-    }
+    throw Error('Password must include at least one letter');
+  }
   if (!/[0-9]/.test(password)) {
-      throw Error("Password must include at least one digit");
+    throw Error('Password must include at least one digit');
   }
   if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-      throw Error("Password must include at least one symbol");
+    throw Error('Password must include at least one symbol');
   }
-  
-  return password;
-}
 
-export default {
-  checkFirstName,
-  checkLastName,
-  checkPhoneNumber,
-  checkEmail,
-  checkPassword,
+  return password;
 };

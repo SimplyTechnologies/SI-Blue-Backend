@@ -1,22 +1,10 @@
 import { Router } from 'express';
-import { authController, userController } from '../controllers/index.js';
-import { registerUser } from '../middlewares/auth.js';
-import { verifyAccessToken, checkRole} from '../middlewares/accesTokenAuthMiddleware.js'
-import { userService } from '../services/index.js';
-
+import userController from '../controllers/user.js';
 
 const router = Router();
 
-router.post('/register', registerUser, authController.registerUser);
+//router.get('/users', checkRole('admin'), userController.getAllUsers)
 
-router.post('/login', authController.loginUser);
-
-router.post('/refresh-token', authController.refreshAccessToken)
-
-router.get('/users', checkRole('admin'), userController.getAllUsers)
-
-router.get('/profile', userController.getUserById)
-
-
+router.get('/profile', userController.getUserById);
 
 export default router;

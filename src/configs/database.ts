@@ -13,13 +13,12 @@ const sequelizeRoot = new Sequelize(
   },
 );
 
-
 const ensureDatabaseExists = async () => {
   try {
     const [result] = await sequelizeRoot.query(
       `SELECT datname FROM pg_database WHERE datname = '${process.env.DB_NAME}'`,
     );
-   
+
     if (result.length == 0) {
       await sequelizeRoot.query(`CREATE DATABASE ${process.env.DB_NAME}`);
       console.log(`DATABASE ${process.env.DB_NAME} CREATED...`);

@@ -31,6 +31,10 @@ const defineUserModel =  (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      role: {
+        type: DataTypes.ENUM('user', 'superadmin'),
+        defaultValue: 'user'
+      }
     },
     {
       tableName: 'users',

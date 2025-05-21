@@ -1,6 +1,6 @@
 import { customerService } from '../services/index.js';
 
-const createCustomer = async (req, res) => {
+ const createCustomer = async (req, res) => {
   try {
     const customerData = req.user;
     await customerService.createCustomer(customerData);
