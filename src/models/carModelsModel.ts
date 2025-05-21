@@ -16,17 +16,15 @@ const defineCarModel =  (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      makeId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-        model: Make,
-        key: 'id',
-      },
-      onDelete: 'CASCADE',
-
-      }
-      ,
+    //   makeId: {
+    //     type: DataTypes.INTEGER,
+    //     allowNull: false,
+    //     references: {
+    //     model: Make,
+    //     key: 'id',
+    //   },
+    //   onDelete: 'CASCADE',
+    // }
     },
     {
       tableName: 'car_model',

@@ -1,4 +1,6 @@
-export const createVehicle = async (req, res) => {};
+export const createVehicle = async (req, res) => {
+  
+};
 
 export const getVehicleById = async (req, res) => {};
 

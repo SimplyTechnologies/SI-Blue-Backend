@@ -19,7 +19,7 @@ export const maxAge = {
 const envConfig = {
   development: {
     database: {
-      host: process.env.DB_HOST || 'localhost',
+      host: process.env.DATABASE_URL || 'localhost',
       port: process.env.DB_PORT || 5432,
       username: process.env.DB_USER || 'vehicle_admin',
       password: process.env.DB_PASSWORD || 'vehicle',
@@ -28,7 +28,7 @@ const envConfig = {
   },
   production: {
     database: {
-      host: process.env.DB_HOST,
+      host: process.env.DATABASE_URL,
       port: process.env.DB_PORT,
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
