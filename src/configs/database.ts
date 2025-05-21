@@ -15,19 +15,18 @@ const sequelizeRoot = new Sequelize(
 
 const ensureDatabaseExists = async () => {
   try {
-    console.log(process.env.DB_NAME);
     const [result] = await sequelizeRoot.query(
       `SELECT datname FROM pg_database WHERE datname = '${process.env.DB_NAME}'`,
     );
 
-    if (result.length === 0) {
+    if (result.length == 0) {
       await sequelizeRoot.query(`CREATE DATABASE ${process.env.DB_NAME}`);
       console.log(`DATABASE ${process.env.DB_NAME} CREATED...`);
     } else {
       console.log(`DATABASE ${process.env.DB_NAME} already exists`);
     }
   } catch (err) {
-    console.log(err.stack);
+    console.log(err.message);
     process.exit(1);
   }
 };
@@ -46,7 +45,7 @@ const connectToDB = async () => {
     await sequelize.authenticate();
     console.log(`Connected to db ${process.env.DB_NAME}`);
   } catch (err) {
-    console.log(err.stack);
+    console.log(err.message);
     console.log(`Error while connecting db...`);
     process.exit(1);
   }

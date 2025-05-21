@@ -1,66 +1,47 @@
-import { Model, DataTypes } from 'sequelize';
-const { Vehicle } = require('./vehiclesModel');
+import { DataTypes } from "sequelize";
 
-class User extends Model {
-  static initModel(sequelize) {
-    User.init(
-      {
-        id: {
-          type: DataTypes.INTEGER,
-          primaryKey: true,
-          autoIncrement: true,
-        },
-        firstName: {
-          type: DataTypes.TEXT,
-          unique: true,
-          allowNull: false,
-        },
-        lastName: {
-          type: DataTypes.TEXT,
-          allowNull: false,
-        },
-        email: {
-          type: DataTypes.STRING,
-          unique: true,
-          allowNull: false,
-        },
-        phoneNumber: {
-          type: DataTypes.INTEGER,
-          allowNull: false,
-        },
-        userName: {
-          type: DataTypes.TEXT,
-          unique: true,
-          allowNull: false,
-        },
-        password: {
-          type: DataTypes.STRING,
-          allowNull: true,
-        },
-        carId: {
-          type: DataTypes.INTEGER,
-          allowNull: false,
-          references: {
-            model: Vehicle,
-            key: 'id',
-          },
-          onUpdate: 'CASCADE',
-          onDelete: 'CASCADE',
-        },
+let User
+const defineUserModel =  (sequelize) => {
 
-        role: {
-          type: DataTypes.ENUM('user', 'superadmin'),
-          defaultValue: 'user',
-        },
+   User = sequelize.define(
+    'User',
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
       },
-      {
-        sequelize,
-        modelName: 'User',
-        tableName: 'users',
-        timestamps: true,
+      first_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
-    );
-  }
-}
+      last_name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      phone_number: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      role: {
+        type: DataTypes.ENUM('user', 'superadmin'),
+        defaultValue: 'user'
+      }
+    },
+    {
+      tableName: 'users',
+      timestamps: false,
+      underscored: false,
+    }
+  );
+};
 
-export { User };
+export { defineUserModel, User };

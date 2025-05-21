@@ -10,6 +10,12 @@ const baseConfig = {
   },
 };
 
+export const maxAge = {
+  accessTokenMaxAge: process.env.ACCESS_TOKEN_MAX_AGE,
+  refreshTokenMaxAge: process.env.REFRESH_TOKEN_MAX_AGE
+
+}
+
 const envConfig = {
   development: {
     database: {

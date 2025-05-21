@@ -1,27 +1,30 @@
-import { Model, DataTypes } from 'sequelize';
+import { DataTypes } from "sequelize";
 
-class Make extends Model {
-  static initModel(sequelize) {
-    Make.init(
-      {
-        id: {
-          type: DataTypes.INTEGER,
-          allowNull: false,
-          autoIncrement: true,
-        },
-        name: {
-          type: DataTypes.TEXT,
-          allowNull: false,
-        },
-      },
-      {
-        sequelize,
-        modelName: 'Make',
-        tableName: 'makes',
-        timestamps: true,
-      },
-    );
-  }
-}
+let Make
+const defineMakeModel =  (sequelize) => {
 
-export { Make };
+   Make = sequelize.define(
+    'Make',
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+    },
+    {
+      tableName: 'makes',
+      timestamps: false,
+      underscored: false,
+    }
+  );
+};
+
+export { defineMakeModel, Make };
+
+
+
