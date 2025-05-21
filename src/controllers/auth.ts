@@ -117,8 +117,25 @@ const refreshAccessToken = async (req, res) => {
 
 const logoutUser = async (req, res) => {
   try {
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    const { accessToken, refreshToken } = req.cookies;
+
+    if (!accessToken || !refreshToken) {
+      return res.status(400).json({
+        message: 'Invalid tokens',
+      });
+    }
+
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+    });
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+    });
 
     return res.status(200).json({
       message: 'Successfully logged out',
