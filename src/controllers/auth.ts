@@ -87,9 +87,45 @@ const refreshToken = (req: Request, res: Response) => {
   }
 };
 
+const logout = (req: Request, res: Response) => {
+  try {
+    const { accessToken, refreshToken } = req.cookies;
+
+    if (!accessToken || !refreshToken) {
+      return res.status(400).json({
+        message: 'Invalid tokens',
+      });
+    }
+
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+
+    return res.status(200).json({
+      message: 'Successfully logged out',
+    });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.log(err.message);
+    } else {
+      console.log('An unknown error occurred');
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+};
+
 export default {
   registerUser,
   login,
   refreshToken,
+  logout,
 };
 
