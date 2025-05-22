@@ -1,12 +1,15 @@
-const createVehicle = async () => {};
+import { Vehicle } from "../models/vehiclesModel";
 
-const getVehicleById = async (id:number) => {};
+const createVehicle = async (vehicle: Vehicle) => {};
+
+const getVehicleById = async (id: number) => {};
 
 const getAllVehicles = async () => {};
 
-const deleteVehicleById = async () => {};
+const deleteVehicleById = async (id: number) => {};
 
-const updateVehicleById = async () => {};
+const updateVehicleById = async (vehicle: Vehicle, id: number) => {};
+
 const getVehicleByVin = async (vin: string) => {
 
 }

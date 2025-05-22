@@ -24,8 +24,8 @@ const registerUser = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid role' });
     }
 
-    const userId = await userService.createUser(registerUser);
-    res.status(201).json({ userId, message: 'User registered successfully' });
+    const user = await userService.createUser(registerUser);
+    res.status(201).json({ user, message: 'User registered successfully' });
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.log(err.message);
@@ -46,21 +46,21 @@ const login = (req: Request, res: Response, next: NextFunction) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: accessTokenMaxAge,
-    });
+    // res.cookie('accessToken', accessToken, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'production',
+    //   sameSite: 'strict',
+    //   maxAge: accessTokenMaxAge,
+    // });
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: refreshTokenMaxAge,
-    });
+    // res.cookie('refreshToken', refreshToken, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'production',
+    //   sameSite: 'strict',
+    //   maxAge: refreshTokenMaxAge,
+    // });
 
-    res.status(200).json({loggedUser, message: 'Login successful' });
+    res.status(200).json({accessToken, refreshToken,loggedUser, message: 'Login successful' });
   })(req, res, next);
 };
 
