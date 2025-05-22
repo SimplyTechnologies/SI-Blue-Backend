@@ -10,7 +10,7 @@ const createUser = async (userData: User) => {
     email: userData.email,
     role: 'user',
   });
-  const {password, ...returnedUser} = user
+  const {password, ...returnedUser} = user.dataValues
   return returnedUser
 };
 
