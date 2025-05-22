@@ -22,7 +22,7 @@ const ensureDatabaseExists = async () => {
             console.log(error.message);
         }
         else
-            console.log('An unknown error occured');
+            console.log('An unknown error occurred');
         process.exit(1);
     }
 };
@@ -43,7 +43,7 @@ const connectToDB = async () => {
             console.log(err.message);
         }
         else
-            console.log('An unknown error occured');
+            console.log('An unknown error occurred');
         console.log(`Error while connecting db...`);
         process.exit(1);
     }

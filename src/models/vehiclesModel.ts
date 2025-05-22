@@ -2,11 +2,11 @@ import { DataTypes, Model, Sequelize, Optional } from 'sequelize';
 import { User } from './usersModel';
 import { CarModel } from './carModelsModel';
 
-interface LocationData {
+export interface LocationData {
   street: string;
   city: string;
   state: string;
-  zipcode: string;
+  zipCode: string;
   country: string;
   additionalInfo?: string;
 }
@@ -55,7 +55,7 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
         allowNull: false,
         validate: {
           isValidLocation(value: LocationData) {
-            if (!value.street || !value.city || !value.state || !value.zipcode || !value.country) {
+            if (!value.street || !value.city || !value.state || !value.zipCode || !value.country) {
               throw new Error('Location must include street, city, state, zipcode, and country');
             }
           },

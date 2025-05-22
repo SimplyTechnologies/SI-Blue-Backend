@@ -22,7 +22,7 @@ const getUserById = async (req: Request, res: Response) => {
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.log(err.message);
-    } else console.log('An unknown error occured');
+    } else console.log('An unknown error occurred ');
     res.status(500).json({ message: 'Internal server error' });
   }
 };

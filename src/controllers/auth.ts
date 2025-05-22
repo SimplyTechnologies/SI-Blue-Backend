@@ -29,7 +29,7 @@ const registerUser = async (req: Request, res: Response) => {
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.log(err.message);
-    } else console.log('An unknown error occured');
+    } else console.log('An unknown error occurred');
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -41,6 +41,7 @@ const login = (req: Request, res: Response, next: NextFunction) => {
     if (!user) {
       return res.status(401).json({ message: info?.message || 'Unauthorized' });
     }
+    const {password, ...loggedUser} = user.dataValues 
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
@@ -59,7 +60,7 @@ const login = (req: Request, res: Response, next: NextFunction) => {
       maxAge: refreshTokenMaxAge,
     });
 
-    res.status(200).json({ message: 'Login successful' });
+    res.status(200).json({loggedUser, message: 'Login successful' });
   })(req, res, next);
 };
 
