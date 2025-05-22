@@ -1,11 +1,9 @@
-export const createVehicle = async (req, res) => {
-  
-};
+import { Request, Response } from 'express';
 
-export const getVehicleById = async (req, res) => {};
+export const createVehicle = async (req: Request, res: Response) => {};
 
-export const deleteVehicleById = async (req, res) => {};
+export const getVehicleById = async (req: Request, res: Response) => {};
 
-export const gerAllVehicles = async (req, res) => {};
+export const deleteVehicleById = async (req: Request, res: Response) => {};
 
-
+export const gerAllVehicles = async (req: Request, res: Response) => {};

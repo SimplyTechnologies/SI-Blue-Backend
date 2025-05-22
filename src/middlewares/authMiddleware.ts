@@ -1,9 +1,12 @@
 import passport from 'passport';
 import bcrypt from 'bcrypt';
+import { Request, Response, NextFunction } from 'express';
 import { checkEmail, checkFirstName, checkPassword } from '../helpers/auth';
+import { userService } from '../services';
+import { User } from '../models/usersModel';
 
-export const authenticateJWT = (req, res, next) => {
-  passport.authenticate('jwt', { session: false }, (err, user, info) => {
+export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate('jwt', { session: false }, (err: unknown, user: User, info: unknown) => {
     if (err) {
       return next(err);
     }
@@ -17,8 +20,8 @@ export const authenticateJWT = (req, res, next) => {
   })(req, res, next);
 };
 
-export const authenticateRefreshToken = (req, res, next) => {
-  passport.authenticate('jwt-refresh', { session: false }, (err, user, info) => {
+export const authenticateRefreshToken = (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate('jwt-refresh', { session: false }, (err: unknown, user: User, info: unknown) => {
     if (err) {
       return next(err);
     }
@@ -32,57 +35,49 @@ export const authenticateRefreshToken = (req, res, next) => {
   })(req, res, next);
 };
 
-export const isSuperAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 'superadmin') {
-    return res.status(403).json({ message: 'Forbidden: SuperAdmin access required' });
-  }
-  next();
-};
-
-export const validateRegistration = async (req, res, next) => {
+export const validateRegistration = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const email = checkEmail(req.body.email);
-    const firstname = checkFirstName(req.body.firstName);
-    const lastname = checkFirstName(req.body.lastName);
+    if (!email) {
+      throw Error('Please provide us an email');
+    }
+    const founded = await userService.getUserByEmail(email);
+    if (founded) {
+      throw Error('User already exists');
+    }
+    if (
+      !req.body.firstName ||
+      !req.body.lastName ||
+      !req.body.phoneNumber ||
+      !req.body.password ||
+      !req.body.confirmedPassword
+    ) {
+      throw Error('Please provide us firstname, lastname, password and confirmedPasswprd');
+    }
+    const first_name = checkFirstName(req.body.firstName);
+    const last_name = checkFirstName(req.body.lastName);
     const password = checkPassword(req.body.password);
     const confirmedPassword = req.body.password;
-    const phonenumber = req.body.phoneNumber;
+    const phone_number = req.body.phoneNumber;
     if (password !== confirmedPassword) {
       throw Error('Please write the same password');
     }
     const hashedPassword = await bcrypt.hash(password, 12);
     const registeredUser = {
       email,
-      firstname,
-      lastname,
+      first_name,
+      last_name,
       password: hashedPassword,
-      phonenumber,
+      phone_number,
     };
 
     req.user = registeredUser;
     next();
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
-    res.status(400).json({ message: err.message });
+    if (err instanceof Error) {
+      res.status(400).json({ message: err.message });
+    }
   }
 };
 
-export const checkRole = roles => {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ message: 'Not authorized' });
-    }
-
-    const userRole = req.user.role;
-
-    const requiredRoles = Array.isArray(roles) ? roles : [roles];
-
-    if (!requiredRoles.includes(userRole)) {
-      return res.status(403).json({
-        message: 'Access denied.',
-      });
-    }
-
-    next();
-  };
-};

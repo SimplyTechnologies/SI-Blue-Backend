@@ -1,5 +1,4 @@
-export const checkFirstName = firstName => {
-  console.log(firstName);
+export const checkFirstName = (firstName: string) => {
   if (typeof firstName !== 'string') {
     throw Error('Firstname must be a string');
   }
@@ -9,7 +8,7 @@ export const checkFirstName = firstName => {
   return firstName;
 };
 
-export const checkLastName = lastName => {
+export const checkLastName = (lastName: string) => {
   if (typeof lastName !== 'string') {
     throw Error('Lastname must be a string');
   }
@@ -19,7 +18,7 @@ export const checkLastName = lastName => {
   return lastName;
 };
 
-export const checkPhoneNumber = phoneNumber => {
+export const checkPhoneNumber = (phoneNumber: string) => {
   if (typeof phoneNumber !== 'string') {
     throw Error('Phone number must be a string');
   }
@@ -38,7 +37,7 @@ export const checkPhoneNumber = phoneNumber => {
   return trimmedNumber;
 };
 
-export const checkEmail = email => {
+export const checkEmail = (email: string) => {
   if (typeof email !== 'string') {
     throw Error('Email must be a string');
   }
@@ -54,7 +53,7 @@ export const checkEmail = email => {
   return trimmedEmail;
 };
 
-export const checkPassword = password => {
+export const checkPassword = (password: string) => {
   if (typeof password != 'string') {
     throw Error('Password must be a string');
   }

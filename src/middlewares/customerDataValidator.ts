@@ -1,7 +1,9 @@
+import { Response, Request } from 'express';
 import { checkEmail, checkFirstName, checkLastName, checkPhoneNumber } from '../helpers/auth.js';
 import { customerService } from '../services/index.js';
+import { NextFunction } from 'express';
 
-export const customerDataValidate = (req, res, next) => {
+export const customerDataValidate = (req: Request, res: Response, next: NextFunction) => {
   try {
     const email = checkEmail(req.body.email);
     const founded = customerService.getCustomerByEmail(email);

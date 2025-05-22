@@ -3,11 +3,11 @@ import config from './config';
 
 const sequelizeRoot = new Sequelize(
   process.env.DEFAULT_DB as string,
-  config.database.username,
-  config.database.password,
+  config.database.username as string,
+  config.database.password as string,
   {
     host: config.database.host,
-    port: config.database.port,
+    port: config.database.port as number,
     logging: false,
     dialect: 'postgres',
   },
@@ -25,8 +25,10 @@ const ensureDatabaseExists = async () => {
     } else {
       console.log(`DATABASE ${process.env.DB_NAME} already exists`);
     }
-  } catch (err) {
-    console.log(err.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.log(error.message);
+    } else console.log('An unknown error occured');
     process.exit(1);
   }
 };
@@ -34,18 +36,25 @@ const ensureDatabaseExists = async () => {
 const connectToDB = async () => {
   await ensureDatabaseExists();
 
-  const sequelize = new Sequelize(config.database.database, config.database.username, config.database.password, {
-    host: config.database.host,
-    port: config.database.port,
-    logging: false,
-    dialect: 'postgres',
-  });
+  const sequelize = new Sequelize(
+    config.database.database as string,
+    config.database.username as string,
+    config.database.password,
+    {
+      host: config.database.host,
+      port: config.database.port as number,
+      logging: false,
+      dialect: 'postgres',
+    },
+  );
 
   try {
     await sequelize.authenticate();
     console.log(`Connected to db ${process.env.DB_NAME}`);
-  } catch (err) {
-    console.log(err.message);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.log(err.message);
+    } else console.log('An unknown error occured');
     console.log(`Error while connecting db...`);
     process.exit(1);
   }

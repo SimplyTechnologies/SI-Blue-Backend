@@ -1,10 +1,31 @@
-import { DataTypes } from "sequelize";
+import { DataTypes, Model, Sequelize } from 'sequelize';
 
-let User
-const defineUserModel =  (sequelize) => {
+export type UserRole = 'user' | 'superadmin';
 
-   User = sequelize.define(
-    'User',
+export interface UserAttributes {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone_number: string;
+  password: string;
+  role: UserRole;
+}
+
+export interface UserCreationAttributes extends Omit<UserAttributes, 'id'> {}
+
+export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+  public id!: number;
+  public first_name!: string;
+  public last_name!: string;
+  public email!: string;
+  public phone_number!: string;
+  public password!: string;
+  public role!: UserRole;
+}
+
+export const defineUserModel = (sequelize: Sequelize): typeof User => {
+  User.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -22,6 +43,10 @@ const defineUserModel =  (sequelize) => {
       email: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
+        validate: {
+          isEmail: true,
+        },
       },
       phone_number: {
         type: DataTypes.STRING,
@@ -33,15 +58,19 @@ const defineUserModel =  (sequelize) => {
       },
       role: {
         type: DataTypes.ENUM('user', 'superadmin'),
-        defaultValue: 'user'
-      }
+        allowNull: false,
+        defaultValue: 'user',
+      },
     },
     {
+      sequelize,
       tableName: 'users',
       timestamps: false,
       underscored: false,
-    }
+    },
   );
+
+  return User;
 };
 
-export { defineUserModel, User };
+export type UserModelType = typeof User;
