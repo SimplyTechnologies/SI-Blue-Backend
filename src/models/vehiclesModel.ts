@@ -1,15 +1,40 @@
+import { DataTypes, Model, Sequelize, Optional } from 'sequelize';
+import { User } from './usersModel';
+import { CarModel } from './carModelsModel';
 
-import { DataTypes } from "sequelize";
-import { Make } from "./carMakesModel";
-import { User } from "./usersModel";
-import { Customer } from "./customersModel";
-import { CarModel } from "./carModelsModel";
+interface LocationData {
+  street: string;
+  city: string;
+  state: string;
+  zipcode: string;
+  country: string;
+  additionalInfo?: string;
+}
 
-let Vehicle
-const defineVehicleModel =  (sequelize) => {
+interface VehicleAttributes {
+  id: number;
+  year: number;
+  vin: string;
+  location: LocationData;
+  sold: boolean;
+  userId: number;
+  modelId: number;
+}
 
-  Vehicle = sequelize.define(
-    'Vehicle',
+interface VehicleCreationAttributes extends Optional<VehicleAttributes, 'id'> {}
+
+class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implements VehicleAttributes {
+  public id!: number;
+  public year!: number;
+  public vin!: string;
+  public location!: LocationData;
+  public sold!: boolean;
+  public userId!: number;
+  public modelId!: number;
+}
+
+const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
+  Vehicle.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -26,97 +51,55 @@ const defineVehicleModel =  (sequelize) => {
         unique: true,
       },
       location: {
-        type: DataTypes.STRING,
-        allowNull: true
-      },
-      street: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      city: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      state: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      country: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      zipcode: {
-        type: DataTypes.STRING,
-        allowNull: false
+        type: DataTypes.JSON,
+        allowNull: false,
+        validate: {
+          isValidLocation(value: LocationData) {
+            if (!value.street || !value.city || !value.state || !value.zipcode || !value.country) {
+              throw new Error('Location must include street, city, state, zipcode, and country');
+            }
+          },
+        },
+        get() {
+          return this.getDataValue('location');
+        },
+        set(value: LocationData) {
+          this.setDataValue('location', value);
+        },
       },
       sold: {
         type: DataTypes.BOOLEAN,
-        allowNull: false
+        allowNull: false,
+        defaultValue: false,
       },
-      // makeId: {
-      //   type: DataTypes.INTEGER,
-      //   allowNull: false,
-      //   references: {
-      //   model: Make,
-      //   key: 'id',
-      // },
-      // onDelete: 'CASCADE',
-      // onUpdate: 'CASCADE',
-      // },
-    // userId: {
-    //     type: DataTypes.INTEGER,
-    //     allowNull: false,
-    //     references: {
-    //       model: User, 
-    //       key: 'id',
-    //     },
-    //     onUpdate: 'CASCADE',
-    //     onDelete: 'CASCADE',
-    //   },
-    // customerId: {
-    //     type: DataTypes.INTEGER,
-    //     allowNull: false,
-    //     references: {
-    //       model: Customer,
-    //       key: 'id',
-    //     },
-    //     onUpdate: 'CASCADE',
-    //     onDelete: 'CASCADE',
-    //   },
-    //   modelId: {
-    //     type: DataTypes.INTEGER,
-    //     allowNull: false,
-    //     references: {
-    //       model: CarModel,
-    //       key: 'id',
-    //     },
-    //     onUpdate: 'CASCADE',
-    //     onDelete: 'CASCADE',
-    //   },
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: User,
+          key: 'id',
+        },
+      },
+      modelId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: CarModel,
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
     },
     {
+      sequelize,
       tableName: 'vehicle',
       timestamps: false,
       underscored: false,
-    }
+    },
   );
+
+  return Vehicle;
 };
 
-export { defineVehicleModel, Vehicle };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export { defineVehicleModel, Vehicle, VehicleAttributes, VehicleCreationAttributes };

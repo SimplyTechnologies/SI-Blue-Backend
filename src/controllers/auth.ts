@@ -1,35 +1,41 @@
 import passport from 'passport';
 import ms, { StringValue } from 'ms';
+import { Request, Response, NextFunction } from 'express';
 
 import { userService } from '../services';
 import { generateAccessToken, generateRefreshToken } from '../helpers/tokenUtils.js';
 import { maxAge } from '../configs/config.js';
 
+import { User, UserRole } from '../models/usersModel';
+
 const roles = ['user', 'superadmin'];
 const accessTokenMaxAge = ms((maxAge.accessTokenMaxAge as StringValue) || '15m');
 const refreshTokenMaxAge = ms((maxAge.refreshTokenMaxAge as StringValue) || '7d');
 
-const registerUser = async (req, res) => {
+const registerUser = async (req: Request, res: Response) => {
   try {
-    const registerUser = req.user;
+    const registerUser = req.user as User;
+    const role = registerUser.role as UserRole;
 
-    if (!registerUser.role) {
+    if (!role) {
       registerUser.role = 'user';
     }
-    if (!roles.includes(registerUser.role)) {
+    if (!roles.includes(registerUser.role as string)) {
       return res.status(400).json({ message: 'Invalid role' });
     }
 
-    await userService.createUser(registerUser);
-    res.status(201).json({ message: 'User registered successfully' });
-  } catch (err) {
-    console.error(err.message);
+    const userId = await userService.createUser(registerUser);
+    res.status(201).json({ userId, message: 'User registered successfully' });
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.log(err.message);
+    } else console.log('An unknown error occured');
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-const login = (req, res, next) => {
-  passport.authenticate('local', { session: false }, (err, user, info) => {
+const login = (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate('local', { session: false }, (err: unknown, user: User, info: any) => {
     if (err) return next(err);
 
     if (!user) {
@@ -57,9 +63,9 @@ const login = (req, res, next) => {
   })(req, res, next);
 };
 
-const refreshToken = (req, res) => {
+const refreshToken = (req: Request, res: Response) => {
   try {
-    const user = req.user;
+    const user = req.user as User;
 
     if (!user) {
       return res.status(401).json({ message: 'Unauthorized' });

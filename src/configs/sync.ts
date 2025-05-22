@@ -1,28 +1,94 @@
-import connectToDB from './database';
-import { defineUserModel } from '../models/usersModel';
-import { defineVehicleModel } from '../models/vehiclesModel';
-import {defineMakeModel} from '../models/carMakesModel'
-import { defineCarModel } from '../models/carModelsModel'
-import { defineCustomerModel } from '../models/customersModel';
+import { Sequelize } from 'sequelize';
+import connectToDB from '../configs/database';
+import { defineUserModel, User } from '../models/usersModel.js';
+import { defineMakeModel, Make } from '../models/carMakesModel.js';
+import { defineCarModel, CarModel } from '../models/carModelsModel.js';
+import { defineCustomerModel, Customer } from '../models/customersModel.js';
+import { defineVehicleModel, Vehicle } from '../models/vehiclesModel.js';
 
-const syncDatabase = async () => {
+const syncDatabase = async (): Promise<Sequelize> => {
   try {
+    console.log('Starting database initialization...');
     const sequelize = await connectToDB();
 
-    defineUserModel(sequelize);
-    defineVehicleModel(sequelize);
+    if (!sequelize) {
+      throw new Error('Sequelize instance is undefined');
+    }
+
+    console.log('Initializing models...');
+
     defineMakeModel(sequelize);
     defineCarModel(sequelize);
+    defineUserModel(sequelize);
+    defineVehicleModel(sequelize);
     defineCustomerModel(sequelize);
 
-    await sequelize.authenticate();
-    console.log('Database connected');
+    console.log('Setting up associations...');
 
-    await sequelize.sync({ alter: true });
+    Make.hasMany(CarModel, {
+      foreignKey: 'makeId',
+      as: 'models',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
 
-    console.log('Database synchronized');
-  } catch (err) {
-    console.error('Database sync failed:', err);
+    CarModel.belongsTo(Make, {
+      foreignKey: 'makeId',
+      as: 'make',
+    });
+
+    User.hasMany(Vehicle, {
+      foreignKey: 'userId',
+      as: 'vehicles',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    Vehicle.belongsTo(User, {
+      foreignKey: 'userId',
+      as: 'owner',
+    });
+
+    Vehicle.hasMany(Customer, {
+      foreignKey: 'vehicleId',
+      as: 'customers',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    Customer.belongsTo(Vehicle, {
+      foreignKey: 'vehicleId',
+      as: 'vehicle',
+    });
+
+    CarModel.hasMany(Vehicle, {
+      foreignKey: 'modelId',
+      as: 'vehicles',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    Vehicle.belongsTo(CarModel, {
+      foreignKey: 'modelId',
+      as: 'model',
+    });
+
+    console.log('Creating tables...');
+    try {
+      await sequelize.sync({ alter: true });
+      console.log('All tables have been successfully created or altered!');
+    } catch (syncError: any) {
+      console.error('Error during sync:', syncError);
+      throw syncError;
+    }
+
+    return sequelize;
+  } catch (error: any) {
+    console.error('Error initializing models:', error.message);
+    console.error('Stack trace:', error.stack);
+    throw error;
   }
 };
+
 export { syncDatabase };
+

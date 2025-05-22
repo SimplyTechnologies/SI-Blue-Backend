@@ -1,14 +1,16 @@
 import jwt from 'jsonwebtoken';
 import { userService } from '../services';
+import { Request, Response } from 'express';
+import { User } from '../models/usersModel';
 
- const getUserById = async (req, res) => {
+const getUserById = async (req: Request, res: Response) => {
   try {
     const accessToken = req.cookies.accessToken;
     if (!accessToken) {
       return res.status(401).json({ message: 'Access token not found' });
     }
 
-    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
+    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET as string) as User;
     const user = await userService.getUserById(decoded.id);
 
     if (!user) {
@@ -17,20 +19,22 @@ import { userService } from '../services';
 
     const { password, ...userWithoutPassword } = user;
     res.status(200).json({ user: userWithoutPassword.dataValues });
-  } catch (err) {
-    console.error(err.message);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.log(err.message);
+    } else console.log('An unknown error occured');
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
- const forgetPassword = async (req, res) => {};
+const forgetPassword = async (req: Request, res: Response) => {};
 
- const requestPasswordReset = async (res, req) => {};
+const requestPasswordReset = async (res: Request, req: Response) => {};
 
- const refreshToken = async (req, res) => {};
+const refreshToken = async (req: Request, res: Response) => {};
 
- const getAllUsers = async (req, res) => {};
- 
- export default {
-  getUserById
- }
+const getAllUsers = async (req: Request, res: Response) => {};
+
+export default {
+  getUserById,
+};

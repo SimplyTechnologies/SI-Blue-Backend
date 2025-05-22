@@ -1,12 +1,12 @@
-const createVehicle = async vehicleData => {};
+const createVehicle = async () => {};
 
-const getVehicleById = async id => {};
+const getVehicleById = async (id:number) => {};
 
 const getAllVehicles = async () => {};
 
 const deleteVehicleById = async () => {};
 
-const updateVehicleById = async updatedData => {};
+const updateVehicleById = async () => {};
 
 export default {
   createVehicle,

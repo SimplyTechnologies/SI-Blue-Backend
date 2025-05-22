@@ -4,10 +4,9 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import config from './configs/config.js';
 import { usersRouter, vehiclesRouter } from './routes/index.js';
-import { customersRouter } from './routes/index.js';
 import { syncDatabase } from './configs/sync.js';
 import { configurePassport } from './configs/passport.js';
-import autRoutes from './routes/auth.js';
+import authRoutes from './routes/auth.js';
 
 const app = express();
 
@@ -23,12 +22,11 @@ configurePassport();
 
 app.use(passport.initialize());
 
-const port: number = config.port;
+const port = config.port as number;
 
 app.use('/api/users', usersRouter);
 app.use('/api/vehicles', vehiclesRouter);
-app.use('/api/customers', customersRouter);
-app.use('/api/auth', autRoutes);
+app.use('/api/auth', authRoutes);
 
 syncDatabase()
   .then(() => {

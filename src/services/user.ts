@@ -1,28 +1,31 @@
-import { User } from '../models/usersModel';
+import { User } from '../models/usersModel.js';
 
-const createUser = async userData => {
+
+const createUser = async (userData: User) => {
   const user = await User.create({
-    first_name: userData.firstname,
-    last_name: userData.lastname,
-    phone_number: userData.phonenumber,
+    first_name: userData.first_name,
+    last_name: userData.last_name,
+    phone_number: userData.phone_number,
     password: userData.password,
     email: userData.email,
+    role: 'user',
   });
+  return user.id;
 };
 
-const getUserById = async id => {
+const getUserById = async (id: number) => {
   return await User.findByPk(id, { attributes: { exclude: ['password'] } });
 };
 
-const deleteUserById = async id => {};
+const deleteUserById = async (id: number) => {};
 
 const getAllUsers = async () => {
   return await User.findAll({ attributes: { exclude: ['password'] } });
 };
 
-const updateUser = async updatedData => {};
+const updateUser = async (updatedData: User) => {};
 
-const getUserByEmail = async email => {
+const getUserByEmail = async (email: string) => {
   const user = await User.findOne({ where: { email } });
   if (!user) return null;
   return user;
