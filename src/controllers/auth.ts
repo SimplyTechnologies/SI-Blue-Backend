@@ -46,21 +46,8 @@ const login = (req: Request, res: Response, next: NextFunction) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // res.cookie('accessToken', accessToken, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'strict',
-    //   maxAge: accessTokenMaxAge,
-    // });
-
-    // res.cookie('refreshToken', refreshToken, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'strict',
-    //   maxAge: refreshTokenMaxAge,
-    // });
-
-    res.status(200).json({accessToken, refreshToken,loggedUser, message: 'Login successful' });
+  
+    res.status(200).json({user:{...loggedUser},tokens: {accessToken, refreshToken}});
   })(req, res, next);
 };
 
@@ -74,14 +61,7 @@ const refreshToken = (req: Request, res: Response) => {
 
     const accessToken = generateAccessToken(user);
 
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: accessTokenMaxAge,
-    });
-
-    res.status(200).json({ message: 'Token refreshed successfully' });
+    res.status(200).json({ accessToken});
   } catch (err) {
     console.error('Refresh token error:', err);
     res.status(500).json({ message: 'Internal server error' });
