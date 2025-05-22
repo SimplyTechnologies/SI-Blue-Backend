@@ -25,7 +25,7 @@ export const customerDataValidate = (req: Request, res: Response, next: NextFunc
     req.user = customerData;
 
     next();
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
     res.status(400).json({ message: 'Please provide us name, surname, phonenumber and email' });
   }
