@@ -5,6 +5,7 @@ import { defineMakeModel, Make } from '../models/carMakesModel.js';
 import { defineCarModel, CarModel } from '../models/carModelsModel.js';
 import { defineCustomerModel, Customer } from '../models/customersModel.js';
 import { defineVehicleModel, Vehicle } from '../models/vehiclesModel.js';
+import { defineFavoriteModel, Favorite } from '../models/favorites.js';
 
 const syncDatabase = async (): Promise<Sequelize> => {
   try {
@@ -22,6 +23,7 @@ const syncDatabase = async (): Promise<Sequelize> => {
     defineUserModel(sequelize);
     defineVehicleModel(sequelize);
     defineCustomerModel(sequelize);
+    defineFavoriteModel(sequelize);
 
     console.log('Setting up associations...');
 
@@ -35,18 +37,6 @@ const syncDatabase = async (): Promise<Sequelize> => {
     CarModel.belongsTo(Make, {
       foreignKey: 'makeId',
       as: 'make',
-    });
-
-    User.hasMany(Vehicle, {
-      foreignKey: 'userId',
-      as: 'vehicles',
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    });
-
-    Vehicle.belongsTo(User, {
-      foreignKey: 'userId',
-      as: 'owner',
     });
 
     Vehicle.hasMany(Customer, {
@@ -73,6 +63,44 @@ const syncDatabase = async (): Promise<Sequelize> => {
       as: 'model',
     });
 
+    User.belongsToMany(Vehicle, {
+      through: 'FavoriteVehicles',
+      as: 'favoriteVehicles',
+      foreignKey: 'userId',
+      otherKey: 'vehicleId',
+    });
+
+    Vehicle.belongsToMany(User, {
+      through: 'FavoriteVehicles',
+      as: 'favoritedBy',
+      foreignKey: 'vehicleId',
+      otherKey: 'userId',
+    });
+
+    Favorite.belongsTo(User, {
+      foreignKey: 'userId',
+      as: 'user',
+    });
+
+    Favorite.belongsTo(Vehicle, {
+      foreignKey: 'vehicleId',
+      as: 'vehicle',
+    });
+
+    User.hasMany(Favorite, {
+      foreignKey: 'userId',
+      as: 'favorites',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
+    Vehicle.hasMany(Favorite, {
+      foreignKey: 'vehicleId',
+      as: 'favorites',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+
     console.log('Creating tables...');
     try {
       await sequelize.sync({ alter: true });
@@ -91,4 +119,3 @@ const syncDatabase = async (): Promise<Sequelize> => {
 };
 
 export { syncDatabase };
-

@@ -1,4 +1,5 @@
 import { DataTypes, Model, Sequelize } from 'sequelize';
+import { Vehicle } from './vehiclesModel';
 
 export type UserRole = 'user' | 'superadmin';
 
@@ -22,6 +23,15 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public phone_number!: string;
   public password!: string;
   public role!: UserRole;
+
+  static associate() {
+    User.belongsToMany(Vehicle, {
+      through: 'FavoriteVehicles',
+      as: 'favoriteVehicles',
+      foreignKey: 'userId',
+      otherKey: 'vehicleId',
+    });
+  }
 }
 
 export const defineUserModel = (sequelize: Sequelize): typeof User => {
