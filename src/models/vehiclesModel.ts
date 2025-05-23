@@ -9,6 +9,8 @@ export interface LocationData {
   zipcode: string;
   country: string;
   additionalInfo?: string;
+  lat?:number;
+  lng?:number;
 }
 
 interface VehicleAttributes {
@@ -17,7 +19,7 @@ interface VehicleAttributes {
   vin: string;
   location: LocationData;
   sold: boolean;
-  userId: number;
+  userId?: number;
   modelId: number;
 }
 
@@ -72,14 +74,14 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
         allowNull: false,
         defaultValue: false,
       },
-      userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: User,
-          key: 'id',
-        },
-      },
+      // userId: {
+      //   type: DataTypes.INTEGER,
+      //   allowNull: true,
+      //   references: {
+      //     model: User,
+      //     key: 'id',
+      //   },
+      // },
       modelId: {
         type: DataTypes.INTEGER,
         allowNull: false,

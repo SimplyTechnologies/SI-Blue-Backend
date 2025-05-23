@@ -1,11 +1,53 @@
-import { format } from 'fast-csv';
 import { Request, Response } from 'express';
+import { format } from 'fast-csv';
 import vehicleService from '../services/vehicle.js';
+
+declare global {
+  namespace Express {
+    interface Request {
+      vehicle?: {
+        modelId: number;
+        year: number;
+        vin: string;
+        location: {
+          country: string;
+          city: string;
+          street: string;
+          zipcode: string;
+          state: string;
+          lat?: number;
+          lng?: number;
+        };
+      };
+    }
+  }
+}
 
 const PAGE_SIZE = 25;
 
 const createVehicle = async (req: Request, res: Response) => {
-  const vehicle = await vehicleService.createVehicle(req.body.vehicle);
+  try {
+    if (!req.vehicle) {
+      res.status(400).json({
+        success: false,
+        message: 'Vehicle data is missing.',
+      });
+      return;
+    }
+
+    await vehicleService.createVehicle(req.vehicle);
+
+    res.status(201).json({
+      message: 'Vehicle created successfully',
+    });
+  } catch (error: unknown) {
+    console.error('Error creating vehicle:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create vehicle',
+    });
+  }
 };
 
 const getVehicleByVin = async (req: Request, res: Response) => {};
@@ -116,38 +158,9 @@ const exportVehiclesCsv = async (req: Request, res: Response) => {
   }
 };
 
-const getAllMakes = async (req: Request, res: Response) => {
-  try {
-    const makes = await vehicleService.getAllMakes();
-    res.json(makes);
-  } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-const getModelsByMakeId = async (req: Request, res: Response) => {
-  try {
-    const makeId = Number(req.query.makeId);
-    if (!makeId) {
-      return res.status(400).json({ error: 'makeId is required' });
-    }
-    const models = await vehicleService.getModelsByMakeId(makeId);
-
-    const modelsWithoutMakeId = models.map((model: any) => ({
-      id: model.id,
-      name: model.name,
-    }));
-    res.json(modelsWithoutMakeId);
-  } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
 export default {
-  getVehicles,
   createVehicle,
   getVehicleByVin,
+  getVehicles,
   exportVehiclesCsv,
-  getAllMakes,
-  getModelsByMakeId,
 };

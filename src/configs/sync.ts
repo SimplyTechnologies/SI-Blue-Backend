@@ -37,17 +37,17 @@ const syncDatabase = async (): Promise<Sequelize> => {
       as: 'make',
     });
 
-    User.hasMany(Vehicle, {
-      foreignKey: 'userId',
-      as: 'vehicles',
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    });
+    // User.hasMany(Vehicle, {
+    //   foreignKey: 'userId',
+    //   as: 'vehicles',
+    //   onDelete: 'CASCADE',
+    //   onUpdate: 'CASCADE',
+    // });
 
-    Vehicle.belongsTo(User, {
-      foreignKey: 'userId',
-      as: 'owner',
-    });
+    // Vehicle.belongsTo(User, {
+    //   foreignKey: 'userId',
+    //   as: 'owner',
+    // });
 
     Vehicle.hasMany(Customer, {
       foreignKey: 'vehicleId',
