@@ -6,6 +6,10 @@ export interface CarModelAttributes {
   name: string;
   makeId: number;
 }
+export interface CarModelAttributesWithoutId {
+  name: string;
+  makeId: number;
+}
 
 export interface CarModelCreationAttributes extends Optional<CarModelAttributes, 'id'> {}
 
