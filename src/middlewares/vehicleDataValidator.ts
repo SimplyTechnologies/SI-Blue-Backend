@@ -72,7 +72,7 @@ const resolveMakeAndModel = async (vehicleInfo: any) => {
     modelId = newModel.id;
   }
 
-  return { makeId, modelId };
+  return {  modelId };
 };
 
 export const validateInputVehicle = async (req: Request, res: Response, next: NextFunction) => {
@@ -97,7 +97,7 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
       return;
     }
 
-    const { makeId, modelId } = await resolveMakeAndModel(vehicleInfo);
+    const { modelId } = await resolveMakeAndModel(vehicleInfo);
 
     req.vehicle = {
       modelId,
