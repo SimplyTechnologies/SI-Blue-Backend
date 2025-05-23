@@ -1,4 +1,8 @@
 import { Vehicle } from '../models/vehiclesModel';
+import { Op } from 'sequelize';
+import { CarModel } from '../models/carModelsModel';
+import { Make } from '../models/carMakesModel';
+import { SearchVehiclesParams } from '../types/vehicle';
 
 interface CreateVehicleData {
   modelId: number;
@@ -8,10 +12,10 @@ interface CreateVehicleData {
     country: string;
     city: string;
     street: string;
-    zipCode: string;
+    zipcode: string;
     state: string;
-    lat?:number;
-    lng?:number;
+    lat?: number;
+    lng?: number;
   };
   userId?: number;
 }
@@ -25,18 +29,57 @@ const createVehicle = async (vehicleData: CreateVehicleData) => {
       location: vehicleData.location,
       sold: false,
     });
-
     return savedVehicle.dataValues;
   } catch (error) {
     throw new Error('Failed to create vehicle');
   }
 };
 
+const getVehicles = async ({ search, makeId, modelIds, sold, limit, offset }: SearchVehiclesParams) => {
+  const where: any = {};
+  let include: any[] = [
+    {
+      model: CarModel,
+      as: 'model',
+      include: [
+        {
+          model: Make,
+          as: 'make',
+        },
+      ],
+    },
+  ];
+
+  if (search) {
+    where[Op.or] = [
+      { vin: { [Op.iLike]: `%${search}%` } },
+      { '$model.name$': { [Op.iLike]: `%${search}%` } },
+      { '$model.make.name$': { [Op.iLike]: `%${search}%` } },
+    ];
+  }
+  if (modelIds && modelIds.length > 0) {
+    where.modelId = { [Op.in]: modelIds };
+  }
+  if (typeof sold === 'boolean') {
+    where.sold = sold;
+  }
+  if (makeId) {
+    include[0].where = { makeId };
+    include[0].required = true;
+  }
+
+  return await Vehicle.findAndCountAll({
+    where,
+    include,
+    limit,
+    offset,
+  });
+};
+
 const getVehicleByVin = async (vin: string) => {
   try {
-   
     const vehicle = await Vehicle.findOne({
-      where: { vin }
+      where: { vin },
     });
     return vehicle?.dataValues || null;
   } catch (error) {
@@ -57,5 +100,6 @@ const getVehicleById = async (id: number) => {
 export default {
   createVehicle,
   getVehicleByVin,
+  getVehicles,
   getVehicleById,
 };

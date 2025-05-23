@@ -1,32 +1,29 @@
-import { Make } from "../models/carMakesModel"
-import { CarModel } from "../models/carModelsModel"
-import { Op } from "sequelize"
+import { Make } from '../models/carMakesModel';
+import { CarModel } from '../models/carModelsModel';
+
+const getAllMakes = async () => {
+  return await Make.findAll();
+};
 
 const getMakeById = async (id: number) => {
-    const make = await CarModel.findByPk(id)
-    if(!make){
-        return null
-    }
-    console.log('service', make)
-    
-
-}
+  const make = await CarModel.findByPk(id);
+  if (!make) {
+    return null;
+  }
+  console.log('service', make);
+};
 const getMakeByName = async (name: string) => {
-   const make = await Make.findOne({where: {name}})
-   return make?.dataValues
-  };
+  const make = await Make.findOne({ where: { name } });
+  return make?.dataValues;
+};
 
 const createMake = async (make: string) => {
-    
-    const created = await Make.create({name: make})
-   
-   
-    return created
-
-}
+  return await Make.create({ name: make });
+};
 
 export default {
-    getMakeById,
-    createMake,
-    getMakeByName
-}
+  getAllMakes,
+  getMakeById,
+  createMake,
+  getMakeByName,
+};

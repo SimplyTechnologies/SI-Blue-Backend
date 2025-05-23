@@ -14,10 +14,10 @@ declare global {
           country: string;
           city: string;
           street: string;
-          zipCode: string;
+          zipcode: string;
           state: string;
-          lat?:number;
-          lng?:number;
+          lat?: number;
+          lng?: number;
         };
       };
     }
@@ -35,11 +35,11 @@ const validateInput = (body: any) => {
     return { isValid: false, message: 'Location is required' };
   }
 
-  const { country, street, zipCode, state , lat, lng} = location;
-  if (!country || !street || !zipCode || !state) {
+  const { country, street, zipcode, state, lat, lng } = location;
+  if (!country || !street || !zipcode || !state) {
     return {
       isValid: false,
-      message: 'Complete location required (country, street, zipCode, state)',
+      message: 'Complete location required (country, street, zipcode, state)',
     };
   }
 
@@ -72,7 +72,7 @@ const resolveMakeAndModel = async (vehicleInfo: any) => {
     modelId = newModel.id;
   }
 
-  return {  modelId };
+  return { modelId };
 };
 
 export const validateInputVehicle = async (req: Request, res: Response, next: NextFunction) => {
