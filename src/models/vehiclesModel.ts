@@ -33,6 +33,15 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
   public sold!: boolean;
   public userId!: number;
   public modelId!: number;
+
+  static associate() {
+    Vehicle.belongsToMany(User, {
+      through: 'favorites',
+      as: 'favorite',
+      foreignKey: 'vehicleId',
+      otherKey: 'userId',
+    });
+  }
 }
 
 const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {

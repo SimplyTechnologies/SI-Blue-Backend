@@ -37,18 +37,6 @@ const syncDatabase = async (): Promise<Sequelize> => {
       as: 'make',
     });
 
-    // User.hasMany(Vehicle, {
-    //   foreignKey: 'userId',
-    //   as: 'vehicles',
-    //   onDelete: 'CASCADE',
-    //   onUpdate: 'CASCADE',
-    // });
-
-    // Vehicle.belongsTo(User, {
-    //   foreignKey: 'userId',
-    //   as: 'owner',
-    // });
-
     Vehicle.hasMany(Customer, {
       foreignKey: 'vehicleId',
       as: 'customers',
@@ -73,6 +61,20 @@ const syncDatabase = async (): Promise<Sequelize> => {
       as: 'model',
     });
 
+    User.belongsToMany(Vehicle, {
+      through: 'favorites',
+      as: 'favorite',
+      foreignKey: 'userId',
+      otherKey: 'vehicleId',
+    });
+
+    Vehicle.belongsToMany(User, {
+      through: 'favorites',
+      as: 'favorite',
+      foreignKey: 'vehicleId',
+      otherKey: 'userId',
+    });
+
     console.log('Creating tables...');
     try {
       await sequelize.sync({ alter: true });
@@ -91,4 +93,3 @@ const syncDatabase = async (): Promise<Sequelize> => {
 };
 
 export { syncDatabase };
-
