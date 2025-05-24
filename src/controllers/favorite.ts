@@ -54,13 +54,13 @@ export const getFavoritesByUserId = async (req: Request, res: Response) => {
 
 export const deleteFavoriteById = async (req: Request, res: Response) => {
   try {
-    const userId = req.body.userId;
+    const { userId, vehicleId } = req.body;
 
-    if (!userId) {
-      return res.status(400).json({ message: 'userId is required' });
+    if (!userId || !vehicleId) {
+      return res.status(400).json({ message: 'userId and vehicleId are required' });
     }
 
-    await favoritesService.deleteFavoriteById(userId);
+    await favoritesService.deleteFavoriteById(userId, vehicleId);
 
     return res.status(200).json({
       message: 'Favorite deleted successfully',

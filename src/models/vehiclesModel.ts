@@ -6,9 +6,11 @@ export interface LocationData {
   street: string;
   city: string;
   state: string;
-  zipCode: string;
+  zipcode: string;
   country: string;
   additionalInfo?: string;
+  lat?:number;
+  lng?:number;
 }
 
 interface VehicleAttributes {
@@ -17,7 +19,7 @@ interface VehicleAttributes {
   vin: string;
   location: LocationData;
   sold: boolean;
-  userId: number;
+  userId?: number;
   modelId: number;
 }
 
@@ -34,8 +36,8 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
 
   static associate() {
     Vehicle.belongsToMany(User, {
-      through: 'FavoriteVehicles',
-      as: 'favoritedBy',
+      through: 'favorites',
+      as: 'favorite',
       foreignKey: 'vehicleId',
       otherKey: 'userId',
     });
@@ -64,7 +66,7 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
         allowNull: false,
         validate: {
           isValidLocation(value: LocationData) {
-            if (!value.street || !value.city || !value.state || !value.zipCode || !value.country) {
+            if (!value.street || !value.city || !value.state || !value.zipcode || !value.country) {
               throw new Error('Location must include street, city, state, zipcode, and country');
             }
           },
@@ -81,14 +83,14 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
         allowNull: false,
         defaultValue: false,
       },
-      userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: User,
-          key: 'id',
-        },
-      },
+      // userId: {
+      //   type: DataTypes.INTEGER,
+      //   allowNull: true,
+      //   references: {
+      //     model: User,
+      //     key: 'id',
+      //   },
+      // },
       modelId: {
         type: DataTypes.INTEGER,
         allowNull: false,

@@ -1,7 +1,6 @@
 import passport from 'passport';
 import ms, { StringValue } from 'ms';
 import { Request, Response, NextFunction } from 'express';
-
 import { userService } from '../services';
 import { generateAccessToken, generateRefreshToken } from '../helpers/tokenUtils.js';
 import { maxAge } from '../configs/config.js';

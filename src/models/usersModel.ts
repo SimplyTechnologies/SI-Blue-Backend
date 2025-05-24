@@ -1,4 +1,4 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import { BelongsToManyAddAssociationMixin, BelongsToManyGetAssociationsMixin, DataTypes, Model, Sequelize } from 'sequelize';
 import { Vehicle } from './vehiclesModel';
 
 export type UserRole = 'user' | 'superadmin';
@@ -24,10 +24,14 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public password!: string;
   public role!: UserRole;
 
+  public addFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
+  public getFavorites!: BelongsToManyGetAssociationsMixin<Vehicle>;
+  public removeFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>; // Same type as add
+
   static associate() {
     User.belongsToMany(Vehicle, {
-      through: 'FavoriteVehicles',
-      as: 'favoriteVehicles',
+      through: 'favorites',
+      as: 'favorite',
       foreignKey: 'userId',
       otherKey: 'vehicleId',
     });

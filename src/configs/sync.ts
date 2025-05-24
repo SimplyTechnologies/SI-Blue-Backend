@@ -5,7 +5,6 @@ import { defineMakeModel, Make } from '../models/carMakesModel.js';
 import { defineCarModel, CarModel } from '../models/carModelsModel.js';
 import { defineCustomerModel, Customer } from '../models/customersModel.js';
 import { defineVehicleModel, Vehicle } from '../models/vehiclesModel.js';
-import { defineFavoriteModel, Favorite } from '../models/favorites.js';
 
 const syncDatabase = async (): Promise<Sequelize> => {
   try {
@@ -23,7 +22,6 @@ const syncDatabase = async (): Promise<Sequelize> => {
     defineUserModel(sequelize);
     defineVehicleModel(sequelize);
     defineCustomerModel(sequelize);
-    defineFavoriteModel(sequelize);
 
     console.log('Setting up associations...');
 
@@ -64,41 +62,17 @@ const syncDatabase = async (): Promise<Sequelize> => {
     });
 
     User.belongsToMany(Vehicle, {
-      through: 'FavoriteVehicles',
-      as: 'favoriteVehicles',
+      through: 'favorites',
+      as: 'favorite',
       foreignKey: 'userId',
       otherKey: 'vehicleId',
     });
 
     Vehicle.belongsToMany(User, {
-      through: 'FavoriteVehicles',
-      as: 'favoritedBy',
+      through: 'favorites',
+      as: 'favorite',
       foreignKey: 'vehicleId',
       otherKey: 'userId',
-    });
-
-    Favorite.belongsTo(User, {
-      foreignKey: 'userId',
-      as: 'user',
-    });
-
-    Favorite.belongsTo(Vehicle, {
-      foreignKey: 'vehicleId',
-      as: 'vehicle',
-    });
-
-    User.hasMany(Favorite, {
-      foreignKey: 'userId',
-      as: 'favorites',
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    });
-
-    Vehicle.hasMany(Favorite, {
-      foreignKey: 'vehicleId',
-      as: 'favorites',
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
     });
 
     console.log('Creating tables...');
