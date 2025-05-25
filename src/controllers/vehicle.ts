@@ -55,6 +55,12 @@ const getVehicleByVin = async (req: Request, res: Response) => {};
 const getVehicles = async (req: Request, res: Response) => {
   try {
     const { search, makeId, modelIds, availability, page, offset } = req.query;
+    const userId = req.body.userId;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'userId is required' });
+    }
+    
     let modelIdsArray: number[] | undefined = undefined;
     let sold: boolean | undefined = undefined;
     const pageNum = page ? Math.max(Number(page), 1) : 1;
@@ -71,13 +77,14 @@ const getVehicles = async (req: Request, res: Response) => {
     if (availability === 'Sold') sold = true;
     else if (availability === 'In Stock') sold = false;
 
-    const { rows, count } = await vehicleService.getVehicles({
+    const { rows, count, favVehicles, favoriteVehicleIds } = await vehicleService.getVehicles({
       search: search as string,
       makeId: makeId ? Number(makeId) : undefined,
       modelIds: modelIdsArray,
       sold,
       limit,
       offset: offsetNum,
+      userId,
     });
 
     const result = rows.map((v: any) => ({
@@ -87,6 +94,7 @@ const getVehicles = async (req: Request, res: Response) => {
       location: v.location,
       sold: v.sold,
       userId: v.userId,
+      favorite: favoriteVehicleIds.includes(v.id),
       model: v.model
         ? {
             id: v.model.id,
@@ -101,8 +109,31 @@ const getVehicles = async (req: Request, res: Response) => {
             }
           : null,
     }));
+
+    const favoriteVehicles = favVehicles.map((vehicle: any) => ({
+      id: vehicle.id,
+      year: vehicle.year,
+      vin: vehicle.vin,
+      location: vehicle.location,
+      sold: vehicle.sold,
+      model: vehicle.model
+        ? {
+            id: vehicle.model.id,
+            name: vehicle.model.name,
+          }
+        : null,
+      make:
+        vehicle.model && vehicle.model.make
+          ? {
+              id: vehicle.model.make.id,
+              name: vehicle.model.make.name,
+            }
+          : null,
+    }));
+
     res.json({
       vehicles: result,
+      favoriteVehicles,
       total: count,
       page: pageNum,
       pageSize: limit,

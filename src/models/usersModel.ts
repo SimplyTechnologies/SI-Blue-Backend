@@ -25,7 +25,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   public role!: UserRole;
 
   public addFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
-  public getFavorites!: BelongsToManyGetAssociationsMixin<Vehicle>;
+  public getFavorite!: BelongsToManyGetAssociationsMixin<Vehicle>;
   public removeFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>; // Same type as add
 
   static associate() {

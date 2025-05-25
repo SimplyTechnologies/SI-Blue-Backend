@@ -33,25 +33,6 @@ export const createFavorite = async (req: Request, res: Response) => {
   }
 };
 
-export const getFavoritesByUserId = async (req: Request, res: Response) => {
-  try {
-    const userId = req.body.userId;
-
-    if (!userId) {
-      return res.status(400).json({ message: 'userId is required' });
-    }
-
-    const favorites = await favoritesService.getFavoritesByUserId(userId);
-
-    return res.status(200).json({
-      favorites,
-    });
-  } catch (error) {
-    console.error('Error retrieving favorites:', error);
-    return res.status(500).json({ message: 'Internal server error' });
-  }
-};
-
 export const deleteFavoriteById = async (req: Request, res: Response) => {
   try {
     const { userId, vehicleId } = req.body;
