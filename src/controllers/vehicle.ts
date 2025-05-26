@@ -109,31 +109,9 @@ const getVehicles = async (req: Request, res: Response) => {
             }
           : null,
     }));
-
-    const favoriteVehicles = favVehicles.map((vehicle: any) => ({
-      id: vehicle.id,
-      year: vehicle.year,
-      vin: vehicle.vin,
-      location: vehicle.location,
-      sold: vehicle.sold,
-      model: vehicle.model
-        ? {
-            id: vehicle.model.id,
-            name: vehicle.model.name,
-          }
-        : null,
-      make:
-        vehicle.model && vehicle.model.make
-          ? {
-              id: vehicle.model.make.id,
-              name: vehicle.model.make.name,
-            }
-          : null,
-    }));
-
+    
     res.json({
       vehicles: result,
-      favoriteVehicles,
       total: count,
       page: pageNum,
       pageSize: limit,
