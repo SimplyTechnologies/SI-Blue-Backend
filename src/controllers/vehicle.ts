@@ -55,6 +55,12 @@ const getVehicleByVin = async (req: Request, res: Response) => {};
 const getVehicles = async (req: Request, res: Response) => {
   try {
     const { search, makeId, modelIds, availability, page, offset } = req.query;
+    const userId = req.params.userId;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'userId is required' });
+    }
+    
     let modelIdsArray: number[] | undefined = undefined;
     let sold: boolean | undefined = undefined;
     const pageNum = page ? Math.max(Number(page), 1) : 1;
@@ -71,13 +77,14 @@ const getVehicles = async (req: Request, res: Response) => {
     if (availability === 'Sold') sold = true;
     else if (availability === 'In Stock') sold = false;
 
-    const { rows, count } = await vehicleService.getVehicles({
+    const { rows, count, favoriteVehicleIds } = await vehicleService.getVehicles({
       search: search as string,
       makeId: makeId ? Number(makeId) : undefined,
       modelIds: modelIdsArray,
       sold,
       limit,
       offset: offsetNum,
+      userId,
     });
 
     const result = rows.map((v: any) => ({
@@ -87,6 +94,7 @@ const getVehicles = async (req: Request, res: Response) => {
       location: v.location,
       sold: v.sold,
       userId: v.userId,
+      favorite: favoriteVehicleIds.includes(v.id),
       model: v.model
         ? {
             id: v.model.id,
@@ -101,6 +109,7 @@ const getVehicles = async (req: Request, res: Response) => {
             }
           : null,
     }));
+
     res.json({
       vehicles: result,
       total: count,

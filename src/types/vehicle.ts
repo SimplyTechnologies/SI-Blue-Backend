@@ -38,4 +38,5 @@ export type SearchVehiclesParams = {
   sold?: boolean;
   limit?: number;
   offset?: number;
+  userId?: string;
 };

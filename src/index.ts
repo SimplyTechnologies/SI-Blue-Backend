@@ -7,6 +7,7 @@ import { usersRouter, vehiclesRouter } from './routes/index.js';
 import { syncDatabase } from './configs/sync.js';
 import { configurePassport } from './configs/passport.js';
 import authRoutes from './routes/auth.js';
+import favoriteRoutes from './routes/favorite.js';
 
 const app = express();
 
@@ -27,6 +28,7 @@ const port = config.port as number;
 app.use('/api/users', usersRouter);
 app.use('/api/vehicles', vehiclesRouter);
 app.use('/api/auth', authRoutes);
+app.use('/api/favorites', favoriteRoutes);
 
 syncDatabase()
   .then(() => {
