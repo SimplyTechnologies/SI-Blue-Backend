@@ -55,7 +55,7 @@ const getVehicleByVin = async (req: Request, res: Response) => {};
 const getVehicles = async (req: Request, res: Response) => {
   try {
     const { search, makeId, modelIds, availability, page, offset } = req.query;
-    const userId = req.body.userId;
+    const userId = req.params.userId;
 
     if (!userId) {
       return res.status(400).json({ message: 'userId is required' });
