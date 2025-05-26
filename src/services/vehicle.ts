@@ -3,8 +3,6 @@ import { Op } from 'sequelize';
 import { CarModel } from '../models/carModelsModel';
 import { Make } from '../models/carMakesModel';
 import { SearchVehiclesParams } from '../types/vehicle';
-import { User } from '../models/usersModel';
-import { favoritesService } from '.';
 
 interface CreateVehicleData {
   modelId: number;
@@ -37,9 +35,7 @@ const createVehicle = async (vehicleData: CreateVehicleData) => {
   }
 };
 
-const getVehicles = async ({ search, makeId, modelIds, sold, limit, offset, userId }: SearchVehiclesParams) => {
-  if (!userId) throw new Error('UserId is required');
-
+const getVehicles = async ({ search, makeId, modelIds, sold, limit, offset }: SearchVehiclesParams) => {
   const where: any = {};
   let include: any[] = [
     {
@@ -72,20 +68,12 @@ const getVehicles = async ({ search, makeId, modelIds, sold, limit, offset, user
     include[0].required = true;
   }
 
-  const favVehicles = await favoritesService.getFavoritesByUserId(parseInt(userId));
-  const favoriteVehicleIds = favVehicles.map(vehicle => vehicle.id);
-
-  const vehicleData = await Vehicle.findAndCountAll({
+  return await Vehicle.findAndCountAll({
     where,
     include,
     limit,
     offset,
   });
-
-  return {
-    ...vehicleData,
-    favoriteVehicleIds,
-  };
 };
 
 const getVehicleByVin = async (vin: string) => {

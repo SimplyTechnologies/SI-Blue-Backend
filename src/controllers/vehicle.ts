@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { format } from 'fast-csv';
-import vehicleService from '../services/vehicle.js';
+import { vehicleService } from '../services';
+import favoritesService from '../services/favorite';
 
 declare global {
   namespace Express {
@@ -54,13 +55,8 @@ const getVehicleByVin = async (req: Request, res: Response) => {};
 
 const getVehicles = async (req: Request, res: Response) => {
   try {
-    const { search, makeId, modelIds, availability, page, offset } = req.query;
-    const userId = req.params.userId;
+    const { search, makeId, modelIds, availability, page, offset, favorite } = req.query;
 
-    if (!userId) {
-      return res.status(400).json({ message: 'userId is required' });
-    }
-    
     let modelIdsArray: number[] | undefined = undefined;
     let sold: boolean | undefined = undefined;
     const pageNum = page ? Math.max(Number(page), 1) : 1;
@@ -77,14 +73,66 @@ const getVehicles = async (req: Request, res: Response) => {
     if (availability === 'Sold') sold = true;
     else if (availability === 'In Stock') sold = false;
 
-    const { rows, count, favoriteVehicleIds } = await vehicleService.getVehicles({
+    let favoriteVehicleIds: Set<number> = new Set();
+    let favorites: any[] = [];
+    if (req.user) {
+      try {
+        favorites = await favoritesService.getFavoritesByUserId(Number(req.user));
+        favoriteVehicleIds = new Set(favorites.map((fav: any) => fav.id));
+      } catch {}
+    }
+
+    if (favorite === '1' && req.user) {
+      const allVehicles = await vehicleService.getVehicles({
+        search: search as string,
+        makeId: makeId ? Number(makeId) : undefined,
+        modelIds: modelIdsArray,
+        sold,
+      });
+
+      const favoriteRows = allVehicles.rows.filter((v: any) => favoriteVehicleIds.has(v.id));
+      const count = favoriteRows.length;
+
+      const paginatedRows = favoriteRows.slice(offsetNum, offsetNum + limit);
+      const result = paginatedRows.map((v: any) => ({
+        id: v.id,
+        year: v.year,
+        vin: v.vin,
+        location: v.location,
+        sold: v.sold,
+        userId: v.userId,
+        favorite: true,
+        model: v.model
+          ? {
+            id: v.model.id,
+            name: v.model.name,
+          }
+          : null,
+        make:
+          v.model && v.model.make
+            ? {
+              id: v.model.make.id,
+              name: v.model.make.name,
+            }
+            : null,
+      }));
+      res.json({
+        vehicles: result,
+        total: count,
+        page: pageNum,
+        pageSize: limit,
+        totalPages: Math.ceil(count / limit),
+      });
+      return;
+    }
+
+    const { rows, count } = await vehicleService.getVehicles({
       search: search as string,
       makeId: makeId ? Number(makeId) : undefined,
       modelIds: modelIdsArray,
       sold,
       limit,
       offset: offsetNum,
-      userId,
     });
 
     const result = rows.map((v: any) => ({
@@ -94,19 +142,19 @@ const getVehicles = async (req: Request, res: Response) => {
       location: v.location,
       sold: v.sold,
       userId: v.userId,
-      favorite: favoriteVehicleIds.includes(v.id),
+      favorite: favoriteVehicleIds.has(v.id),
       model: v.model
         ? {
-            id: v.model.id,
-            name: v.model.name,
-          }
+          id: v.model.id,
+          name: v.model.name,
+        }
         : null,
       make:
         v.model && v.model.make
           ? {
-              id: v.model.make.id,
-              name: v.model.make.name,
-            }
+            id: v.model.make.id,
+            name: v.model.make.name,
+          }
           : null,
     }));
 
@@ -124,7 +172,7 @@ const getVehicles = async (req: Request, res: Response) => {
 
 const exportVehiclesCsv = async (req: Request, res: Response) => {
   try {
-    const { makeId, modelIds, availability } = req.query;
+    const { makeId, modelIds, availability, favorite } = req.query;
     let modelIdsArray: number[] | undefined = undefined;
     let sold: boolean | undefined = undefined;
 
@@ -138,21 +186,35 @@ const exportVehiclesCsv = async (req: Request, res: Response) => {
     if (availability === 'Sold') sold = true;
     else if (availability === 'In Stock') sold = false;
 
-    const { rows } = await vehicleService.getVehicles({
-      makeId: makeId ? Number(makeId) : undefined,
-      modelIds: modelIdsArray,
-      sold,
-    });
+    let rows: any[] = [];
+    if (favorite === '1' && req.user) {
+      const favorites = await favoritesService.getFavoritesByUserId(Number(req.user));
+      const favoriteVehicleIds = new Set(favorites.map((fav: any) => fav.id));
+
+      const allVehicles = await vehicleService.getVehicles({
+        makeId: makeId ? Number(makeId) : undefined,
+        modelIds: modelIdsArray,
+        sold,
+      });
+      rows = allVehicles.rows.filter((v: any) => favoriteVehicleIds.has(v.id));
+    } else {
+      const result = await vehicleService.getVehicles({
+        makeId: makeId ? Number(makeId) : undefined,
+        modelIds: modelIdsArray,
+        sold,
+      });
+      rows = result.rows;
+    }
 
     const csvRows = rows.map((v: any) => ({
-      year: v.year,
-      make: v.model && v.model.make ? v.model.make.name : '',
-      model: v.model ? v.model.name : '',
-      vin: v.vin,
-      availability: v.sold ? 'Sold' : 'In Stock',
-      location: v.location
+      VIN: v.vin,
+      Make: v.model && v.model.make ? v.model.make.name : '',
+      Model: v.model ? v.model.name : '',
+      Year: v.year,
+      Location: v.location
         ? `${v.location.street}, ${v.location.city}, ${v.location.state} ${v.location.zipcode}, ${v.location.country}`
         : '',
+      Availability: v.sold ? 'Sold' : 'In Stock',
     }));
 
     res.setHeader('Content-Type', 'text/csv');
