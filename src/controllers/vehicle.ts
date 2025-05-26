@@ -77,7 +77,7 @@ const getVehicles = async (req: Request, res: Response) => {
     if (availability === 'Sold') sold = true;
     else if (availability === 'In Stock') sold = false;
 
-    const { rows, count, favVehicles, favoriteVehicleIds } = await vehicleService.getVehicles({
+    const { rows, count, favoriteVehicleIds } = await vehicleService.getVehicles({
       search: search as string,
       makeId: makeId ? Number(makeId) : undefined,
       modelIds: modelIdsArray,
@@ -109,7 +109,7 @@ const getVehicles = async (req: Request, res: Response) => {
             }
           : null,
     }));
-    
+
     res.json({
       vehicles: result,
       total: count,
