@@ -10,7 +10,7 @@ router.post('/vehicle', validateInputVehicle, vehicleController.createVehicle);
 
 router.get('get-vehicle', vehicleController.getVehicleByVin);
 
-router.get('', vehicleController.getVehicles);
+router.get('/:userId', vehicleController.getVehicles);
 
 router.get('/export', vehicleController.exportVehiclesCsv);
 
