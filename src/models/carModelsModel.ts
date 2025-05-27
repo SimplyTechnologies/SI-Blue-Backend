@@ -35,7 +35,7 @@ export const defineCarModel = (sequelize: Sequelize): typeof CarModel => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: Make,
+          model: 'makes',
           key: 'id',
         },
         onDelete: 'CASCADE',
