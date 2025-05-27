@@ -1,32 +1,56 @@
-import { Response, Request } from 'express';
+import { NextFunction, Request, Response } from "express";
+import { CustomerSchema } from "../schemas/customersSchema";
+import { customerService, vehicleService } from "../services";
+import { Customer } from "../models/customersModel";
 
-import { customerService } from '../services/index.js';
-import { NextFunction } from 'express';
-
-export const customerDataValidate = (req: Request, res: Response, next: NextFunction) => {
+export const validateCustomerRegistration = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const email = req.body.email;
-    const founded = customerService.getCustomerByEmail(email);
-    if (!founded) {
-      throw new Error('Customer already exists');
+    const result = CustomerSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        errors: result.error.errors.map(err => err.message),
+      });
     }
 
-    const firstName = req.body.firstName;
-    const lastName = req.body.lastName;
-    const phoneNumber = req.body.phoneNumber;
+    const { email, firstName, lastName, phoneNumber, vehicleId } = result.data;
 
-    const customerData = {
+    const existingCustomer = await customerService.getCustomerByEmail(email)
+    const existedCar = await vehicleService.getVehicleById(vehicleId)
+    if(!existedCar) {
+      return res.status(401).json({message: 'Car missing'})
+    }
+    if (existingCustomer) {
+      req.customer = existingCustomer
+      next()
+    }
+
+    
+    const customer = {
+      email,
       firstName,
       lastName,
-      phoneNumber,
-      email,
+
+      phoneNumber
     };
 
-    req.user = customerData;
+    req.customer = customer;
 
     next();
-  } catch (err: unknown) {
-    console.error(err);
-    res.status(400).json({ message: 'Please provide us name, surname, phonenumber and email' });
+  } catch (error) {
+    console.error('Customer registration validation error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const assignVehicleExistedCustomer = async (req: Request, res: Response, next: NextFunction) => {
+  const existingCustomer = req.customer
+  if(!existingCustomer){
+    return res.status(400).json({message: 'Customer data missing'})
+  }
+
+  
+
+
+
+}

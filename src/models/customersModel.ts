@@ -1,27 +1,21 @@
 import { DataTypes, Model, Sequelize, Optional } from 'sequelize';
-import { Vehicle } from './vehiclesModel';
 
 export interface CustomerAttributes {
   id: number;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  phone_number: string;
-  vehicleId: number;
+  phoneNumber: string;
 }
+
 export interface CustomerCreationAttributes extends Optional<CustomerAttributes, 'id'> {}
 
 export class Customer extends Model<CustomerAttributes, CustomerCreationAttributes> implements CustomerAttributes {
   public id!: number;
-  public first_name!: string;
-  public last_name!: string;
+  public firstName!: string;
+  public lastName!: string;
   public email!: string;
-  public phone_number!: string;
-  public vehicleId!: number;
-
-  public getFullName(): string {
-    return `${this.first_name} ${this.last_name}`;
-  }
+  public phoneNumber!: string;
 }
 
 export const defineCustomerModel = (sequelize: Sequelize): typeof Customer => {
@@ -32,11 +26,11 @@ export const defineCustomerModel = (sequelize: Sequelize): typeof Customer => {
         primaryKey: true,
         autoIncrement: true,
       },
-      first_name: {
+      firstName: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      last_name: {
+      lastName: {
         type: DataTypes.STRING,
         allowNull: false,
       },
@@ -47,19 +41,9 @@ export const defineCustomerModel = (sequelize: Sequelize): typeof Customer => {
           isEmail: true,
         },
       },
-      phone_number: {
+      phoneNumber: {
         type: DataTypes.STRING,
         allowNull: false,
-      },
-      vehicleId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: Vehicle,
-          key: 'id',
-        },
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
       },
     },
     {
@@ -67,7 +51,7 @@ export const defineCustomerModel = (sequelize: Sequelize): typeof Customer => {
       tableName: 'customers',
       timestamps: false,
       underscored: false,
-    },
+    }
   );
 
   return Customer;

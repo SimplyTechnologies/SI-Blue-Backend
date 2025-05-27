@@ -36,18 +36,9 @@ const syncDatabase = async (): Promise<Sequelize> => {
       foreignKey: 'makeId',
       as: 'make',
     });
+    Vehicle.belongsTo(Customer, { foreignKey: 'customerId', as: 'customer' });
 
-    Vehicle.hasMany(Customer, {
-      foreignKey: 'vehicleId',
-      as: 'customers',
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    });
-
-    Customer.belongsTo(Vehicle, {
-      foreignKey: 'vehicleId',
-      as: 'vehicle',
-    });
+    Customer.hasMany(Vehicle, { foreignKey: 'customerId', as: 'vehicles' });
 
     CarModel.hasMany(Vehicle, {
       foreignKey: 'modelId',
@@ -60,19 +51,18 @@ const syncDatabase = async (): Promise<Sequelize> => {
       foreignKey: 'modelId',
       as: 'model',
     });
-
     User.belongsToMany(Vehicle, {
       through: 'favorites',
-      as: 'favorite',
       foreignKey: 'userId',
       otherKey: 'vehicleId',
+      as: 'favoriteVehicles',
     });
 
     Vehicle.belongsToMany(User, {
       through: 'favorites',
-      as: 'favorite',
       foreignKey: 'vehicleId',
       otherKey: 'userId',
+      as: 'favoriteByUsers',
     });
 
     console.log('Creating tables...');
@@ -82,10 +72,10 @@ const syncDatabase = async (): Promise<Sequelize> => {
       if (process.env.NODE_ENV === 'development') {
 await sequelize.query(`
           SELECT setval(
-                   pg_get_serial_sequence('vehicle', 'id'),
-                   COALESCE((SELECT MAX(id) FROM vehicle), 1),
-                   true
-                 );
+            pg_get_serial_sequence('vehicles', 'id'),
+            COALESCE((SELECT MAX(id) FROM vehicles), 1),
+            true
+          );
         `);
         console.log('Vehicle ID sequence has been synchronized');
       }
@@ -103,3 +93,4 @@ await sequelize.query(`
 };
 
 export { syncDatabase };
+

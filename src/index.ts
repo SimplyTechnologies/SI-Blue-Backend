@@ -3,7 +3,7 @@ import passport from 'passport';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import config from './configs/config.js';
-import { usersRouter, vehiclesRouter } from './routes/index.js';
+import { usersRouter, vehiclesRouter, customerRoutes} from './routes/index.js';
 import { syncDatabase } from './configs/sync.js';
 import { configurePassport } from './configs/passport.js';
 import authRoutes from './routes/auth.js';
@@ -30,6 +30,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/vehicles', vehiclesRouter);
 app.use('/api/auth', authRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/customers', customerRoutes)
 
 syncDatabase()
   .then(() => {
