@@ -85,10 +85,21 @@ const forgotPassword = async (req:Request, res:Response) => {
   }
 }
 
+const resetPassword = (req: Request, res: Response) => {
+  const {password, confirmPassword} = req.body
+  if(!password || !confirmPassword){
+    return res.status(400).json({message: "Bad request"})
+  }
+  return res.status(201).json({message: 'Password reset successfully'})
+
+
+}
+
 export default {
   registerUser,
   login,
   refreshToken,
-  forgotPassword
+  forgotPassword,
+  resetPassword
 };
 
