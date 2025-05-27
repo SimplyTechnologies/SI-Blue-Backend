@@ -83,6 +83,17 @@ const getVehicles = async (req: Request, res: Response) => {
     const limit = offset ? Number(offset) : PAGE_SIZE;
     const offsetNum = (pageNum - 1) * limit;
 
+    if (availability && !['Sold', 'In Stock'].includes(availability as string)) {
+      res.json({
+        vehicles: [],
+        total: 0,
+        page: pageNum,
+        pageSize: limit,
+        totalPages: 0,
+      });
+      return;
+    }
+
     if (modelIds) {
       if (Array.isArray(modelIds)) {
         modelIdsArray = modelIds.map(Number);
@@ -124,16 +135,16 @@ const getVehicles = async (req: Request, res: Response) => {
         favorite: true,
         model: v.model
           ? {
-            id: v.model.id,
-            name: v.model.name,
-          }
+              id: v.model.id,
+              name: v.model.name,
+            }
           : null,
         make:
           v.model && v.model.make
             ? {
-              id: v.model.make.id,
-              name: v.model.make.name,
-            }
+                id: v.model.make.id,
+                name: v.model.make.name,
+              }
             : null,
       }));
       res.json({
@@ -165,16 +176,16 @@ const getVehicles = async (req: Request, res: Response) => {
       favorite: favoriteVehicleIds.has(v.id),
       model: v.model
         ? {
-          id: v.model.id,
-          name: v.model.name,
-        }
+            id: v.model.id,
+            name: v.model.name,
+          }
         : null,
       make:
         v.model && v.model.make
           ? {
-            id: v.model.make.id,
-            name: v.model.make.name,
-          }
+              id: v.model.make.id,
+              name: v.model.make.name,
+            }
           : null,
     }));
 
@@ -256,4 +267,3 @@ export default {
   getVehicleById,
   exportVehiclesCsv,
 };
-
