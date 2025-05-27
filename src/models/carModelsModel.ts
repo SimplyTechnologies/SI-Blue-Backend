@@ -6,6 +6,10 @@ export interface CarModelAttributes {
   name: string;
   makeId: number;
 }
+export interface CarModelAttributesWithoutId {
+  name: string;
+  makeId: number;
+}
 
 export interface CarModelCreationAttributes extends Optional<CarModelAttributes, 'id'> {}
 
@@ -31,7 +35,7 @@ export const defineCarModel = (sequelize: Sequelize): typeof CarModel => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: Make,
+          model: 'makes',
           key: 'id',
         },
         onDelete: 'CASCADE',

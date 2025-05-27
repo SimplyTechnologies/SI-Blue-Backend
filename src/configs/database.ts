@@ -24,11 +24,13 @@ const ensureDatabaseExists = async () => {
       console.log(`DATABASE ${process.env.DB_NAME} CREATED...`);
     } else {
       console.log(`DATABASE ${process.env.DB_NAME} already exists`);
+      
     }
+    
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.log(error.message);
-    } else console.log('An unknown error occured');
+    } else console.log('An unknown error occurred');
     process.exit(1);
   }
 };
@@ -50,7 +52,9 @@ const connectToDB = async () => {
 
   try {
     await sequelize.authenticate();
+    
     console.log(`Connected to db ${process.env.DB_NAME}`);
+    
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.log(err.message);

@@ -1,14 +1,17 @@
 import { DataTypes, Model, Sequelize, Optional } from 'sequelize';
 import { User } from './usersModel';
 import { CarModel } from './carModelsModel';
+import { Customer } from './customersModel';
 
 export interface LocationData {
   street: string;
   city: string;
   state: string;
-  zipCode: string;
+  zipcode: string;
   country: string;
   additionalInfo?: string;
+  lat?:number;
+  lng?:number;
 }
 
 interface VehicleAttributes {
@@ -17,8 +20,9 @@ interface VehicleAttributes {
   vin: string;
   location: LocationData;
   sold: boolean;
-  userId: number;
+  userId?: number;
   modelId: number;
+  customerId: number;
 }
 
 interface VehicleCreationAttributes extends Optional<VehicleAttributes, 'id'> {}
@@ -31,6 +35,8 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
   public sold!: boolean;
   public userId!: number;
   public modelId!: number;
+  public customerId!: number;
+
 }
 
 const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
@@ -55,7 +61,7 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
         allowNull: false,
         validate: {
           isValidLocation(value: LocationData) {
-            if (!value.street || !value.city || !value.state || !value.zipCode || !value.country) {
+            if (!value.street || !value.city || !value.state || !value.zipcode || !value.country) {
               throw new Error('Location must include street, city, state, zipcode, and country');
             }
           },
@@ -72,14 +78,14 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
         allowNull: false,
         defaultValue: false,
       },
-      userId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: User,
-          key: 'id',
-        },
-      },
+      // userId: {
+      //   type: DataTypes.INTEGER,
+      //   allowNull: true,
+      //   references: {
+      //     model: User,
+      //     key: 'id',
+      //   },
+      // },
       modelId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -90,10 +96,20 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       },
+      customerId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'customers',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
     },
     {
       sequelize,
-      tableName: 'vehicle',
+      tableName: 'vehicles',
       timestamps: false,
       underscored: false,
     },

@@ -1,27 +1,33 @@
 import { DataTypes, Model, Sequelize } from 'sequelize';
-
-export type UserRole = 'user' | 'superadmin';
+import { UserRoleType } from '../schemas/usersSchema';
 
 export interface UserAttributes {
   id: number;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  phone_number: string;
+  phoneNumber: string;
   password: string;
-  role: UserRole;
+  role: UserRoleType;
+  isActive: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export interface UserCreationAttributes extends Omit<UserAttributes, 'id'> {}
+export interface UserCreationAttributes extends Omit<UserAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
 
-export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
-  public id!: number;
-  public first_name!: string;
-  public last_name!: string;
-  public email!: string;
-  public phone_number!: string;
-  public password!: string;
-  public role!: UserRole;
+export class User extends Model<UserAttributes, UserCreationAttributes> {
+  declare id: number;
+  declare firstName: string;
+  declare lastName: string;
+  declare email: string;
+  declare phoneNumber: string;
+  declare password: string;
+  declare role: UserRoleType;
+  declare isActive: boolean;
+  declare createdAt: Date;
+  declare updatedAt: Date;
+
 }
 
 export const defineUserModel = (sequelize: Sequelize): typeof User => {
@@ -30,47 +36,78 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        autoIncrement: true
       },
-      first_name: {
-        type: DataTypes.STRING,
+      firstName: {
+        type: DataTypes.STRING(50),
         allowNull: false,
+        field: 'first_name'
       },
-      last_name: {
-        type: DataTypes.STRING,
+      lastName: {
+        type: DataTypes.STRING(50),
         allowNull: false,
+        field: 'last_name'
       },
       email: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(100),
         allowNull: false,
         unique: true,
         validate: {
-          isEmail: true,
-        },
+          isEmail: true
+        }
       },
-      phone_number: {
-        type: DataTypes.STRING,
+      phoneNumber: {
+        type: DataTypes.STRING(15),
         allowNull: false,
+        field: 'phone_number'
       },
       password: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        type: DataTypes.STRING(255),
+        allowNull: false
       },
       role: {
         type: DataTypes.ENUM('user', 'superadmin'),
         allowNull: false,
-        defaultValue: 'user',
+        defaultValue: 'user'
       },
+      isActive: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+        field: 'is_active'
+      }
     },
     {
       sequelize,
       tableName: 'users',
-      timestamps: false,
-      underscored: false,
-    },
+      timestamps: true,
+      underscored: true,
+      indexes: [
+        { unique: true, fields: ['email'] },
+        { fields: ['role'] },
+        { fields: ['is_active'] }
+      ]
+    }
   );
 
   return User;
 };
 
-export type UserModelType = typeof User;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

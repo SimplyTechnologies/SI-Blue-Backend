@@ -1,16 +1,18 @@
 import { User } from '../models/usersModel.js';
+import { RegisterInput } from '../schemas/usersSchema.js';
 
 
-const createUser = async (userData: User) => {
+const createUser = async (userData: RegisterInput) => {
   const user = await User.create({
-    first_name: userData.first_name,
-    last_name: userData.last_name,
-    phone_number: userData.phone_number,
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+    phoneNumber: userData.phoneNumber,
     password: userData.password,
     email: userData.email,
-    role: 'user',
+    role: userData.role == 'superadmin' ? 'superadmin' : 'user',
+    isActive: true
   });
-  const {password, ...returnedUser} = user
+  const {password, ...returnedUser} = user.dataValues
   return returnedUser
 };
 
@@ -29,7 +31,7 @@ const updateUser = async (updatedData: User) => {};
 const getUserByEmail = async (email: string) => {
   const user = await User.findOne({ where: { email } });
   if (!user) return null;
-  return user;
+  return user.dataValues;
 };
 
 const getUserProfile = async () => {};

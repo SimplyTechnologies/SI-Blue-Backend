@@ -7,6 +7,8 @@ import { usersRouter, vehiclesRouter } from './routes/index.js';
 import { syncDatabase } from './configs/sync.js';
 import { configurePassport } from './configs/passport.js';
 import authRoutes from './routes/auth.js';
+import favoriteRoutes from './routes/favorite.js';
+
 
 const app = express();
 
@@ -15,7 +17,7 @@ app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: ['http://localhost:5173', 'http://localhost:5174', 'https://si-blue-frontend.onrender.com'],
   }),
 );
 configurePassport();
@@ -27,10 +29,13 @@ const port = config.port as number;
 app.use('/api/users', usersRouter);
 app.use('/api/vehicles', vehiclesRouter);
 app.use('/api/auth', authRoutes);
+app.use('/api/favorites', favoriteRoutes);
 
 syncDatabase()
   .then(() => {
     console.log('Models initialized');
+   
+    
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });

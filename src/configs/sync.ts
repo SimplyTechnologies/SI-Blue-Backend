@@ -36,30 +36,9 @@ const syncDatabase = async (): Promise<Sequelize> => {
       foreignKey: 'makeId',
       as: 'make',
     });
+    Vehicle.belongsTo(Customer, { foreignKey: 'customerId', as: 'customer' });
 
-    User.hasMany(Vehicle, {
-      foreignKey: 'userId',
-      as: 'vehicles',
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    });
-
-    Vehicle.belongsTo(User, {
-      foreignKey: 'userId',
-      as: 'owner',
-    });
-
-    Vehicle.hasMany(Customer, {
-      foreignKey: 'vehicleId',
-      as: 'customers',
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-    });
-
-    Customer.belongsTo(Vehicle, {
-      foreignKey: 'vehicleId',
-      as: 'vehicle',
-    });
+    Customer.hasMany(Vehicle, { foreignKey: 'customerId', as: 'vehicles' });
 
     CarModel.hasMany(Vehicle, {
       foreignKey: 'modelId',
@@ -72,11 +51,34 @@ const syncDatabase = async (): Promise<Sequelize> => {
       foreignKey: 'modelId',
       as: 'model',
     });
+    User.belongsToMany(Vehicle, {
+      through: 'favorites',
+      foreignKey: 'userId',
+      otherKey: 'vehicleId',
+      as: 'favoriteVehicles',
+    });
+
+    Vehicle.belongsToMany(User, {
+      through: 'favorites',
+      foreignKey: 'vehicleId',
+      otherKey: 'userId',
+      as: 'favoriteByUsers',
+    });
 
     console.log('Creating tables...');
     try {
       await sequelize.sync({ alter: true });
       console.log('All tables have been successfully created or altered!');
+      if (process.env.NODE_ENV === 'development') {
+        await sequelize.query(`
+          SELECT setval(
+            pg_get_serial_sequence('vehicles', 'id'),
+            COALESCE((SELECT MAX(id) FROM vehicles), 1),
+            true
+          );
+        `);
+        console.log('Vehicle ID sequence has been synchronized');
+      }
     } catch (syncError: any) {
       console.error('Error during sync:', syncError);
       throw syncError;
