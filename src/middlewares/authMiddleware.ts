@@ -1,18 +1,29 @@
+import { Request, Response, NextFunction } from 'express';
 import passport from 'passport';
 import bcrypt from 'bcrypt';
-import { Request, Response, NextFunction } from 'express';
-import { checkEmail, checkFirstName, checkPassword } from '../helpers/auth';
-import { userService } from '../services';
+import { RegisterSchema, LoginSchema } from '../schemas/usersSchema';
+import { userService } from '../services/index';
 import { User } from '../models/usersModel';
 
-export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate('jwt', { session: false }, (err: unknown, user: User, info: unknown) => {
-    if (err) {
-      return next(err);
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User;
+      validatedData?: any;
     }
+  }
+}
+
+export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate('jwt', { session: false }, (err: any, user: User) => {
+    if (err) return next(err);
 
     if (!user) {
-      return res.status(401).json({ message: 'Unauthorized: Invalid or expired token' });
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({ message: 'Account is inactive' });
     }
 
     req.user = user;
@@ -21,10 +32,8 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 };
 
 export const authenticateRefreshToken = (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate('jwt-refresh', { session: false }, (err: unknown, user: User, info: unknown) => {
-    if (err) {
-      return next(err);
-    }
+  passport.authenticate('jwt-refresh', { session: false }, (err: any, user: User) => {
+    if (err) return next(err);
 
     if (!user) {
       return res.status(403).json({ message: 'Invalid refresh token' });
@@ -35,49 +44,95 @@ export const authenticateRefreshToken = (req: Request, res: Response, next: Next
   })(req, res, next);
 };
 
+export const requireRole = (...roles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({
+        message: 'Authentication required',
+      });
+    }
+    const role = { ...req.user } as string;
+
+    if (!roles.includes(role)) {
+      return res.status(403).json({
+        message: 'Insufficient permissions',
+        required: roles,
+        current: role,
+      });
+    }
+
+    next();
+  };
+};
+
+export const requireAdmin = requireRole('superadmin');
+
 export const validateRegistration = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const email = checkEmail(req.body.email);
-    if (!email) {
-      throw Error('Please provide us an email');
+    const result = RegisterSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        errors: result.error.errors.map(err => err.message),
+      });
     }
-    const founded = await userService.getUserByEmail(email);
-    if (founded) {
-      throw Error('User already exists');
+
+    const { email, password, ...userData } = result.data;
+
+    const existingUser = await userService.getUserByEmail(email);
+    if (existingUser) {
+      return res.status(409).json({ message: 'User already exists' });
     }
-    if (
-      !req.body.firstName ||
-      !req.body.lastName ||
-      !req.body.phoneNumber ||
-      !req.body.password ||
-      !req.body.confirmedPassword
-    ) {
-      throw Error('Please provide us firstname, lastname, password and confirmedPasswprd');
-    }
-    const first_name = checkFirstName(req.body.firstName);
-    const last_name = checkFirstName(req.body.lastName);
-    const password = checkPassword(req.body.password);
-    const confirmedPassword = req.body.password;
-    const phone_number = req.body.phoneNumber;
-    if (password !== confirmedPassword) {
-      throw Error('Please write the same password');
-    }
+
     const hashedPassword = await bcrypt.hash(password, 12);
-    const registeredUser = {
+    const user = {
+      ...userData,
       email,
-      first_name,
-      last_name,
       password: hashedPassword,
-      phone_number,
     };
 
-    req.user = registeredUser;
+    req.user = user;
+
     next();
-  } catch (err: unknown) {
-    console.error(err);
-    if (err instanceof Error) {
-      res.status(400).json({ message: err.message });
-    }
+  } catch (error) {
+    console.error('Registration validation error:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const validateLogin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = LoginSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(400).json({
+        message: 'Validation failed',
+        errors: result.error.errors,
+      });
+    }
+
+    const { email, password } = result.data;
+
+    const user = await userService.getUserByEmail(email);
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({ message: 'Account is inactive' });
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('Login validation error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 

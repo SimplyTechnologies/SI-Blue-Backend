@@ -11,15 +11,16 @@ declare global {
           country: string;
           city: string;
           street: string;
-          zipCode: string;
+          zipcode: string;
           state: string;
-          lat?:number;
-          lng?:number;
+          lat?: number;
+          lng?: number;
         };
       };
     }
   }
 }
+
 const createVehicle = async (req: Request, res: Response) => {
   try {
     if (!req.vehicle) {
@@ -51,3 +52,4 @@ export default {
   createVehicle,
   getVehicleByVin,
 };
+

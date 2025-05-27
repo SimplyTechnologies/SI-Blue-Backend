@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { User } from '../models/usersModel';
 
+
 const JWT_SECRET = process.env.JWT_SECRET as string;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string;
 

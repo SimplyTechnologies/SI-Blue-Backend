@@ -40,7 +40,7 @@
     "postgres": "^3.4.5",
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.3",
-    "zod": "^3.25.20"
+    "zod": "^3.25.28"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

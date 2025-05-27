@@ -6,7 +6,7 @@ export interface LocationData {
   street: string;
   city: string;
   state: string;
-  zipCode: string;
+  zipcode: string;
   country: string;
   additionalInfo?: string;
   lat?:number;
@@ -57,7 +57,7 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
         allowNull: false,
         validate: {
           isValidLocation(value: LocationData) {
-            if (!value.street || !value.city || !value.state || !value.zipCode || !value.country) {
+            if (!value.street || !value.city || !value.state || !value.zipcode || !value.country) {
               throw new Error('Location must include street, city, state, zipcode, and country');
             }
           },

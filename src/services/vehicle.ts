@@ -8,10 +8,10 @@ interface CreateVehicleData {
     country: string;
     city: string;
     street: string;
-    zipCode: string;
+    zipcode: string;
     state: string;
-    lat?:number;
-    lng?:number;
+    lat?: number;
+    lng?: number;
   };
   userId?: number;
 }
@@ -27,16 +27,16 @@ const createVehicle = async (vehicleData: CreateVehicleData) => {
     });
 
     return savedVehicle.dataValues;
-  } catch (error) {
+  } catch (error: any) {
+    console.log(error.message);
     throw new Error('Failed to create vehicle');
   }
 };
 
 const getVehicleByVin = async (vin: string) => {
   try {
-   
     const vehicle = await Vehicle.findOne({
-      where: { vin }
+      where: { vin },
     });
     return vehicle?.dataValues || null;
   } catch (error) {

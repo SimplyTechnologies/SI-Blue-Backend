@@ -8,6 +8,7 @@ import { syncDatabase } from './configs/sync.js';
 import { configurePassport } from './configs/passport.js';
 import authRoutes from './routes/auth.js';
 
+
 const app = express();
 
 app.use(express.json());
@@ -31,6 +32,8 @@ app.use('/api/auth', authRoutes);
 syncDatabase()
   .then(() => {
     console.log('Models initialized');
+   
+    
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });

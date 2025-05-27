@@ -1,7 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import { getVehicleInfo } from '../services/vinService';
 import vehicleService from '../services/vehicle.js';
 import { makeService, modelService } from '../services/index.js';
+import { User } from '../models/usersModel';
+import config from '../configs/config';
 
 declare global {
   namespace Express {
@@ -14,10 +17,10 @@ declare global {
           country: string;
           city: string;
           street: string;
-          zipCode: string;
+          zipcode: string;
           state: string;
-          lat?:number;
-          lng?:number;
+          lat?: number;
+          lng?: number;
         };
       };
     }
@@ -35,8 +38,8 @@ const validateInput = (body: any) => {
     return { isValid: false, message: 'Location is required' };
   }
 
-  const { country, street, zipCode, state , lat, lng} = location;
-  if (!country || !street || !zipCode || !state) {
+  const { country, street, zipcode, state, lat, lng } = location;
+  if (!country || !street || !zipcode || !state) {
     return {
       isValid: false,
       message: 'Complete location required (country, street, zipCode, state)',
@@ -72,12 +75,33 @@ const resolveMakeAndModel = async (vehicleInfo: any) => {
     modelId = newModel.id;
   }
 
-  return {  modelId };
+  return { modelId };
+};
+export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith('Bearer') ? authHeader.substring(7) : null;
+
+    if (!token) {
+      return res.status(401).json({ message: 'Authentication required, please login' });
+    }
+
+    const decode = (await jwt.verify(token, config.jwt.secret as any)) as any;
+
+    if (!decode) {
+      return res.status(402).json({ message: 'Invalid token' });
+    }
+
+    req.user = decode.id;
+    next();
+  } catch (err) {
+    return res.status(500).json({ message: 'internal server error' });
+  }
 };
 
 export const validateInputVehicle = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { year, vin, location } = req.body;
+    const { modelId, makeId, year, vin, location } = req.body;
 
     const existedCar = await vehicleService.getVehicleByVin(vin);
 
@@ -91,17 +115,17 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
       return;
     }
 
-    const vehicleInfo = await getVehicleInfo(vin);
-    if (!vehicleInfo || !vehicleInfo.make || !vehicleInfo.model) {
-      res.status(404).json({ message: 'Vehicle information not found for this VIN' });
-      return;
-    }
+    // const vehicleInfo = await getVehicleInfo(vin);
+    // if (!vehicleInfo || !vehicleInfo.make || !vehicleInfo.model) {
+    //   res.status(404).json({ message: 'Vehicle information not found for this VIN' });
+    //   return;
+    // }
 
-    const { modelId } = await resolveMakeAndModel(vehicleInfo);
+    // const { modelId } = await resolveMakeAndModel(vehicleInfo);
 
     req.vehicle = {
       modelId,
-      year: vehicleInfo.year || year,
+      year,
       vin,
       location,
     };
@@ -114,3 +138,4 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
     });
   }
 };
+
