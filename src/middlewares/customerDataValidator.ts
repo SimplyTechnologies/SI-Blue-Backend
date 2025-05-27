@@ -1,19 +1,19 @@
 import { Response, Request } from 'express';
-import { checkEmail, checkFirstName, checkLastName, checkPhoneNumber } from '../helpers/auth.js';
+
 import { customerService } from '../services/index.js';
 import { NextFunction } from 'express';
 
 export const customerDataValidate = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const email = checkEmail(req.body.email);
+    const email = req.body.email;
     const founded = customerService.getCustomerByEmail(email);
     if (!founded) {
       throw new Error('Customer already exists');
     }
 
-    const firstName = checkFirstName(req.body.firstName);
-    const lastName = checkLastName(req.body.lastName);
-    const phoneNumber = checkPhoneNumber(req.body.phoneNumber);
+    const firstName = req.body.firstName;
+    const lastName = req.body.lastName;
+    const phoneNumber = req.body.phoneNumber;
 
     const customerData = {
       firstName,

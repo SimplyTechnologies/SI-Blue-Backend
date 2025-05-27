@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
-import config from '../configs/config.js';
-import { getVehicleInfo } from '../services/vinService';
+
 import vehicleService from '../services/vehicle.js';
 import { makeService, modelService } from '../services/index.js';
+
+import config from '../configs/config';
 
 declare global {
   namespace Express {
@@ -76,10 +77,31 @@ const resolveMakeAndModel = async (vehicleInfo: any) => {
 
   return { modelId };
 };
+export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith('Bearer') ? authHeader.substring(7) : null;
+
+    if (!token) {
+      return res.status(401).json({ message: 'Authentication required, please login' });
+    }
+
+    const decode = (await jwt.verify(token, config.jwt.secret as any)) as any;
+
+    if (!decode) {
+      return res.status(402).json({ message: 'Invalid token' });
+    }
+
+    req.user = decode.id;
+    next();
+  } catch (err) {
+    return res.status(500).json({ message: 'internal server error' });
+  }
+};
 
 export const validateInputVehicle = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { year, vin, location } = req.body;
+    const { modelId, makeId, year, vin, location } = req.body;
 
     const existedCar = await vehicleService.getVehicleByVin(vin);
 
@@ -93,17 +115,17 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
       return;
     }
 
-    const vehicleInfo = await getVehicleInfo(vin);
-    if (!vehicleInfo || !vehicleInfo.make || !vehicleInfo.model) {
-      res.status(404).json({ message: 'Vehicle information not found for this VIN' });
-      return;
-    }
+    // const vehicleInfo = await getVehicleInfo(vin);
+    // if (!vehicleInfo || !vehicleInfo.make || !vehicleInfo.model) {
+    //   res.status(404).json({ message: 'Vehicle information not found for this VIN' });
+    //   return;
+    // }
 
-    const { modelId } = await resolveMakeAndModel(vehicleInfo);
+    // const { modelId } = await resolveMakeAndModel(vehicleInfo);
 
     req.vehicle = {
       modelId,
-      year: vehicleInfo.year || year,
+      year,
       vin,
       location,
     };
@@ -117,23 +139,4 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
   }
 };
 
-export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    let { accessToken } = req.cookies;
-    if (!accessToken) {
-      const authHeader = req.headers.authorization;
-      accessToken = authHeader && authHeader.startsWith('Bearer') ? authHeader.substring(7) : null;
-    }
-    if (!accessToken) {
-      return res.status(401).json({ message: 'Authentication required, please login' });
-    }
-    const decode = jwt.verify(accessToken, config.jwt.secret as any) as any;
-    if (!decode) {
-      return res.status(402).json({ message: 'Invalid token' });
-    }
-    req.user = decode.id;
-    next();
-  } catch (err) {
-    return res.status(500).json({ message: 'internal server error' });
-  }
-};
+

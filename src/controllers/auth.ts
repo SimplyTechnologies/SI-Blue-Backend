@@ -5,16 +5,17 @@ import { userService } from '../services';
 import { generateAccessToken, generateRefreshToken } from '../helpers/tokenUtils.js';
 import { maxAge } from '../configs/config.js';
 
-import { User, UserRole } from '../models/usersModel';
+import { User } from '../models/usersModel';
+import { RegisterInput, UserRoleType } from '../schemas/usersSchema';
 
 const roles = ['user', 'superadmin'];
-const accessTokenMaxAge = ms((maxAge.accessTokenMaxAge as StringValue) || '15m');
-const refreshTokenMaxAge = ms((maxAge.refreshTokenMaxAge as StringValue) || '7d');
+
 
 const registerUser = async (req: Request, res: Response) => {
   try {
-    const registerUser = req.user as User;
-    const role = registerUser.role as UserRole;
+    const registerUser = req.user as RegisterInput;
+  
+    const role = registerUser.role as UserRoleType;
 
     if (!role) {
       registerUser.role = 'user';
@@ -39,8 +40,10 @@ const login = (req: Request, res: Response, next: NextFunction) => {
 
     if (!user) {
       return res.status(401).json({ message: info?.message || 'Unauthorized' });
+      
     }
-    const {password, ...loggedUser} = user.dataValues 
+    
+    const {password, ...loggedUser} = user 
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
@@ -65,11 +68,27 @@ const refreshToken = (req: Request, res: Response) => {
     console.error('Refresh token error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
-};
+}; 
+
+const forgotPassword = async (req:Request, res:Response) => {
+
+  try {
+    const { email } = req.body
+    const user = await userService.getUserByEmail(email)
+    if(!user) {
+      return res.status(404).json({ message: 'User not found'})
+    }
+    res.status(201).json({message: 'User exists'})
+
+  } catch(err) {
+    res.status(500).json({message: 'Internal server error'})
+  }
+}
 
 export default {
   registerUser,
   login,
   refreshToken,
+  forgotPassword
 };
 

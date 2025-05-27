@@ -30,7 +30,8 @@ const createVehicle = async (vehicleData: CreateVehicleData) => {
       sold: false,
     });
     return savedVehicle.dataValues;
-  } catch (error) {
+  } catch (error: any) {
+    console.log(error.message);
     throw new Error('Failed to create vehicle');
   }
 };
