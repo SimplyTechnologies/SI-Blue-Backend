@@ -95,7 +95,10 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     req.user = decode.id;
     next();
   } catch (err) {
-    return res.status(500).json({ message: 'internal server error' });
+    if (err instanceof Error && err.message === 'jwt expired') {
+      return res.status(401).json({ message: 'Token expired!' });
+    }
+    return res.status(500).json({ err: err instanceof Error ? err.message : err });
   }
 };
 
@@ -138,5 +141,4 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
     });
   }
 };
-
 

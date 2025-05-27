@@ -60,19 +60,6 @@ const syncDatabase = async (): Promise<Sequelize> => {
       foreignKey: 'modelId',
       as: 'model',
     });
-    User.belongsToMany(Vehicle, {
-      through: 'userFavoriteVehicles', 
-      foreignKey: 'userId',
-      otherKey: 'vehicleId',
-      as: 'favoriteVehicles' 
-    });
-
-    Vehicle.belongsToMany(User, {
-      through: 'userFavoriteVehicles',
-      foreignKey: 'vehicleId',
-      otherKey: 'userId',
-      as: 'favoritedByUsers'
-    });
 
     User.belongsToMany(Vehicle, {
       through: 'favorites',
@@ -93,12 +80,12 @@ const syncDatabase = async (): Promise<Sequelize> => {
       await sequelize.sync({ alter: true });
       console.log('All tables have been successfully created or altered!');
       if (process.env.NODE_ENV === 'development') {
-        await sequelize.query(`
+await sequelize.query(`
           SELECT setval(
-            pg_get_serial_sequence('vehicle', 'id'),
-            COALESCE((SELECT MAX(id) FROM vehicle), 1),
-            true
-          );
+                   pg_get_serial_sequence('vehicle', 'id'),
+                   COALESCE((SELECT MAX(id) FROM vehicle), 1),
+                   true
+                 );
         `);
         console.log('Vehicle ID sequence has been synchronized');
       }
