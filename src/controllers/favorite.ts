@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { User } from '../models/usersModel';
-import { Vehicle } from '../models/vehiclesModel';
 import { favoritesService } from '../services';
+import { userService } from '../services';
+import { vehicleService } from '../services';
 
 export const createFavorite = async (req: Request, res: Response) => {
   try {
@@ -12,12 +12,12 @@ export const createFavorite = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'userId and vehicleId are required' });
     }
 
-    const user = await User.findByPk(userId);
+    const user = await userService.getUserById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const vehicle = await Vehicle.findByPk(vehicleId);
+    const vehicle = await vehicleService.getVehicleById(vehicleId);
     if (!vehicle) {
       return res.status(404).json({ message: 'Vehicle not found' });
     }
