@@ -53,6 +53,26 @@ const createVehicle = async (req: Request, res: Response) => {
 
 const getVehicleByVin = async (req: Request, res: Response) => {};
 
+const getVehicleById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const vehicle = await vehicleService.getVehicleById(parseInt(id));
+
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+
+    res.status(200).json({
+      vehicle,
+    });
+  } catch (error: unknown) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get vehicle by id',
+    });
+  }
+};
+
 const getVehicles = async (req: Request, res: Response) => {
   try {
     const { search, makeId, modelIds, availability, page, offset, favorite } = req.query;
@@ -233,5 +253,6 @@ export default {
   createVehicle,
   getVehicleByVin,
   getVehicles,
+  getVehicleById,
   exportVehiclesCsv,
 };
