@@ -66,7 +66,7 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
         allowNull: false
       },
       role: {
-        type: DataTypes.ENUM('user', 'admin', 'superadmin'),
+        type: DataTypes.ENUM('user', 'superadmin'),
         allowNull: false,
         defaultValue: 'user'
       },

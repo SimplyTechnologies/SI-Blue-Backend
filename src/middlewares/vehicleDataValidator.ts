@@ -1,9 +1,9 @@
-import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { getVehicleInfo } from '../services/vinService';
+import { NextFunction, Request, Response } from 'express';
+
 import vehicleService from '../services/vehicle.js';
 import { makeService, modelService } from '../services/index.js';
-import { User } from '../models/usersModel';
+
 import config from '../configs/config';
 
 declare global {
@@ -42,7 +42,7 @@ const validateInput = (body: any) => {
   if (!country || !street || !zipcode || !state) {
     return {
       isValid: false,
-      message: 'Complete location required (country, street, zipCode, state)',
+      message: 'Complete location required (country, street, zipcode, state)',
     };
   }
 
@@ -138,4 +138,5 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
     });
   }
 };
+
 
