@@ -28,6 +28,7 @@ const createVehicle = async (vehicleData: CreateVehicleData) => {
       vin: vehicleData.vin,
       location: vehicleData.location,
       sold: false,
+      customerId: null,
     });
     return savedVehicle.dataValues;
   } catch (error: any) {

@@ -43,7 +43,7 @@ export const authenticateRefreshToken = (req: Request, res: Response, next: Next
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
 
-    req.user = decodedJWT.id;
+    req.user = decodedJWT;
     next();
   })(req, res, next);
 };
