@@ -1,4 +1,10 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import {
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  DataTypes,
+  Model,
+  Sequelize,
+} from 'sequelize';
 import { UserRoleType } from '../schemas/usersSchema';
 import { Vehicle } from './vehiclesModel';
 
@@ -28,6 +34,9 @@ export class User extends Model<UserAttributes, UserCreationAttributes> {
   declare isActive: boolean;
   declare createdAt: Date;
   declare updatedAt: Date;
+  public addFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
+  public getFavorite!: BelongsToManyGetAssociationsMixin<Vehicle>;
+  public removeFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
 
   static associate() {
     User.belongsToMany(Vehicle, {

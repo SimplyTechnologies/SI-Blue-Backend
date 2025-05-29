@@ -1,7 +1,8 @@
-import { Vehicle } from '../models/vehiclesModel';
 import { Op } from 'sequelize';
-import { CarModel } from '../models/carModelsModel';
 import { Make } from '../models/carMakesModel';
+import { Vehicle } from '../models/vehiclesModel';
+import { CarModel } from '../models/carModelsModel';
+import { Customer } from '../models/customersModel';
 import { SearchVehiclesParams } from '../types/vehicle';
 
 interface CreateVehicleData {
@@ -27,7 +28,12 @@ const createVehicle = async (vehicleData: CreateVehicleData) => {
       year: vehicleData.year,
       vin: vehicleData.vin,
       location: vehicleData.location,
+<<<<<<< HEAD
       sold: false
+=======
+      sold: false,
+      customerId: null,
+>>>>>>> origin/dev
     });
     return savedVehicle.dataValues;
   } catch (error: any) {
