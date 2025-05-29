@@ -18,4 +18,6 @@ router.get('/makes', makeController.getAllMakes);
 
 router.get('/models', modelController.getModelsByMakeId);
 
+router.get('/dashboard-data', vehicleController.getAllVehicleLocations);
+
 export default router;
