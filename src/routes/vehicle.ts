@@ -19,6 +19,8 @@ router.get('/makes', makeController.getAllMakes);
 
 router.get('/models', modelController.getModelsByMakeId);
 
-router.post('/decode/vin', decodeVin)
+router.get('/dashboard-data', vehicleController.getAllVehicleLocations);
+
+router.post('/decode/vin', decodeVin);
 
 export default router;

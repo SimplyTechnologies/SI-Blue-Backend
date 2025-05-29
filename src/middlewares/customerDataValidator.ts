@@ -2,6 +2,13 @@ import { NextFunction, Request, Response } from 'express';
 import { CustomerSchema } from '../schemas/customersSchema';
 import { customerService, vehicleService } from '../services';
 
+declare global {
+  namespace Express {
+    interface Request {
+      customer?: any;
+    }
+  }
+}
 
 export const validateCustomerByEmail = (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -9,7 +16,7 @@ export const validateCustomerByEmail = (req: Request, res: Response, next: NextF
     if (!email || typeof email !== 'string') {
       return res.status(400).json({ message: 'Email is missing or not a valid string' });
     }
-    
+
     const EmailSchema = CustomerSchema.pick({ email: true });
     EmailSchema.parse({ email });
 
@@ -17,7 +24,7 @@ export const validateCustomerByEmail = (req: Request, res: Response, next: NextF
   } catch (err) {
     console.error('Email validation error:', err);
     res.status(400).json({
-      message: 'Invalid email format'
+      message: 'Invalid email format',
     });
   }
 };
@@ -71,10 +78,9 @@ export const assignVehicleExistedCustomer = async (req: Request, res: Response, 
     if (!vehicleId) {
       return res.status(400).json({ message: 'Vehicle data missing' });
     }
-    const customerId = existingCustomer.id
-    if(!customerId){
-      return res.status(400).json({ message: 'Customer ID required'})
+    const customerId = existingCustomer.id;
+    if (!customerId) {
+      return res.status(400).json({ message: 'Customer ID required' });
     }
-    
   } catch (err) {}
 };
