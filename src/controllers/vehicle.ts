@@ -260,10 +260,25 @@ const exportVehiclesCsv = async (req: Request, res: Response) => {
   }
 };
 
+const getAllVehicleLocations = async (req: Request, res: Response) => {
+  try {
+    const { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount } = await vehicleService.getAllVehicleLocationsAndCounts();
+    res.json({
+      vehicles: vehicleLocations,
+      totalCount,
+      totalSoldVehicles,
+      totalCustomerCount,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch vehicle locations' });
+  }
+};
+
 export default {
   createVehicle,
   getVehicleByVin,
   getVehicles,
   getVehicleById,
   exportVehiclesCsv,
+  getAllVehicleLocations,
 };
