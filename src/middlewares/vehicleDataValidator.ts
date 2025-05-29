@@ -141,4 +141,3 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
     });
   }
 };
-

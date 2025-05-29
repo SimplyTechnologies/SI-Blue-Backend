@@ -1,7 +1,21 @@
-import { NextFunction, Request, Response } from "express";
-import { CustomerSchema } from "../schemas/customersSchema";
-import { customerService, vehicleService } from "../services";
-import { Customer } from "../models/customersModel";
+import { NextFunction, Request, Response } from 'express';
+import { CustomerSchema } from '../schemas/customersSchema';
+import { customerService, vehicleService } from '../services';
+import { Customer } from '../models/customersModel';
+
+declare global {
+  namespace Express {
+    interface Request {
+      customer?: {
+        email: string;
+        firstName: string;
+        lastName: string;
+        phoneNumber?: string;
+        vehicleId?: string;
+      } | Customer;
+    }
+  }
+}
 
 export const validateCustomerRegistration = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -25,7 +39,7 @@ export const validateCustomerRegistration = async (req: Request, res: Response, 
       next()
     }
 
-    
+
     const customer = {
       email,
       firstName,
@@ -49,7 +63,7 @@ export const assignVehicleExistedCustomer = async (req: Request, res: Response, 
     return res.status(400).json({message: 'Customer data missing'})
   }
 
-  
+
 
 
 
