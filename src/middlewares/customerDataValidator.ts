@@ -1,21 +1,26 @@
 import { NextFunction, Request, Response } from 'express';
 import { CustomerSchema } from '../schemas/customersSchema';
 import { customerService, vehicleService } from '../services';
-import { Customer } from '../models/customersModel';
 
-declare global {
-  namespace Express {
-    interface Request {
-      customer?: {
-        email: string;
-        firstName: string;
-        lastName: string;
-        phoneNumber?: string;
-        vehicleId?: string;
-      } | Customer;
+
+export const validateCustomerByEmail = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const email = req.query.email;
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ message: 'Email is missing or not a valid string' });
     }
+    
+    const EmailSchema = CustomerSchema.pick({ email: true });
+    EmailSchema.parse({ email });
+
+    next();
+  } catch (err) {
+    console.error('Email validation error:', err);
+    res.status(400).json({
+      message: 'Invalid email format'
+    });
   }
-}
+};
 
 export const validateCustomerRegistration = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -29,23 +34,22 @@ export const validateCustomerRegistration = async (req: Request, res: Response, 
 
     const { email, firstName, lastName, phoneNumber, vehicleId } = result.data;
 
-    const existingCustomer = await customerService.getCustomerByEmail(email)
-    const existedCar = await vehicleService.getVehicleById(vehicleId)
-    if(!existedCar) {
-      return res.status(401).json({message: 'Car missing'})
+    const existingCustomer = await customerService.getCustomerByEmail(email);
+    const existedCar = await vehicleService.getVehicleById(vehicleId);
+    if (!existedCar) {
+      return res.status(401).json({ message: 'Car missing' });
     }
     if (existingCustomer) {
-      req.customer = existingCustomer
-      next()
+      req.customer = existingCustomer;
+      next();
     }
-
 
     const customer = {
       email,
       firstName,
       lastName,
 
-      phoneNumber
+      phoneNumber,
     };
 
     req.customer = customer;
@@ -58,13 +62,19 @@ export const validateCustomerRegistration = async (req: Request, res: Response, 
 };
 
 export const assignVehicleExistedCustomer = async (req: Request, res: Response, next: NextFunction) => {
-  const existingCustomer = req.customer
-  if(!existingCustomer){
-    return res.status(400).json({message: 'Customer data missing'})
-  }
-
-
-
-
-
-}
+  try {
+    const existingCustomer = req.customer;
+    const { vehicleId } = req.body;
+    if (!existingCustomer) {
+      return res.status(400).json({ message: 'Customer data missing' });
+    }
+    if (!vehicleId) {
+      return res.status(400).json({ message: 'Vehicle data missing' });
+    }
+    const customerId = existingCustomer.id
+    if(!customerId){
+      return res.status(400).json({ message: 'Customer ID required'})
+    }
+    
+  } catch (err) {}
+};

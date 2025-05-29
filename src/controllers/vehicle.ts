@@ -51,7 +51,9 @@ const createVehicle = async (req: Request, res: Response) => {
   }
 };
 
-const getVehicleByVin = async (req: Request, res: Response) => {};
+const getVehicleByVin = async (req: Request, res: Response) => {
+  
+};
 
 const getVehicleById = async (req: Request, res: Response) => {
   try {

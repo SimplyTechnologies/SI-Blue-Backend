@@ -21,7 +21,7 @@ interface VehicleAttributes {
   sold: boolean;
   userId?: number;
   modelId: number;
-  customerId: number | null;
+  customerId?: number;
 }
 
 interface VehicleCreationAttributes extends Optional<VehicleAttributes, 'id'> {}

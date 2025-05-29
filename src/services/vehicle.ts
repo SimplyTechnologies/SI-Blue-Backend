@@ -28,8 +28,12 @@ const createVehicle = async (vehicleData: CreateVehicleData) => {
       year: vehicleData.year,
       vin: vehicleData.vin,
       location: vehicleData.location,
+<<<<<<< HEAD
+      sold: false
+=======
       sold: false,
       customerId: null,
+>>>>>>> origin/dev
     });
     return savedVehicle.dataValues;
   } catch (error: any) {
@@ -100,26 +104,14 @@ const getVehicleById = async (id: number) => {
   }
 };
 
-const getAllVehicleLocationsAndCounts = async () => {
-  const vehicles = await Vehicle.findAll({
-    attributes: ['id', 'location', 'sold'],
-    raw: true,
-  });
-  const vehicleLocations = vehicles.map((v: any) => ({
-    id: v.id,
-    lat: v.location.lat ? v.location.lat : null,
-    lng: v.location.lng ? v.location.lng : null,
-  }));
-  const totalCount = vehicles.length;
-  const totalSoldVehicles = vehicles.filter((v: any) => v.sold).length;
-  const totalCustomerCount = await Customer.count();
-  return { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount };
-};
+const updateVehicleByCustomerId = async (id: number) => {
+
+}
 
 export default {
   createVehicle,
   getVehicleByVin,
   getVehicles,
   getVehicleById,
-  getAllVehicleLocationsAndCounts,
+  updateVehicleByCustomerId
 };

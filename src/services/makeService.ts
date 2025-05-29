@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import { Make } from '../models/carMakesModel';
 import { CarModel } from '../models/carModelsModel';
 
@@ -10,15 +11,21 @@ const getMakeById = async (id: number) => {
   if (!make) {
     return null;
   }
-  console.log('service', make);
+ return make
 };
-const getMakeByName = async (name: string) => {
-  const make = await Make.findOne({ where: { name } });
-  return make?.dataValues;
+export const getMakeByName = async (name: string) => {
+  return await Make.findOne({
+    where: {
+      name: {
+        [Op.iLike]: name 
+      }
+    }
+  });
 };
 
 const createMake = async (make: string) => {
-  return await Make.create({ name: make });
+  const createdMake =  await Make.create({ name: make });
+  return createdMake.dataValues
 };
 
 export default {
