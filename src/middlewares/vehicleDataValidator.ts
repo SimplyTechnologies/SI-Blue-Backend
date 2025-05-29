@@ -93,6 +93,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     }
 
     req.user = decode.id;
+    req.userId = decode.id;
     next();
   } catch (err) {
     if (err instanceof Error && err.message === 'jwt expired') {
