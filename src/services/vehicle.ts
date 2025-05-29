@@ -28,12 +28,7 @@ const createVehicle = async (vehicleData: CreateVehicleData) => {
       year: vehicleData.year,
       vin: vehicleData.vin,
       location: vehicleData.location,
-<<<<<<< HEAD
       sold: false
-=======
-      sold: false,
-      customerId: null,
->>>>>>> origin/dev
     });
     return savedVehicle.dataValues;
   } catch (error: any) {
