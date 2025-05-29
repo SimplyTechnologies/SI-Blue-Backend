@@ -27,7 +27,7 @@ const createVehicle = async (vehicleData: CreateVehicleData) => {
       year: vehicleData.year,
       vin: vehicleData.vin,
       location: vehicleData.location,
-      sold: false,
+      sold: false
     });
     return savedVehicle.dataValues;
   } catch (error: any) {
@@ -98,9 +98,14 @@ const getVehicleById = async (id: number) => {
   }
 };
 
+const updateVehicleByCustomerId = async (id: number) => {
+
+}
+
 export default {
   createVehicle,
   getVehicleByVin,
   getVehicles,
   getVehicleById,
+  updateVehicleByCustomerId
 };
