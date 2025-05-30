@@ -1,7 +1,6 @@
 import { DataTypes, Model, Sequelize, Optional } from 'sequelize';
 import { User } from './usersModel';
 import { CarModel } from './carModelsModel';
-import { Customer } from './customersModel';
 
 export interface LocationData {
   street: string;
@@ -10,8 +9,8 @@ export interface LocationData {
   zipcode: string;
   country: string;
   additionalInfo?: string;
-  lat?:number;
-  lng?:number;
+  lat?: number;
+  lng?: number;
 }
 
 interface VehicleAttributes {
@@ -22,7 +21,7 @@ interface VehicleAttributes {
   sold: boolean;
   userId?: number;
   modelId: number;
-  customerId: number;
+  customerId?: number;
 }
 
 interface VehicleCreationAttributes extends Optional<VehicleAttributes, 'id'> {}
@@ -37,6 +36,14 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
   public modelId!: number;
   public customerId!: number;
 
+  static associate() {
+    Vehicle.belongsToMany(User, {
+      through: 'favorites',
+      as: 'favorite',
+      foreignKey: 'vehicleId',
+      otherKey: 'userId',
+    });
+  }
 }
 
 const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
@@ -110,7 +117,7 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
     {
       sequelize,
       tableName: 'vehicles',
-      timestamps: false,
+      timestamps: true,
       underscored: false,
     },
   );

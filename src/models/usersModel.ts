@@ -1,5 +1,12 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
+import {
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  DataTypes,
+  Model,
+  Sequelize,
+} from 'sequelize';
 import { UserRoleType } from '../schemas/usersSchema';
+import { Vehicle } from './vehiclesModel';
 
 export interface UserAttributes {
   id: number;
@@ -27,7 +34,18 @@ export class User extends Model<UserAttributes, UserCreationAttributes> {
   declare isActive: boolean;
   declare createdAt: Date;
   declare updatedAt: Date;
+  public addFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
+  public getFavorite!: BelongsToManyGetAssociationsMixin<Vehicle>;
+  public removeFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
 
+  static associate() {
+    User.belongsToMany(Vehicle, {
+      through: 'favorites',
+      as: 'favorite',
+      foreignKey: 'userId',
+      otherKey: 'vehicleId',
+    });
+  }
 }
 
 export const defineUserModel = (sequelize: Sequelize): typeof User => {
@@ -36,78 +54,55 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
       },
       firstName: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        field: 'first_name'
+        field: 'first_name',
       },
       lastName: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        field: 'last_name'
+        field: 'last_name',
       },
       email: {
         type: DataTypes.STRING(100),
         allowNull: false,
         unique: true,
         validate: {
-          isEmail: true
-        }
+          isEmail: true,
+        },
       },
       phoneNumber: {
         type: DataTypes.STRING(15),
         allowNull: false,
-        field: 'phone_number'
+        field: 'phone_number',
       },
       password: {
         type: DataTypes.STRING(255),
-        allowNull: false
+        allowNull: false,
       },
       role: {
         type: DataTypes.ENUM('user', 'superadmin'),
         allowNull: false,
-        defaultValue: 'user'
+        defaultValue: 'user',
       },
       isActive: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: true,
-        field: 'is_active'
-      }
+        field: 'is_active',
+      },
     },
     {
       sequelize,
       tableName: 'users',
       timestamps: true,
       underscored: true,
-      indexes: [
-        { unique: true, fields: ['email'] },
-        { fields: ['role'] },
-        { fields: ['is_active'] }
-      ]
-    }
+      indexes: [{ unique: true, fields: ['email'] }, { fields: ['role'] }, { fields: ['is_active'] }],
+    },
   );
 
   return User;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

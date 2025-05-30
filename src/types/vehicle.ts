@@ -17,9 +17,11 @@ export interface VehicleAttributes {
   sold: boolean;
   userId: number;
   modelId: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export interface VehicleCreationAttributes extends Optional<VehicleAttributes, 'id'> {}
+export interface VehicleCreationAttributes extends Optional<VehicleAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
 
 export class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implements VehicleAttributes {
   public id!: number;
@@ -29,6 +31,8 @@ export class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes>
   public sold!: boolean;
   public userId!: number;
   public modelId!: number;
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
 }
 
 export type SearchVehiclesParams = {

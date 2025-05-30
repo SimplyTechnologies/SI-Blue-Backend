@@ -1,14 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
+import { JwtPayload } from 'jsonwebtoken';
 import passport from 'passport';
 import bcrypt from 'bcrypt';
 import { RegisterSchema, LoginSchema } from '../schemas/usersSchema';
 import { userService } from '../services/index';
 import { User } from '../models/usersModel';
+import { verifyRefreshToken } from '../helpers/tokenUtils';
 
 declare global {
   namespace Express {
     interface Request {
       user?: User;
+      userId?: number;
       validatedData?: any;
     }
   }
@@ -33,13 +36,15 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
 export const authenticateRefreshToken = (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate('jwt-refresh', { session: false }, (err: any, user: User) => {
+    const decodedJWT = verifyRefreshToken(req.body.refreshToken) as JwtPayload;
+
     if (err) return next(err);
 
-    if (!user) {
+    if (!decodedJWT) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
 
-    req.user = user;
+    req.user = decodedJWT;
     next();
   })(req, res, next);
 };
@@ -133,6 +138,3 @@ export const validateLogin = async (req: Request, res: Response, next: NextFunct
     res.status(500).json({ message: 'Server error' });
   }
 };
-
-
-

@@ -1,7 +1,8 @@
-import { Vehicle } from '../models/vehiclesModel';
 import { Op } from 'sequelize';
-import { CarModel } from '../models/carModelsModel';
 import { Make } from '../models/carMakesModel';
+import { Vehicle } from '../models/vehiclesModel';
+import { CarModel } from '../models/carModelsModel';
+import { Customer } from '../models/customersModel';
 import { SearchVehiclesParams } from '../types/vehicle';
 
 interface CreateVehicleData {
@@ -74,6 +75,7 @@ const getVehicles = async ({ search, makeId, modelIds, sold, limit, offset }: Se
     include,
     limit,
     offset,
+    order: [['createdAt', 'DESC']],
   });
 };
 
@@ -98,9 +100,29 @@ const getVehicleById = async (id: number) => {
   }
 };
 
+const updateVehicleByCustomerId = async (id: number) => {};
+
+const getAllVehicleLocationsAndCounts = async () => {
+  const vehicles = await Vehicle.findAll({
+    attributes: ['id', 'location', 'sold'],
+    raw: true,
+  });
+  const vehicleLocations = vehicles.map((v: any) => ({
+    id: v.id,
+    lat: v.location.lat ? v.location.lat : null,
+    lng: v.location.lng ? v.location.lng : null,
+  }));
+  const totalCount = vehicles.length;
+  const totalSoldVehicles = vehicles.filter((v: any) => v.sold).length;
+  const totalCustomerCount = await Customer.count();
+  return { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount };
+};
+
 export default {
   createVehicle,
   getVehicleByVin,
   getVehicles,
   getVehicleById,
+  updateVehicleByCustomerId,
+  getAllVehicleLocationsAndCounts,
 };
