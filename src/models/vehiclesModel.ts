@@ -9,8 +9,8 @@ export interface LocationData {
   zipcode: string;
   country: string;
   additionalInfo?: string;
-  lat?:number;
-  lng?:number;
+  lat?: number;
+  lng?: number;
 }
 
 interface VehicleAttributes {
@@ -44,7 +44,6 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
       otherKey: 'userId',
     });
   }
-
 }
 
 const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
@@ -118,7 +117,7 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
     {
       sequelize,
       tableName: 'vehicles',
-      timestamps: false,
+      timestamps: true,
       underscored: false,
     },
   );

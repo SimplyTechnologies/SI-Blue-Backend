@@ -67,7 +67,6 @@ const syncDatabase = async (): Promise<Sequelize> => {
 
     console.log('Creating tables...');
     try {
-      await sequelize.sync({ alter: true });
       console.log('All tables have been successfully created or altered!');
       if (process.env.NODE_ENV === 'development') {
         await sequelize.query(`

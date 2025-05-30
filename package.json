@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Vehicle management system built with Express and TypeScript",
   "main": "dist/index.js",
-  "type": "module",
   "scripts": {
     "dev": "tsx watch --clear-screen=false src/index.ts",
+    "migrate": "sequelize-cli db:migrate",
     "build": "tsc "
   },
   "keywords": [
