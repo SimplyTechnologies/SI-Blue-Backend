@@ -34,31 +34,26 @@ export const getVehicleInfo = async (vin: string) => {
       throw new Error('Invalid VIN provided');
     }
 
-    const make = results.find(item => item.Variable === 'Make')?.Value || null ;
+    const make = results.find(item => item.Variable === 'Make')?.Value || null;
     const model = results.find(item => item.Variable === 'Model')?.Value || null;
     const year = results.find(item => item.Variable === 'Model Year')?.Value || null;
-    
 
-    const dbMake = await makeService.getMakeByName(make as string)
-    const dbModel = await modelService.getModelByName(model as string)
-    if(!dbMake && !dbMake ){
-      const createdMake = await makeService.createMake(make as string)
-      const createdModel = await modelService.createModel({name:model as string, makeId:createdMake.id})
-      
-      return {vehicleMake:createdMake, vehicleModel:createdModel, year}
-    }
-    if(dbMake && !dbModel){
-      const makeId = dbMake.dataValues.id
-      const createdModel = await modelService.createModel({name:model as string, makeId})
-      return {vehicleMake:dbMake, vehicleModel:createdModel, year}
-    }
-    if(dbModel && dbMake){
-    
-      return {vehicleMake: dbMake.dataValues, vehicleModel:dbModel, year };
+    const dbMake = await makeService.getMakeByName(make as string);
+    const dbModel = await modelService.getModelByName(model as string);
+    if (!dbMake && !dbMake) {
+      const createdMake = await makeService.createMake(make as string);
+      const createdModel = await modelService.createModel({ name: model as string, makeId: createdMake.id });
 
+      return { vehicleMake: createdMake, vehicleModel: createdModel, year };
     }
-    
-    
+    if (dbMake && !dbModel) {
+      const makeId = dbMake.dataValues.id;
+      const createdModel = await modelService.createModel({ name: model as string, makeId });
+      return { vehicleMake: dbMake, vehicleModel: createdModel, year };
+    }
+    if (dbModel && dbMake) {
+      return { vehicleMake: dbMake.dataValues, vehicleModel: dbModel, year };
+    }
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       if (error.code === 'ECONNABORTED') {
@@ -68,6 +63,11 @@ export const getVehicleInfo = async (vin: string) => {
     }
 
     if (error instanceof Error) {
+      if (error.message === 'Invalid VIN provided') {
+        throw new Error(
+          'Vehicle information isn’t available for this VIN. Please enter the make, model, and year manually',
+        );
+      }
       throw new Error(error.message || 'Failed to decode VIN');
     }
 

@@ -22,7 +22,10 @@ const getModelByName = async (name: string) => {
 };
 
 const getModelsByMakeId = async (makeId: number) => {
-  return await CarModel.findAll({ where: { makeId } });
+  return await CarModel.findAll({
+    where: { makeId },
+    order: [['name', 'ASC']]
+  });
 };
 
 export default {
@@ -31,3 +34,4 @@ export default {
   getModelByName,
   getModelsByMakeId,
 };
+

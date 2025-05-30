@@ -51,9 +51,7 @@ const createVehicle = async (req: Request, res: Response) => {
   }
 };
 
-const getVehicleByVin = async (req: Request, res: Response) => {
-  
-};
+const getVehicleByVin = async (req: Request, res: Response) => {};
 
 const getVehicleById = async (req: Request, res: Response) => {
   try {
@@ -175,6 +173,7 @@ const getVehicles = async (req: Request, res: Response) => {
       location: v.location,
       sold: v.sold,
       userId: v.userId,
+      createdAt: v.createdAt,
       favorite: favoriteVehicleIds.has(v.id),
       model: v.model
         ? {
@@ -264,7 +263,8 @@ const exportVehiclesCsv = async (req: Request, res: Response) => {
 
 const getAllVehicleLocations = async (req: Request, res: Response) => {
   try {
-    const { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount } = await vehicleService.getAllVehicleLocationsAndCounts();
+    const { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount } =
+      await vehicleService.getAllVehicleLocationsAndCounts();
     res.json({
       vehicles: vehicleLocations,
       totalCount,
