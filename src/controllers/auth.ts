@@ -1,20 +1,17 @@
 import passport from 'passport';
-import ms, { StringValue } from 'ms';
 import { Request, Response, NextFunction } from 'express';
 import { userService } from '../services';
 import { generateAccessToken, generateRefreshToken } from '../helpers/tokenUtils.js';
-import { maxAge } from '../configs/config.js';
 
 import { User } from '../models/usersModel';
 import { RegisterInput, UserRoleType } from '../schemas/usersSchema';
 
 const roles = ['user', 'superadmin'];
 
-
 const registerUser = async (req: Request, res: Response) => {
   try {
     const registerUser = req.user as RegisterInput;
-  
+
     const role = registerUser.role as UserRoleType;
 
     if (!role) {
@@ -37,19 +34,15 @@ const registerUser = async (req: Request, res: Response) => {
 const login = (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate('local', { session: false }, (err: unknown, user: User, info: any) => {
     if (err) return next(err);
-
     if (!user) {
       return res.status(401).json({ message: info?.message || 'Unauthorized' });
-      
     }
-    
-    const {password, ...loggedUser} = user 
+
+    const { password, ...loggedUser } = user;
 
     const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
-
-  
-    res.status(200).json({user:{...loggedUser},tokens: {accessToken, refreshToken}});
+    const refreshToken = generateRefreshToken(user, req.body.remember);
+    res.status(200).json({ user: { ...loggedUser }, tokens: { accessToken, refreshToken } });
   })(req, res, next);
 };
 
@@ -63,43 +56,38 @@ const refreshToken = (req: Request, res: Response) => {
 
     const accessToken = generateAccessToken(user);
 
-    res.status(200).json({ accessToken});
+    res.status(200).json({ accessToken });
   } catch (err) {
     console.error('Refresh token error:', err);
     res.status(500).json({ message: 'Internal server error' });
   }
-}; 
+};
 
-const forgotPassword = async (req:Request, res:Response) => {
-
+const forgotPassword = async (req: Request, res: Response) => {
   try {
-    const { email } = req.body
-    const user = await userService.getUserByEmail(email)
-    if(!user) {
-      return res.status(404).json({ message: 'User not found'})
+    const { email } = req.body;
+    const user = await userService.getUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-    res.status(201).json({message: 'User exists'})
-
-  } catch(err) {
-    res.status(500).json({message: 'Internal server error'})
+    res.status(201).json({ message: 'User exists' });
+  } catch (err) {
+    res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
 const resetPassword = (req: Request, res: Response) => {
-  const {password, confirmPassword} = req.body
-  if(!password || !confirmPassword){
-    return res.status(400).json({message: "Bad request"})
+  const { password, confirmPassword } = req.body;
+  if (!password || !confirmPassword) {
+    return res.status(400).json({ message: 'Bad request' });
   }
-  return res.status(201).json({message: 'Password reset successfully'})
-
-
-}
+  return res.status(201).json({ message: 'Password reset successfully' });
+};
 
 export default {
   registerUser,
   login,
   refreshToken,
   forgotPassword,
-  resetPassword
+  resetPassword,
 };
-

@@ -24,7 +24,6 @@ export const decodeVin = async (req: Request, res: Response) => {
     }
 
     const vehicleInfo = await getVehicleInfo(vin.toUpperCase());
-    console.log(vehicleInfo);
 
     if (!vehicleInfo?.vehicleMake) {
       return res.status(400).json({
