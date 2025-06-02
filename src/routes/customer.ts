@@ -1,10 +1,16 @@
-import { Router} from 'express'
-import { validateCustomerByEmail, validateCustomerRegistration } from '../middlewares/customerDataValidator'
-import customerController from '../controllers/customer'
+import { Router } from 'express';
+import { authenticateToken } from '../middlewares/authMiddleware';
+import { validateCustomerByEmail, validateCustomerRegistration } from '../middlewares/customerDataValidator';
+import customerController from '../controllers/customer';
 
-const router = Router()
+const router = Router();
 
-router.post('/customer', validateCustomerRegistration, customerController.createCustomer )
-router.get('/',validateCustomerByEmail, customerController.getCustomerByEmail )
+router.use(authenticateToken);
 
-export default router
+router.post('/customer', validateCustomerRegistration, customerController.createCustomer);
+
+router.get('/', validateCustomerByEmail, customerController.getCustomerByEmail);
+
+router.get('/get-customers', customerController.getCustomers);
+
+export default router;

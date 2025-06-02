@@ -75,7 +75,10 @@ const getVehicles = async ({ search, makeId, modelIds, sold, limit, offset }: Se
     include,
     limit,
     offset,
-    order: [['createdAt', 'DESC']],
+    order: [
+      ['createdAt', 'DESC'],
+      ['id', 'DESC'],
+    ],
   });
 };
 
