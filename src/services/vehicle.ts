@@ -1,9 +1,10 @@
-import { Op } from 'sequelize';
+import { Op, Transaction } from 'sequelize';
 import { Make } from '../models/carMakesModel';
 import { Vehicle } from '../models/vehiclesModel';
 import { CarModel } from '../models/carModelsModel';
 import { Customer } from '../models/customersModel';
 import { SearchVehiclesParams } from '../types/vehicle';
+import { customerService } from '.';
 
 interface CreateVehicleData {
   modelId: number;
@@ -100,7 +101,39 @@ const getVehicleById = async (id: number) => {
   }
 };
 
-const updateVehicleByCustomerId = async (id: number) => {};
+const updateVehicleByCustomerId = async (customerId: number, vehicleId: number) => {
+  try {
+    if (!vehicleId || !customerId) {
+      throw new Error('Customer ID or vehicle ID missing');
+    }
+
+    const customer = await customerService.findCustomerById(customerId);
+    if (!customer) {
+      throw new Error('Customer data missing');
+    }
+
+    const vehicle = await Vehicle.findByPk(vehicleId);
+    if (!vehicle) {
+      throw new Error('Vehicle data missing');
+    }
+
+    const [updatedCount] = await Vehicle.update(
+      { customerId },
+      {
+        where: { id: vehicleId },
+      },
+    );
+
+    if (updatedCount === 0) {
+      throw new Error('Vehicle update failed - no rows affected');
+    }
+
+    return updatedCount;
+  } catch (err: any) {
+    console.error('Error in updateVehicleByCustomerId:', err.message);
+    throw new Error('Failed to update vehicle');
+  }
+};
 
 const getAllVehicleLocationsAndCounts = async () => {
   const vehicles = await Vehicle.findAll({

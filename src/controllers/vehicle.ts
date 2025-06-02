@@ -30,7 +30,6 @@ const createVehicle = async (req: Request, res: Response) => {
   try {
     if (!req.vehicle) {
       res.status(400).json({
-        success: false,
         message: 'Vehicle data is missing.',
       });
       return;
@@ -45,7 +44,6 @@ const createVehicle = async (req: Request, res: Response) => {
     console.error('Error creating vehicle:', error);
 
     res.status(500).json({
-      success: false,
       message: 'Failed to create vehicle',
     });
   }
@@ -284,3 +282,4 @@ export default {
   exportVehiclesCsv,
   getAllVehicleLocations,
 };
+
