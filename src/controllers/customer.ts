@@ -68,8 +68,26 @@ const getCustomerByEmail = async (req: Request, res: Response) => {
   }
 };
 
+const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { search, page, offset } = req.query;
+        const pageNum = page ? Math.max(Number(page), 1) : 1;
+        const limit = offset ? Number(offset) : 25;
+        const result = await customerService.getCustomers({
+            search: search as string,
+            page: pageNum,
+            offset: limit
+        });
+        res.status(200).json(result);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
 export default {
   createCustomer,
   getCustomerByEmail,
   getCustomer,
+  getCustomers
 };
