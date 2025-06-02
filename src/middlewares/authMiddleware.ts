@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { JwtPayload } from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import passport from 'passport';
 import bcrypt from 'bcrypt';
 import { RegisterSchema, LoginSchema } from '../schemas/usersSchema';
 import { userService } from '../services/index';
 import { User } from '../models/usersModel';
 import { verifyRefreshToken } from '../helpers/tokenUtils';
+import config from '../configs/config';
 
 declare global {
   namespace Express {
@@ -17,21 +18,30 @@ declare global {
   }
 }
 
-export const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate('jwt', { session: false }, (err: any, user: User) => {
-    if (err) return next(err);
+export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith('Bearer') ? authHeader.substring(7) : null;
 
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid token' });
+    if (!token) {
+      return res.status(401).json({ message: 'Authentication required, please login' });
     }
 
-    if (!user.isActive) {
-      return res.status(403).json({ message: 'Account is inactive' });
+    const decode = jwt.verify(token, config.jwt.secret as any) as any;
+
+    if (!decode) {
+      return res.status(402).json({ message: 'Invalid token' });
     }
 
-    req.user = user;
+    req.user = decode.id;
+    req.userId = decode.id;
     next();
-  })(req, res, next);
+  } catch (err) {
+    if (err instanceof Error && err.message === 'jwt expired') {
+      return res.status(401).json({ message: 'Token expired!' });
+    }
+    return res.status(500).json({ err: err instanceof Error ? err.message : err });
+  }
 };
 
 export const authenticateRefreshToken = (req: Request, res: Response, next: NextFunction) => {
