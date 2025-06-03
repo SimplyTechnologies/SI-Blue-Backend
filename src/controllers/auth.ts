@@ -1,10 +1,13 @@
 import passport from 'passport';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import { Request, Response, NextFunction } from 'express';
 import { userService } from '../services';
 import { generateAccessToken, generateRefreshToken } from '../helpers/tokenUtils.js';
 
 import { User } from '../models/usersModel';
 import { RegisterInput, UserRoleType } from '../schemas/usersSchema';
+import { sendEmail } from '../helpers/sendEmail';
 
 const roles = ['user', 'superadmin'];
 
@@ -70,18 +73,40 @@ const forgotPassword = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.status(201).json({ message: 'User exists' });
+    const token = generateAccessToken(user as User);
+    const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    await sendEmail(email, 'Reset Password', `<a href="${link}">Click here to reset your password</a>`);
+
+    res.status(201).json({ message: 'Password reset email sent' });
   } catch (err) {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
 
-const resetPassword = (req: Request, res: Response) => {
+const resetPassword = async (req: Request, res: Response) => {
+  const { token } = req.query;
+  if (!token) {
+    return res.status(400).json({ message: 'Bad request' });
+  }
   const { password, confirmPassword } = req.body;
   if (!password || !confirmPassword) {
     return res.status(400).json({ message: 'Bad request' });
   }
-  return res.status(201).json({ message: 'Password reset successfully' });
+  try {
+    const decoded = jwt.verify(token as string, process.env.JWT_SECRET as string) as { id: number };
+    const user = await userService.getUserById(decoded.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.password = await bcrypt.hash(password, 12);
+    await user.save();
+
+    res.status(201).json({ message: 'Password reset successfully' });
+  } catch (err) {
+    res.status(400).json({ message: 'Invalid or expired token' });
+  }
 };
 
 export default {
