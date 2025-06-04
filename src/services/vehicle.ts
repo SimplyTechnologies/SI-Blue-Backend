@@ -196,6 +196,13 @@ const getAllVehicleLocationsAndCounts = async () => {
   return { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount };
 };
 
+const deleteVehicle = async (id: number) => {
+  const vehicle = await Vehicle.findByPk(id);
+  if (vehicle) {
+    return await vehicle.destroy();
+  }
+};
+
 export default {
   createVehicle,
   getVehicleByVin,
@@ -203,4 +210,5 @@ export default {
   getVehicleById,
   updateVehicleByCustomerId,
   getAllVehicleLocationsAndCounts,
+  deleteVehicle,
 };
