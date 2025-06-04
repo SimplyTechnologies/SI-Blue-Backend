@@ -5,7 +5,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 export const sendEmail = async (to: string, subject: string, html: string) => {
   const msg = {
     to,
-    from: 'noreply@example.com',
+    from: 'haykdarbinyan04@gmail.com',
     subject,
     html,
   };

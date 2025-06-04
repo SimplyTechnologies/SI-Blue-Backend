@@ -10,6 +10,7 @@ declare global {
         modelId: number;
         year: number;
         vin: string;
+        createdAt?:Date;
         location: {
           country: string;
           city: string;
@@ -53,8 +54,12 @@ const getVehicleByVin = async (req: Request, res: Response) => {};
 
 const getVehicleById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const vehicle = await vehicleService.getVehicleById(parseInt(id));
+    const vehicleId = req.params.id;
+    if(!vehicleId) {
+      return res.status(400).json({message: 'Vehicle ID missing'})
+    }
+    const vehicle = await vehicleService.getVehicleById(Number(vehicleId));
+    
 
     if (!vehicle) {
       return res.status(404).json({ message: 'Vehicle not found' });

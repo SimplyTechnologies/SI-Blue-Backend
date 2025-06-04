@@ -14,6 +14,8 @@ router.post('/vehicle', validateInputVehicle, vehicleController.createVehicle);
 
 router.put('/vehicle/:id', validateInputVehicleUpdate, vehicleController.updateVehicle);
 
+router.get('/vehicle/:id', vehicleController.getVehicleById);
+
 router.get('get-vehicle', vehicleController.getVehicleByVin);
 
 router.get('/', vehicleController.getVehicles);

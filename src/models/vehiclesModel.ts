@@ -22,6 +22,9 @@ interface VehicleAttributes {
   userId?: number;
   modelId: number;
   customerId?: number;
+  assignedDate?: Date;
+  favorite?: User[];
+  model?: CarModel
 }
 
 interface VehicleCreationAttributes extends Optional<VehicleAttributes, 'id'> {}
@@ -35,6 +38,9 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
   public userId!: number;
   public modelId!: number;
   public customerId!: number;
+  public assignedDate?: Date;
+  public favorite?: User[];
+  public model?: any;
 
   static associate() {
     Vehicle.belongsToMany(User, {
@@ -84,6 +90,10 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
+      },
+      assignedDate: {
+        type: DataTypes.DATE,
+        allowNull: true,
       },
       // userId: {
       //   type: DataTypes.INTEGER,
