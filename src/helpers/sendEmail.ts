@@ -13,6 +13,6 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
   try {
     await sgMail.send(msg);
   } catch (error) {
-    console.error('Error sending email:', error.response?.body?.errors);
+    console.error('Error sending email:', error);
   }
 };
