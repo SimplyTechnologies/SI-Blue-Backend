@@ -167,14 +167,14 @@ export const validateAccountActivation = async (req: Request, res: Response, nex
       return res.status(404).json({ message: 'User not found' });
     }
 
-    if (existingUser.status === 'active') {
+    if (existingUser.isActive) {
       return res.status(409).json({ message: 'Account already active' });
     }
   
     const hashedPassword = await bcrypt.hash(password, 12);
 
     existingUser.password = hashedPassword;
-    existingUser.status = 'active';
+    existingUser.isActive = true;
 
     req.user = existingUser;
     
