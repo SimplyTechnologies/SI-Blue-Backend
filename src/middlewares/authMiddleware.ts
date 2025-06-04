@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import passport from 'passport';
 import bcrypt from 'bcrypt';
-import { RegisterSchema, LoginSchema } from '../schemas/usersSchema';
+import { RegisterSchema, LoginSchema, AccountActivationSchema } from '../schemas/usersSchema';
 import { userService } from '../services/index';
 import { User } from '../models/usersModel';
 import { verifyRefreshToken } from '../helpers/tokenUtils';
@@ -145,6 +145,42 @@ export const validateLogin = async (req: Request, res: Response, next: NextFunct
     next();
   } catch (error) {
     console.error('Login validation error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const validateAccountActivation = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = AccountActivationSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        errors: result.error.errors.map(err => err.message),
+      });
+    }
+
+    const { email, password, token } = result.data;
+
+    const existingUser = await userService.getUserByEmail(email);
+
+    if (!existingUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (existingUser.status === 'active') {
+      return res.status(409).json({ message: 'Account already active' });
+    }
+  
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    existingUser.password = hashedPassword;
+    existingUser.status = 'active';
+
+    req.user = existingUser;
+    
+    next();
+  } catch (error) {
+    console.error('Account Activation error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

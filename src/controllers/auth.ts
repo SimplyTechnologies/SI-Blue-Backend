@@ -109,10 +109,20 @@ const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
+const activateAccount = async (req: Request, res: Response) => {
+  const { user } = req.body;
+
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user, req.body.remember);
+  res.status(201).json({ user: { ...user }, tokens: { accessToken, refreshToken } });
+};
+
 export default {
   registerUser,
   login,
   refreshToken,
   forgotPassword,
   resetPassword,
+  activateAccount,
 };
+

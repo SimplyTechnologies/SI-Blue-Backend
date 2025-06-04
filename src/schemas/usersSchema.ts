@@ -70,11 +70,31 @@ export const ChangePasswordSchema = z.object({
   path: ["confirmPassword"]
 });
 
+export const AccountActivationSchema = z
+  .object({
+    email: z
+      .string({ required_error: 'Email is required' })
+      .email('Invalid email format')
+      .max(100, 'Email must be less than 100 characters')
+      .toLowerCase()
+      .transform(str => str.trim()),
+    token: z.string(),
+    password: z.string().min(8).max(128),
+    confirmPassword: z.string().min(1),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  }).refine(data => data.token, {
+    message: "Activation link has expired",
+    path: ['activationLink'],
+  });
 
 export type UserInput = z.infer<typeof UserSchema>;
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>;
+export type AccountActivationSchemaInput = z.infer<typeof AccountActivationSchema>;
 
 
 
