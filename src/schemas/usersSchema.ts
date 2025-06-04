@@ -75,6 +75,7 @@ export type UserInput = z.infer<typeof UserSchema>;
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>;
+export const UserSchemaWithoutPassword = UserSchema.omit({ password: true });
 
 
 

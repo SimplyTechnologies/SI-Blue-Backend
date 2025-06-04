@@ -2,16 +2,45 @@ import jwt from 'jsonwebtoken';
 import { userService } from '../services';
 import { Request, Response } from 'express';
 import { User } from '../models/usersModel';
-
+import { generateAccessToken } from '../helpers/tokenUtils';
+import config from '../configs/config';
+import { sendEmail } from '../helpers/sendEmail';
+import { InputUser } from '../services/user';
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User;
+    }
+  }
+}
 
 const addNewUser = async (req: Request, res: Response) => {
   try {
+    const { email } = req.body;
+    const user = req.user as InputUser;
     
+    if (!user) {
+      return res.status(400).json({ message: 'User data missing' });
+    }
 
-  } catch(err) {
-    res.status(500).json({message: 'Internal server error'})
+    const token = generateAccessToken(user as User);
+    const link = `${config.frontendUrl}/account-activation?token=${token}`;
+    console.log(link);
+
+    try {
+      await sendEmail(email, 'Account-activation', `<a href="${link}">Click here to activate your profile</a>`);
+      await userService.addNewUser(user)
+      return res.status(200).json({ message: 'Account activation email sent' });
+    } catch (emailError) {
+      console.error('SendGrid error:', emailError);
+      return res.status(500).json({ message: 'Failed to send activation email' });
+    }
+
+  } catch (err) {
+    console.error('Error in addNewUser:', err);
+    res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
 
 

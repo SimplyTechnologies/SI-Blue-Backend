@@ -14,7 +14,7 @@ export interface UserAttributes {
   lastName: string;
   email: string;
   phoneNumber: string;
-  password: string;
+  password: string | null;
   role: UserRoleType;
   isActive: boolean;
   createdAt?: Date;
@@ -29,7 +29,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> {
   declare lastName: string;
   declare email: string;
   declare phoneNumber: string;
-  declare password: string;
+  declare password: string | null
   declare role: UserRoleType;
   declare isActive: boolean;
   declare createdAt: Date;
@@ -81,7 +81,8 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       },
       password: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
+        defaultValue: null,
       },
       role: {
         type: DataTypes.ENUM('user', 'superadmin'),
@@ -91,7 +92,7 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       isActive: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: true,
+        defaultValue: false,
         field: 'is_active',
       },
     },
