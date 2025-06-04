@@ -6,7 +6,7 @@ const router = Router();
 
 router.post('/register', validateRegistration, authController.registerUser);
 router.post('/forgot-password', authController.forgotPassword)
-router.post('/reset-password', authController.resetPassword)
+router.patch('/reset-password', authController.resetPassword)
 router.post('/login', authController.login);
 
 router.post('/refresh-token', authenticateRefreshToken, authController.refreshToken);

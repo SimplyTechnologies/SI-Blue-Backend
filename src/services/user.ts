@@ -1,7 +1,6 @@
 import { User } from '../models/usersModel.js';
 import { RegisterInput } from '../schemas/usersSchema.js';
 
-
 const createUser = async (userData: RegisterInput) => {
   const user = await User.create({
     firstName: userData.firstName,
@@ -10,10 +9,10 @@ const createUser = async (userData: RegisterInput) => {
     password: userData.password,
     email: userData.email,
     role: userData.role == 'superadmin' ? 'superadmin' : 'user',
-    isActive: true
+    isActive: true,
   });
-  const {password, ...returnedUser} = user.dataValues
-  return returnedUser
+  const { password, ...returnedUser } = user.dataValues;
+  return returnedUser;
 };
 
 const getUserById = async (id: number) => {
@@ -26,7 +25,11 @@ const getAllUsers = async () => {
   return await User.findAll({ attributes: { exclude: ['password'] } });
 };
 
-const updateUser = async (updatedData: User) => {};
+const updateUser = async (updatedData: User) => {
+  await User.update(updatedData, {
+    where: { id: updatedData.id },
+  });
+};
 
 const getUserByEmail = async (email: string) => {
   const user = await User.findOne({ where: { email } });
