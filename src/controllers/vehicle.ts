@@ -54,7 +54,7 @@ const getVehicleByVin = async (req: Request, res: Response) => {};
 
 const getVehicleById = async (req: Request, res: Response) => {
   try {
-    const vehicleId = req.query.id;
+    const vehicleId = req.params.id;
     if(!vehicleId) {
       return res.status(400).json({message: 'Vehicle ID missing'})
     }

@@ -3,6 +3,18 @@ import { userService } from '../services';
 import { Request, Response } from 'express';
 import { User } from '../models/usersModel';
 
+
+const addNewUser = async (req: Request, res: Response) => {
+  try {
+    
+
+  } catch(err) {
+    res.status(500).json({message: 'Internal server error'})
+  }
+}
+
+
+
 const getUserById = async (req: Request, res: Response) => {
   try {
     const accessToken = req.cookies.accessToken;
@@ -27,14 +39,9 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-const forgetPassword = async (req: Request, res: Response) => {};
 
-const requestPasswordReset = async (res: Request, req: Response) => {};
-
-const refreshToken = async (req: Request, res: Response) => {};
-
-const getAllUsers = async (req: Request, res: Response) => {};
 
 export default {
   getUserById,
+  addNewUser
 };

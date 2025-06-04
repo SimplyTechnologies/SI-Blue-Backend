@@ -117,29 +117,7 @@ const getVehicleById = async (id: number, userId?: number) => {
     });
 
     if (!vehicle) return null;
-
-    const { sold, modelId, favorite, model, ...vehicleData } = vehicle.toJSON();
-
-    const vehicleModel = {
-      id: model?.id ,
-      name: model?.name
-    };
-
-    const vehicleMake = {
-      id: model?.makeId,
-      name: model?.make?.name 
-    };
-
-    const returnedData = vehicleData;
-
-    const returnedVehicle = {
-      returnedData,
-      vehicleModel,
-      vehicleMake,
-      favorite: userId ? favorite?.some((user: any) => user.id === userId) || false : false
-    };
-
-    return returnedVehicle;
+    return vehicle.dataValues
   } catch (error) {
     console.error(error);
     throw new Error('Failed to fetch vehicle');

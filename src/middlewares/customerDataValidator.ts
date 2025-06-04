@@ -43,7 +43,7 @@ export const validateCustomerRegistration = async (req: Request, res: Response, 
 
     const { email, firstName, lastName, phoneNumber, vehicleId } = result.data;
     const vehicle = await vehicleService.getVehicleById(vehicleId);
-      if (vehicle?.returnedData.customerId) {
+      if (vehicle?.customerId) {
         return res.status(400).json({ message: 'Vehicle already assigned' });
       }
 
@@ -56,7 +56,7 @@ export const validateCustomerRegistration = async (req: Request, res: Response, 
     const existingCustomer = await customerService.getCustomerByEmail(email);
 
     if (existingCustomer) {
-      if (vehicle?.returnedData.customerId) {
+      if (vehicle?.customerId) {
         return res.status(400).json({ message: 'Vehicle already assigned' });
       }
 
