@@ -58,7 +58,7 @@ const connectToDB = async () => {
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.log(err.message);
-    } else console.log('An unknown error occured');
+    } else console.log('An unknown error occurred');
     console.log(`Error while connecting db...`);
     process.exit(1);
   }

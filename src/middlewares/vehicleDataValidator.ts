@@ -1,7 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-
 import vehicleService from '../services/vehicle.js';
-import { makeService, modelService } from '../services/index.js';
 
 declare global {
   namespace Express {
@@ -35,7 +33,7 @@ const validateInput = (body: any) => {
     return { isValid: false, message: 'Location is required' };
   }
 
-  const { country, street, zipcode, state, lat, lng } = location;
+  const { country, street, zipcode, state } = location;
   if (!country || !street || !zipcode || !state) {
     return {
       isValid: false,
@@ -46,38 +44,9 @@ const validateInput = (body: any) => {
   return { isValid: true };
 };
 
-const resolveMakeAndModel = async (vehicleInfo: any) => {
-  const [existingMake, existingModel] = await Promise.all([
-    makeService.getMakeByName(vehicleInfo.make),
-    modelService.getModelByName(vehicleInfo.model),
-  ]);
-
-  let makeId: number;
-  let modelId: number;
-
-  if (existingMake) {
-    makeId = existingMake.id;
-  } else {
-    const newMake = await makeService.createMake(vehicleInfo.make);
-    makeId = newMake.id;
-  }
-
-  if (existingModel) {
-    modelId = existingModel.id;
-  } else {
-    const newModel = await modelService.createModel({
-      name: vehicleInfo.model,
-      makeId: makeId,
-    });
-    modelId = newModel.id;
-  }
-
-  return { modelId };
-};
-
 export const validateInputVehicle = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { modelId, makeId, year, vin, location } = req.body;
+    const { modelId, year, vin, location } = req.body;
 
     const existedCar = await vehicleService.getVehicleByVin(vin);
 
@@ -90,14 +59,6 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
       res.status(400).json({ message: validation.message });
       return;
     }
-
-    // const vehicleInfo = await getVehicleInfo(vin);
-    // if (!vehicleInfo || !vehicleInfo.make || !vehicleInfo.model) {
-    //   res.status(404).json({ message: 'Vehicle information not found for this VIN' });
-    //   return;
-    // }
-
-    // const { modelId } = await resolveMakeAndModel(vehicleInfo);
 
     req.vehicle = {
       modelId,

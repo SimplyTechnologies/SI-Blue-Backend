@@ -17,6 +17,22 @@ const createCustomer = async (customerData: CustomerSchema) => {
   return returnedCustomer.dataValues;
 };
 
+
+const findCustomerById = async (id: number) => {
+  const customer = await Customer.findByPk(id);
+  return customer;
+};
+const searchDatabase = async (email: string) => {
+  return await Customer.findAll({
+    where: {
+      email: {
+        [Op.iLike]: `%${email.toLowerCase()}%`,
+      },
+    },
+    limit: 10,
+  });
+};
+
 const getCustomerByEmail = async (email: string) => {
   const customer = await Customer.findOne({ where: { email } });
   if (!customer) return null;
@@ -91,4 +107,6 @@ export default {
   getCustomers,
   createCustomer,
   getCustomerByEmail,
+  searchDatabase,
+  findCustomerById,
 };

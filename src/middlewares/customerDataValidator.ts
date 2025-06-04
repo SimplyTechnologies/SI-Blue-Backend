@@ -5,6 +5,8 @@ import { customerService, vehicleService } from '../services';
 declare global {
   namespace Express {
     interface Request {
+      vehicleId: number;
+      customerId: number;
       customer?: any;
     }
   }
@@ -19,6 +21,7 @@ export const validateCustomerByEmail = (req: Request, res: Response, next: NextF
 
     const EmailSchema = CustomerSchema.pick({ email: true });
     EmailSchema.parse({ email });
+    console.log(email);
 
     next();
   } catch (err) {
@@ -41,46 +44,37 @@ export const validateCustomerRegistration = async (req: Request, res: Response, 
 
     const { email, firstName, lastName, phoneNumber, vehicleId } = result.data;
 
-    const existingCustomer = await customerService.getCustomerByEmail(email);
     const existedCar = await vehicleService.getVehicleById(vehicleId);
     if (!existedCar) {
-      return res.status(401).json({ message: 'Car missing' });
+      return res.status(404).json({ message: 'Vehicle not found' });
     }
+
+    const existingCustomer = await customerService.getCustomerByEmail(email);
+
     if (existingCustomer) {
-      req.customer = existingCustomer;
-      next();
+      const vehicle = await vehicleService.getVehicleById(vehicleId);
+      if (vehicle?.customerId) {
+        return res.status(400).json({ message: 'Vehicle already assigned' });
+      }
+
+      req.customerId = existingCustomer.id;
+      req.vehicleId = vehicleId;
+
+      return next();
     }
 
     const customer = {
       email,
       firstName,
       lastName,
-
       phoneNumber,
+      vehicleId,
     };
 
     req.customer = customer;
-
     next();
   } catch (error) {
     console.error('Customer registration validation error:', error);
     res.status(500).json({ message: 'Server error' });
   }
-};
-
-export const assignVehicleExistedCustomer = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const existingCustomer = req.customer;
-    const { vehicleId } = req.body;
-    if (!existingCustomer) {
-      return res.status(400).json({ message: 'Customer data missing' });
-    }
-    if (!vehicleId) {
-      return res.status(400).json({ message: 'Vehicle data missing' });
-    }
-    const customerId = existingCustomer.id;
-    if (!customerId) {
-      return res.status(400).json({ message: 'Customer ID required' });
-    }
-  } catch (err) {}
 };

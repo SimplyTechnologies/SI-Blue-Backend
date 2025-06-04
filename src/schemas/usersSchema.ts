@@ -27,7 +27,7 @@ export const UserSchema = z.object({
   
     phoneNumber: z
       .string({ required_error: 'Phone number is required' })
-      .min(10, 'Phone number must be at least 10 digits')
+      .min(5, 'Phone number must be at least 10 digits')
       .max(25, 'Phone number must be less than 25 digits')
       .regex(/^\+?[\d\s()-]+$/, 'Invalid phone number format')
       .transform(str => str.replace(/\s/g, '')),
