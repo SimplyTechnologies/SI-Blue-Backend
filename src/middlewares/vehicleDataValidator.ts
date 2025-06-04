@@ -75,3 +75,38 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
     });
   }
 };
+
+export const validateInputVehicleUpdate = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { modelId, year, vin, location } = req.body;
+
+    const { id } = req.params;
+
+    const vehicle = await vehicleService.getVehicleById(parseInt(id));
+
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+
+    const validation = validateInput(req.body);
+    if (!validation.isValid) {
+      res.status(400).json({ message: validation.message });
+      return;
+    }
+
+    req.vehicle = {
+      ...vehicle,
+      modelId,
+      year,
+      vin,
+      location,
+    };
+
+    next();
+  } catch (error: any) {
+    console.error('Vehicle validation middleware error:', error);
+    res.status(500).json({
+      message: 'Internal server error',
+    });
+  }
+};

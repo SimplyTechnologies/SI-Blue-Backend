@@ -292,6 +292,27 @@ export const deleteVehicle = async (req: Request, res: Response) => {
   }
 };
 
+const updateVehicle = async (req: Request, res: Response) => {
+  try {
+    if (!req.vehicle) {
+      res.status(400).json({
+        message: 'Vehicle data is missing.',
+      });
+      return;
+    }
+
+    const result = await vehicleService.updateVehicle(parseInt(req.params.id), req.vehicle);
+
+    res.status(200).json(result);
+  } catch (error: unknown) {
+    console.error('Error updating vehicle:', error);
+
+    res.status(500).json({
+      message: 'Failed to update vehicle',
+    });
+  }
+}
+
 export default {
   createVehicle,
   getVehicleByVin,
@@ -300,5 +321,6 @@ export default {
   exportVehiclesCsv,
   getAllVehicleLocations,
   deleteVehicle,
+  updateVehicle,
 };
 

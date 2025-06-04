@@ -161,6 +161,13 @@ const deleteVehicle = async (id: number) => {
   }
 };
 
+const updateVehicle = async (id: number, vehicleData: CreateVehicleData) => {
+  const vehicle = await Vehicle.findByPk(id);
+  if (vehicle) {
+    return await vehicle.update(vehicleData);
+  }
+};
+
 export default {
   createVehicle,
   getVehicleByVin,
@@ -169,4 +176,5 @@ export default {
   updateVehicleByCustomerId,
   getAllVehicleLocationsAndCounts,
   deleteVehicle,
+  updateVehicle,
 };
