@@ -276,6 +276,27 @@ const getAllVehicleLocations = async (req: Request, res: Response) => {
   }
 };
 
+export const deleteVehicle = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ message: 'Bad request' });
+    }
+    const vehicle = await vehicleService.getVehicleById(parseInt(id));
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+    if (vehicle.customerId) {
+      return res.status(409).json({ message: `Vehicle can't be deleted` });
+    }
+
+    await vehicleService.deleteVehicle(parseInt(id));
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to delete vehicle' });
+  }
+};
+
 export default {
   createVehicle,
   getVehicleByVin,
@@ -283,4 +304,6 @@ export default {
   getVehicleById,
   exportVehiclesCsv,
   getAllVehicleLocations,
+  deleteVehicle,
 };
+

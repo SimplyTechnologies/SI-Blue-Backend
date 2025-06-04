@@ -28,4 +28,6 @@ router.get('/dashboard-data', vehicleController.getAllVehicleLocations);
 
 router.post('/decode/vin', decodeVin);
 
+router.delete('/vehicle/:id', vehicleController.deleteVehicle);
+
 export default router;
