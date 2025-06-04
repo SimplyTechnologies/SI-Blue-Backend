@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import { Request, Response, NextFunction } from 'express';
 import { userService } from '../services';
 import { generateAccessToken, generateRefreshToken } from '../helpers/tokenUtils.js';
+import config from '../configs/config';
 
 import { User } from '../models/usersModel';
 import { RegisterInput, UserRoleType } from '../schemas/usersSchema';
@@ -74,7 +75,7 @@ const forgotPassword = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'User not found' });
     }
     const token = generateAccessToken(user as User);
-    const link = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+    const link = `${config.frontendUrl}/reset-password?token=${token}`;
     await sendEmail(email, 'Reset Password', `<a href="${link}">Click here to reset your password</a>`);
 
     res.status(201).json({ message: 'Password reset email sent' });
@@ -93,7 +94,7 @@ const resetPassword = async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'Bad request' });
   }
   try {
-    const decoded = jwt.verify(token as string, process.env.JWT_SECRET as string) as { id: number };
+    const decoded = jwt.verify(token as string, config.jwt.secret as string) as { id: number };
     const user = await userService.getUserById(decoded.id);
 
     if (!user) {
