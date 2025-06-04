@@ -8,15 +8,15 @@ import { decodeVin } from '../controllers/vinController';
 
 const router = Router();
 
-//router.use(authenticateToken);
+router.use(authenticateToken);
 
 router.post('/vehicle', validateInputVehicle, vehicleController.createVehicle);
 
-router.get('/', vehicleController.getVehicleById)
+router.get('/:id', vehicleController.getVehicleById)
 
 router.get('get-vehicle', vehicleController.getVehicleByVin);
 
-//router.get('/', vehicleController.getVehicles);
+router.get('/', vehicleController.getVehicles);
 
 router.get('/export', vehicleController.exportVehiclesCsv);
 
