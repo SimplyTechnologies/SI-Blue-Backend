@@ -12,7 +12,7 @@ router.use(authenticateToken);
 
 router.post('/vehicle', validateInputVehicle, vehicleController.createVehicle);
 
-router.get('/:id', vehicleController.getVehicleById)
+router.get('/vehicle/:id', vehicleController.getVehicleById)
 
 router.get('get-vehicle', vehicleController.getVehicleByVin);
 
