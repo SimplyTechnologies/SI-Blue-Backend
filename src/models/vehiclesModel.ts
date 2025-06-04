@@ -119,6 +119,7 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
       tableName: 'vehicles',
       timestamps: true,
       underscored: false,
+      paranoid: true,
     },
   );
 
