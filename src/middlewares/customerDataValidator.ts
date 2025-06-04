@@ -21,7 +21,6 @@ export const validateCustomerByEmail = (req: Request, res: Response, next: NextF
 
     const EmailSchema = CustomerSchema.pick({ email: true });
     EmailSchema.parse({ email });
-    console.log(email);
 
     next();
   } catch (err) {
@@ -43,8 +42,13 @@ export const validateCustomerRegistration = async (req: Request, res: Response, 
     }
 
     const { email, firstName, lastName, phoneNumber, vehicleId } = result.data;
+    const vehicle = await vehicleService.getVehicleById(vehicleId);
+      if (vehicle?.returnedData.customerId) {
+        return res.status(400).json({ message: 'Vehicle already assigned' });
+      }
 
     const existedCar = await vehicleService.getVehicleById(vehicleId);
+    
     if (!existedCar) {
       return res.status(404).json({ message: 'Vehicle not found' });
     }
@@ -52,8 +56,7 @@ export const validateCustomerRegistration = async (req: Request, res: Response, 
     const existingCustomer = await customerService.getCustomerByEmail(email);
 
     if (existingCustomer) {
-      const vehicle = await vehicleService.getVehicleById(vehicleId);
-      if (vehicle?.customerId) {
+      if (vehicle?.returnedData.customerId) {
         return res.status(400).json({ message: 'Vehicle already assigned' });
       }
 

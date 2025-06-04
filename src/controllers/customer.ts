@@ -48,6 +48,7 @@ const getCustomer = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 const getCustomerByEmail = async (req: Request, res: Response) => {
   try {
     const email = req.query.email as string;

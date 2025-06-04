@@ -1,10 +1,11 @@
-import { Op, Transaction } from 'sequelize';
+import { Op } from 'sequelize';
 import { Make } from '../models/carMakesModel';
-import { Vehicle } from '../models/vehiclesModel';
+import { LocationData, Vehicle } from '../models/vehiclesModel';
 import { CarModel } from '../models/carModelsModel';
 import { Customer } from '../models/customersModel';
 import { SearchVehiclesParams } from '../types/vehicle';
 import { customerService } from '.';
+import {  User } from '../models/usersModel';
 
 interface CreateVehicleData {
   modelId: number;
@@ -20,7 +21,10 @@ interface CreateVehicleData {
     lng?: number;
   };
   userId?: number;
+  createdAt:Date
 }
+
+
 
 const createVehicle = async (vehicleData: CreateVehicleData) => {
   try {
@@ -94,12 +98,50 @@ const getVehicleByVin = async (vin: string) => {
   }
 };
 
-const getVehicleById = async (id: number) => {
+const getVehicleById = async (id: number, userId?: number) => {
   try {
-    const vehicle = await Vehicle.findByPk(id);
+    const vehicle = await Vehicle.findByPk(id, {
+      include: [
+        {
+          model: CarModel,
+          as: 'model',
+          include: [{ model: Make, as: 'make' }]
+        } ,
+        {
+          model: User,
+          as: 'favorite',
+          attributes: ['id'],
+          through: { attributes: [] }
+        }
+      ]
+    });
 
-    return vehicle?.dataValues || null;
+    if (!vehicle) return null;
+
+    const { sold, modelId, favorite, model, ...vehicleData } = vehicle.toJSON();
+
+    const vehicleModel = {
+      id: model?.id ,
+      name: model?.name
+    };
+
+    const vehicleMake = {
+      id: model?.makeId,
+      name: model?.make?.name 
+    };
+
+    const returnedData = vehicleData;
+
+    const returnedVehicle = {
+      returnedData,
+      vehicleModel,
+      vehicleMake,
+      favorite: userId ? favorite?.some((user: any) => user.id === userId) || false : false
+    };
+
+    return returnedVehicle;
   } catch (error) {
+    console.error(error);
     throw new Error('Failed to fetch vehicle');
   }
 };
@@ -121,7 +163,7 @@ const updateVehicleByCustomerId = async (customerId: number, vehicleId: number) 
     }
 
     const [updatedCount] = await Vehicle.update(
-      { customerId },
+      { customerId , assignedDate: new Date()},
       {
         where: { id: vehicleId },
       },
@@ -154,6 +196,13 @@ const getAllVehicleLocationsAndCounts = async () => {
   return { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount };
 };
 
+const deleteVehicle = async (id: number) => {
+  const vehicle = await Vehicle.findByPk(id);
+  if (vehicle) {
+    return await vehicle.destroy();
+  }
+};
+
 export default {
   createVehicle,
   getVehicleByVin,
@@ -161,4 +210,5 @@ export default {
   getVehicleById,
   updateVehicleByCustomerId,
   getAllVehicleLocationsAndCounts,
+  deleteVehicle,
 };

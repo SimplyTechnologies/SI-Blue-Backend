@@ -1,15 +1,17 @@
 import { DataTypes, Model, Sequelize, Optional } from 'sequelize';
-import { Make } from './carMakesModel';
+import { Make, MakeAttributes } from './carMakesModel';
 
 export interface CarModelAttributes {
   id: number;
   name: string;
   makeId: number;
+  
 }
 export interface CarModelAttributesWithoutId {
   name: string;
   makeId: number;
 }
+
 
 export interface CarModelCreationAttributes extends Optional<CarModelAttributes, 'id'> {}
 
@@ -17,6 +19,7 @@ export class CarModel extends Model<CarModelAttributes, CarModelCreationAttribut
   public id!: number;
   public name!: string;
   public makeId!: number;
+  public make?: Make
 }
 
 export const defineCarModel = (sequelize: Sequelize): typeof CarModel => {

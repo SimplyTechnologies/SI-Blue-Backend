@@ -12,6 +12,8 @@ router.use(authenticateToken);
 
 router.post('/vehicle', validateInputVehicle, vehicleController.createVehicle);
 
+router.get('/:id', vehicleController.getVehicleById)
+
 router.get('get-vehicle', vehicleController.getVehicleByVin);
 
 router.get('/', vehicleController.getVehicles);
@@ -25,5 +27,7 @@ router.get('/models', modelController.getModelsByMakeId);
 router.get('/dashboard-data', vehicleController.getAllVehicleLocations);
 
 router.post('/decode/vin', decodeVin);
+
+router.delete('/vehicle/:id', vehicleController.deleteVehicle);
 
 export default router;
