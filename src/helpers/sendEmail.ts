@@ -5,7 +5,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 export const sendEmail = async (to: string, subject: string, html: string) => {
   const msg = {
     to,
-    from: 'noreply@example.com',
+    from: 'haykdarbinyan04@gmail.com',
     subject,
     html,
   };
@@ -13,6 +13,6 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
   try {
     await sgMail.send(msg);
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('Error sending email:', error.response?.body?.errors);
   }
 };
