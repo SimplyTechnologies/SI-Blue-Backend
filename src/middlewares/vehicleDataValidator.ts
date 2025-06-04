@@ -8,6 +8,7 @@ declare global {
         modelId: number;
         year: number;
         vin: string;
+        createdAt?:Date;
         location: {
           country: string;
           city: string;

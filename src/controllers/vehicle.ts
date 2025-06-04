@@ -10,7 +10,7 @@ declare global {
         modelId: number;
         year: number;
         vin: string;
-        createdAt:Date;
+        createdAt?:Date;
         location: {
           country: string;
           city: string;
@@ -286,7 +286,7 @@ export const deleteVehicle = async (req: Request, res: Response) => {
     if (!vehicle) {
       return res.status(404).json({ message: 'Vehicle not found' });
     }
-    if (vehicle.returnedData.customerId) {
+    if (vehicle.customerId) {
       return res.status(409).json({ message: `Vehicle can't be deleted` });
     }
 
