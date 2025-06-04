@@ -4,8 +4,9 @@ import { validateCustomerRegistration } from '../middlewares/customerDataValidat
 import customerController from '../controllers/customer';
 
 const router = Router();
+//router.use(authenticateToken)
 
-router.use(authenticateToken);
+//outer.use(authenticateToken);
 
 router.post('/customer', validateCustomerRegistration, customerController.createCustomer);
 
