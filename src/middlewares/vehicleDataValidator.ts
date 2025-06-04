@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import vehicleService from '../services/vehicle.js';
 
+
 declare global {
   namespace Express {
     interface Request {
@@ -8,6 +9,7 @@ declare global {
         modelId: number;
         year: number;
         vin: string;
+        createdAt?:Date;
         location: {
           country: string;
           city: string;
@@ -64,7 +66,7 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
       modelId,
       year,
       vin,
-      location,
+      location
     };
 
     next();

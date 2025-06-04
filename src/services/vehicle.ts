@@ -21,7 +21,7 @@ interface CreateVehicleData {
     lng?: number;
   };
   userId?: number;
-  createdAt:Date
+  createdAt?:Date
 }
 
 
