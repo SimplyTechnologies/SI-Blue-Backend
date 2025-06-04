@@ -2,7 +2,7 @@ import { Response, Request, NextFunction } from "express";
 import { UserSchemaWithoutPassword } from "../schemas/usersSchema";
 import { userService } from "../services";
 
-export const validateUserData = async (req: Request, res: Response, next: NextFunction) => {
+export const pendingUserDataValidateUserData = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const result = UserSchemaWithoutPassword.safeParse(req.body)
         if (!result.success) {
@@ -17,14 +17,14 @@ export const validateUserData = async (req: Request, res: Response, next: NextFu
           if(founded){
             return res.status(400).json({message: 'User already exists'})
           }
-          const user = {
+          const pendingUser = {
             firstName,
             lastName,
             email,
             phoneNumber
 
           }
-          req.user = user
+          req.pendingUser = pendingUser
           
 
           next()

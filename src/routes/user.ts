@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import userController from '../controllers/user'
-import { validateUserData } from '../middlewares/usersDataValidator';
+import { pendingUserDataValidateUserData } from '../middlewares/pendingUsersDataValidator';
 
 const router = Router();
 
-router.post('/user',validateUserData, userController.addNewUser)
+router.post('/user',pendingUserDataValidateUserData, userController.addNewUser)
 
 
 export default router;
