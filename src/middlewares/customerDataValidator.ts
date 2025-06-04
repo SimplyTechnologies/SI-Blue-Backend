@@ -21,7 +21,6 @@ export const validateCustomerByEmail = (req: Request, res: Response, next: NextF
 
     const EmailSchema = CustomerSchema.pick({ email: true });
     EmailSchema.parse({ email });
-    console.log(email);
 
     next();
   } catch (err) {
@@ -53,7 +52,7 @@ export const validateCustomerRegistration = async (req: Request, res: Response, 
 
     if (existingCustomer) {
       const vehicle = await vehicleService.getVehicleById(vehicleId);
-      if (vehicle?.customerId) {
+      if (vehicle?.returnedData.customerId) {
         return res.status(400).json({ message: 'Vehicle already assigned' });
       }
 
