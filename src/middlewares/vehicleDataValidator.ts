@@ -1,10 +1,5 @@
-import jwt from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
-
 import vehicleService from '../services/vehicle.js';
-import { makeService, modelService } from '../services/index.js';
-
-import config from '../configs/config';
 
 declare global {
   namespace Express {
@@ -38,7 +33,7 @@ const validateInput = (body: any) => {
     return { isValid: false, message: 'Location is required' };
   }
 
-  const { country, street, zipcode, state, lat, lng } = location;
+  const { country, street, zipcode, state } = location;
   if (!country || !street || !zipcode || !state) {
     return {
       isValid: false,
@@ -47,33 +42,6 @@ const validateInput = (body: any) => {
   }
 
   return { isValid: true };
-};
-
-
-export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.startsWith('Bearer') ? authHeader.substring(7) : null;
-
-    if (!token) {
-      return res.status(401).json({ message: 'Authentication required, please login' });
-    }
-
-    const decode = (await jwt.verify(token, config.jwt.secret as any)) as any;
-
-    if (!decode) {
-      return res.status(402).json({ message: 'Invalid token' });
-    }
-
-    req.user = decode.id;
-    req.userId = decode.id;
-    next();
-  } catch (err) {
-    if (err instanceof Error && err.message === 'jwt expired') {
-      return res.status(401).json({ message: 'Token expired!' });
-    }
-    return res.status(500).json({ err: err instanceof Error ? err.message : err });
-  }
 };
 
 export const validateInputVehicle = async (req: Request, res: Response, next: NextFunction) => {
@@ -91,8 +59,6 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
       res.status(400).json({ message: validation.message });
       return;
     }
-
-   
 
     req.vehicle = {
       modelId,

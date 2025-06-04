@@ -135,6 +135,7 @@ const getVehicles = async (req: Request, res: Response) => {
         location: v.location,
         sold: v.sold,
         userId: v.userId,
+        createdAt: v.createdAt,
         favorite: true,
         model: v.model
           ? {
@@ -152,10 +153,8 @@ const getVehicles = async (req: Request, res: Response) => {
       }));
       res.json({
         vehicles: result,
-        total: count,
-        page: pageNum,
-        pageSize: limit,
-        totalPages: Math.ceil(count / limit),
+        previousId: pageNum === 1 ? null : pageNum - 1,
+        nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
       });
       return;
     }
@@ -195,10 +194,8 @@ const getVehicles = async (req: Request, res: Response) => {
 
     res.json({
       vehicles: result,
-      total: count,
-      page: pageNum,
-      pageSize: limit,
-      totalPages: Math.ceil(count / limit),
+      previousId: pageNum === 1 ? null : pageNum - 1,
+      nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
     });
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });
@@ -287,4 +284,3 @@ export default {
   exportVehiclesCsv,
   getAllVehicleLocations,
 };
-

@@ -24,6 +24,7 @@ interface BaseConfig {
   jwt: {
     secret: string | undefined;
   };
+  frontendUrl: string | undefined;
 }
 
 interface Config extends BaseConfig {
@@ -45,6 +46,7 @@ const baseConfig = {
   jwt: {
     secret: process.env.JWT_SECRET,
   },
+  frontendUrl: process.env.FRONTEND_URL,
 };
 
 const envConfig: EnvConfig = {
