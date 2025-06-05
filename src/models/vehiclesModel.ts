@@ -65,7 +65,6 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
       vin: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
       },
       location: {
         type: DataTypes.JSON,
@@ -115,6 +114,12 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
       timestamps: true,
       underscored: false,
       paranoid: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ['vin', 'deletedAt'],
+        }
+      ]
     },
   );
 
