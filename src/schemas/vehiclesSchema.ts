@@ -31,14 +31,14 @@ export const LocationSchema = z.object({
       .max(180, 'Longitude must be between -180 and 180')
       .optional()
   });
-  
-  
+
+
   const validateVIN = (vin: string): boolean => {
     const vinRegex = /^[A-HJ-NPR-Z0-9]{17}$/;
     return vinRegex.test(vin);
   };
-  
- 
+
+
   export const VehicleSchema = z.object({
     vin: z
       .string({ required_error: 'VIN is required' })
@@ -52,10 +52,6 @@ export const LocationSchema = z.object({
       .min(1900, 'Year must be 1900 or later')
       .max(new Date().getFullYear() + 1, 'Year cannot be more than 1 year in the future'),
     location: LocationSchema,
-    sold: z
-      .boolean()
-      .default(false)
-      .optional(),
     modelId: z
       .number({ required_error: 'Model ID is required' })
       .int('Model ID must be an integer')
@@ -66,10 +62,10 @@ export const LocationSchema = z.object({
       .positive('User ID must be positive')
       .optional()
   });
-  
- 
 
- 
+
+
+
   export type CreateVehicle = z.infer<typeof VehicleSchema>;
- 
+
   export type LocationData = z.infer<typeof LocationSchema>;
