@@ -7,9 +7,14 @@ const createCustomer = async (req: Request, res: Response) => {
       const customerId = req.customerId;
       const vehicleId = req.vehicleId;
 
-      await vehicleService.updateVehicleByCustomerId(customerId, vehicleId);
+      const updatedRow  =  await vehicleService.updateVehicleByCustomerId(customerId, vehicleId);
+      if(!updatedRow) {
+        return res.status(500).json({message: 'Failed to update vehicle' })
+      }
+      const updatedCar = await vehicleService.getVehicleById(vehicleId)
+      console.log(updatedCar)
 
-      return res.status(200).json({ message: 'Vehicle updated successfully for existing customer' });
+      return res.status(200).json({updatedCar, message: 'Vehicle updated successfully for existing customer' });
     }
 
     const customer = req.customer;
