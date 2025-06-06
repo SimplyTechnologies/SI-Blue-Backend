@@ -51,6 +51,8 @@ const getCustomers = async (options: { search?: string; page?: number; offset?: 
     };
   }
 
+  const total = await Customer.count({ where });
+
   const result = await Customer.findAndCountAll({
     where,
     limit,
@@ -61,7 +63,7 @@ const getCustomers = async (options: { search?: string; page?: number; offset?: 
         model: Vehicle,
         as: 'vehicles',
         required: false,
-        attributes: ['id', 'vin', 'year'],
+        attributes: ['id', 'vin', 'year', 'assignedDate'],
         include: [
           {
             model: CarModel,
@@ -90,6 +92,7 @@ const getCustomers = async (options: { search?: string; page?: number; offset?: 
         year: v.year,
         make: v.model?.make?.name || null,
         model: v.model?.name || null,
+        assignedDate: v.assignedDate || null,
       })),
     };
   });
@@ -99,7 +102,7 @@ const getCustomers = async (options: { search?: string; page?: number; offset?: 
     total: result.count,
     page,
     pageSize: limit,
-    totalPages: Math.ceil(result.count / limit),
+    totalPages: Math.ceil(total / limit),
   };
 };
 
