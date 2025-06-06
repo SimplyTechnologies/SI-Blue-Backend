@@ -41,7 +41,7 @@ export const getFavoritesByUserId = async (req: Request, res: Response) => {
       year: v.year,
       vin: v.vin,
       location: v.location,
-      sold: v.sold,
+      customerId: v.customerId,
       userId: v.userId,
       model: v.model
         ? {

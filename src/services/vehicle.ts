@@ -33,7 +33,6 @@ const createVehicle = async (vehicleData: CreateVehicleData) => {
       year: vehicleData.year,
       vin: vehicleData.vin,
       location: vehicleData.location,
-      sold: false,
     });
     return savedVehicle.dataValues;
   } catch (error: any) {
@@ -68,7 +67,11 @@ const getVehicles = async ({ search, makeId, modelIds, sold, limit, offset }: Se
     where.modelId = { [Op.in]: modelIds };
   }
   if (typeof sold === 'boolean') {
-    where.sold = sold;
+    if (sold) {
+      where.customerId = { [Op.not]: null };
+    } else {
+      where.customerId = null;
+    }
   }
   if (makeId) {
     include[0].where = { makeId };
@@ -119,7 +122,7 @@ const getVehicleById = async (id: number, userId?: number) => {
     if (!vehicle) return null;
 
     return vehicle.dataValues
-    
+
   } catch (error) {
     console.error(error);
     throw new Error('Failed to fetch vehicle');
@@ -162,7 +165,7 @@ const updateVehicleByCustomerId = async (customerId: number, vehicleId: number) 
 
 const getAllVehicleLocationsAndCounts = async () => {
   const vehicles = await Vehicle.findAll({
-    attributes: ['id', 'location', 'sold'],
+    attributes: ['id', 'location', 'customerId'],
     raw: true,
   });
   const vehicleLocations = vehicles.map((v: any) => ({
@@ -171,7 +174,7 @@ const getAllVehicleLocationsAndCounts = async () => {
     lng: v.location.lng ? v.location.lng : null,
   }));
   const totalCount = vehicles.length;
-  const totalSoldVehicles = vehicles.filter((v: any) => v.sold).length;
+  const totalSoldVehicles = vehicles.filter((v: any) => v.customerId).length;
   const totalCustomerCount = await Customer.count();
   return { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount };
 };
