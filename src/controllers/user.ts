@@ -48,6 +48,22 @@ const getUsers = async (req: Request, res: Response) => {
     res.status(200).json(result);
   } catch (err) {
     console.log(err);
+  }
+};
+
+const updateUser = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const updatedUser = await userService.updateUser(userId, req.body);
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({ user: updatedUser });
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -55,5 +71,6 @@ const getUsers = async (req: Request, res: Response) => {
 export default {
   getUserById,
   createUser,
-  getUsers
+  getUsers,
+  updateUser,
 };

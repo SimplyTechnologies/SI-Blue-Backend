@@ -18,7 +18,6 @@ interface VehicleAttributes {
   year: number;
   vin: string;
   location: LocationData;
-  sold: boolean;
   userId?: number;
   modelId: number;
   customerId?: number;
@@ -34,7 +33,6 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
   public year!: number;
   public vin!: string;
   public location!: LocationData;
-  public sold!: boolean;
   public userId!: number;
   public modelId!: number;
   public customerId!: number;
@@ -67,7 +65,6 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
       vin: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
       },
       location: {
         type: DataTypes.JSON,
@@ -86,23 +83,10 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
           this.setDataValue('location', value);
         },
       },
-      sold: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-      },
       assignedDate: {
         type: DataTypes.DATE,
         allowNull: true,
       },
-      // userId: {
-      //   type: DataTypes.INTEGER,
-      //   allowNull: true,
-      //   references: {
-      //     model: User,
-      //     key: 'id',
-      //   },
-      // },
       modelId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -130,6 +114,12 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
       timestamps: true,
       underscored: false,
       paranoid: true,
+      indexes: [
+        {
+          unique: true,
+          fields: ['vin', 'deletedAt'],
+        }
+      ]
     },
   );
 

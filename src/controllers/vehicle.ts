@@ -10,7 +10,7 @@ declare global {
         modelId: number;
         year: number;
         vin: string;
-        createdAt:Date;
+        createdAt?: Date;
         location: {
           country: string;
           city: string;
@@ -55,11 +55,10 @@ const getVehicleByVin = async (req: Request, res: Response) => {};
 const getVehicleById = async (req: Request, res: Response) => {
   try {
     const vehicleId = req.params.id;
-    if(!vehicleId) {
-      return res.status(400).json({message: 'Vehicle ID missing'})
+    if (!vehicleId) {
+      return res.status(400).json({ message: 'Vehicle ID missing' });
     }
     const vehicle = await vehicleService.getVehicleById(Number(vehicleId));
-    
 
     if (!vehicle) {
       return res.status(404).json({ message: 'Vehicle not found' });
@@ -133,7 +132,7 @@ const getVehicles = async (req: Request, res: Response) => {
         year: v.year,
         vin: v.vin,
         location: v.location,
-        sold: v.sold,
+        customerId: v.customerId,
         userId: v.userId,
         createdAt: v.createdAt,
         favorite: true,
@@ -173,7 +172,7 @@ const getVehicles = async (req: Request, res: Response) => {
       year: v.year,
       vin: v.vin,
       location: v.location,
-      sold: v.sold,
+      customerId: v.customerId,
       userId: v.userId,
       createdAt: v.createdAt,
       favorite: favoriteVehicleIds.has(v.id),
@@ -246,7 +245,7 @@ const exportVehiclesCsv = async (req: Request, res: Response) => {
       Location: v.location
         ? `${v.location.street}, ${v.location.city}, ${v.location.state} ${v.location.zipcode}, ${v.location.country}`
         : '',
-      Availability: v.sold ? 'Sold' : 'In Stock',
+      Availability: !!v.customerId ? 'Sold' : 'In Stock',
     }));
 
     res.setHeader('Content-Type', 'text/csv');
@@ -286,7 +285,7 @@ export const deleteVehicle = async (req: Request, res: Response) => {
     if (!vehicle) {
       return res.status(404).json({ message: 'Vehicle not found' });
     }
-    if (vehicle.returnedData.customerId) {
+    if (vehicle.customerId) {
       return res.status(409).json({ message: `Vehicle can't be deleted` });
     }
 
@@ -297,6 +296,27 @@ export const deleteVehicle = async (req: Request, res: Response) => {
   }
 };
 
+const updateVehicle = async (req: Request, res: Response) => {
+  try {
+    if (!req.vehicle) {
+      res.status(400).json({
+        message: 'Vehicle data is missing.',
+      });
+      return;
+    }
+
+    const result = await vehicleService.updateVehicle(parseInt(req.params.id), req.vehicle);
+
+    res.status(200).json(result);
+  } catch (error: unknown) {
+    console.error('Error updating vehicle:', error);
+
+    res.status(500).json({
+      message: 'Failed to update vehicle',
+    });
+  }
+}
+
 export default {
   createVehicle,
   getVehicleByVin,
@@ -305,5 +325,5 @@ export default {
   exportVehiclesCsv,
   getAllVehicleLocations,
   deleteVehicle,
+  updateVehicle,
 };
-

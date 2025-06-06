@@ -21,7 +21,7 @@ interface CreateVehicleData {
     lng?: number;
   };
   userId?: number;
-  createdAt:Date
+  createdAt?:Date
 }
 
 
@@ -33,7 +33,6 @@ const createVehicle = async (vehicleData: CreateVehicleData) => {
       year: vehicleData.year,
       vin: vehicleData.vin,
       location: vehicleData.location,
-      sold: false,
     });
     return savedVehicle.dataValues;
   } catch (error: any) {
@@ -68,7 +67,11 @@ const getVehicles = async ({ search, makeId, modelIds, sold, limit, offset }: Se
     where.modelId = { [Op.in]: modelIds };
   }
   if (typeof sold === 'boolean') {
-    where.sold = sold;
+    if (sold) {
+      where.customerId = { [Op.not]: null };
+    } else {
+      where.customerId = null;
+    }
   }
   if (makeId) {
     include[0].where = { makeId };
@@ -118,28 +121,8 @@ const getVehicleById = async (id: number, userId?: number) => {
 
     if (!vehicle) return null;
 
-    const { sold, modelId, favorite, model, ...vehicleData } = vehicle.toJSON();
+    return vehicle.dataValues
 
-    const vehicleModel = {
-      id: model?.id ,
-      name: model?.name
-    };
-
-    const vehicleMake = {
-      id: model?.makeId,
-      name: model?.make?.name 
-    };
-
-    const returnedData = vehicleData;
-
-    const returnedVehicle = {
-      returnedData,
-      vehicleModel,
-      vehicleMake,
-      favorite: userId ? favorite?.some((user: any) => user.id === userId) || false : false
-    };
-
-    return returnedVehicle;
   } catch (error) {
     console.error(error);
     throw new Error('Failed to fetch vehicle');
@@ -182,7 +165,7 @@ const updateVehicleByCustomerId = async (customerId: number, vehicleId: number) 
 
 const getAllVehicleLocationsAndCounts = async () => {
   const vehicles = await Vehicle.findAll({
-    attributes: ['id', 'location', 'sold'],
+    attributes: ['id', 'location', 'customerId'],
     raw: true,
   });
   const vehicleLocations = vehicles.map((v: any) => ({
@@ -191,7 +174,7 @@ const getAllVehicleLocationsAndCounts = async () => {
     lng: v.location.lng ? v.location.lng : null,
   }));
   const totalCount = vehicles.length;
-  const totalSoldVehicles = vehicles.filter((v: any) => v.sold).length;
+  const totalSoldVehicles = vehicles.filter((v: any) => v.customerId).length;
   const totalCustomerCount = await Customer.count();
   return { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount };
 };
@@ -203,6 +186,15 @@ const deleteVehicle = async (id: number) => {
   }
 };
 
+const updateVehicle = async (id: number, vehicleData: CreateVehicleData) => {
+  const [updatedCount] = await Vehicle.update({ ...vehicleData, assignedDate: new Date()}, {where: { id: id }});
+  if (updatedCount === 0) {
+    throw new Error('Vehicle update failed - no rows affected');
+  }
+  const vehicle = await getVehicleById(id);
+  return vehicle;
+};
+
 export default {
   createVehicle,
   getVehicleByVin,
@@ -211,4 +203,5 @@ export default {
   updateVehicleByCustomerId,
   getAllVehicleLocationsAndCounts,
   deleteVehicle,
+  updateVehicle,
 };

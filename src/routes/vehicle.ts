@@ -3,7 +3,7 @@ import makeController from '../controllers/make';
 import modelController from '../controllers/model';
 import vehicleController from '../controllers/vehicle';
 import { authenticateToken } from '../middlewares/authMiddleware';
-import { validateInputVehicle } from '../middlewares/vehicleDataValidator';
+import { validateInputVehicle, validateInputVehicleUpdate } from '../middlewares/vehicleDataValidator';
 import { decodeVin } from '../controllers/vinController';
 
 const router = Router();
@@ -12,7 +12,9 @@ router.use(authenticateToken);
 
 router.post('/vehicle', validateInputVehicle, vehicleController.createVehicle);
 
-router.get('/:id', vehicleController.getVehicleById)
+router.put('/vehicle/:id', validateInputVehicleUpdate, vehicleController.updateVehicle);
+
+router.get('/vehicle/:id', vehicleController.getVehicleById);
 
 router.get('get-vehicle', vehicleController.getVehicleByVin);
 
