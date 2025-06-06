@@ -3,15 +3,13 @@ import { userService } from '../services';
 import { Request, Response } from 'express';
 import { User } from '../models/usersModel';
 
-
 const createUser = async (req: Request, res: Response) => {
   try {
-
-  } catch(err) {
-    console.log(err)
-    res.status(500).json({message: 'Internal server error'})
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
 const getUserById = async (req: Request, res: Response) => {
   try {
@@ -37,9 +35,25 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
-
+const getUsers = async (req: Request, res: Response) => {
+  try {
+    const { search, page, offset } = req.query;
+    const pageNum = page ? Math.max(Number(page), 1) : 1;
+    const limit = offset ? Number(offset) : 25;
+    const result = await userService.getAllUsers({
+      search: search as string,
+      page: pageNum,
+      offset: limit,
+    });
+    res.status(200).json(result);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 export default {
   getUserById,
-  createUser
+  createUser,
+  getUsers
 };
