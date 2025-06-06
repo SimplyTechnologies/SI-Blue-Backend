@@ -186,6 +186,15 @@ const deleteVehicle = async (id: number) => {
   }
 };
 
+const updateVehicle = async (id: number, vehicleData: CreateVehicleData) => {
+  const [updatedCount] = await Vehicle.update({ ...vehicleData, assignedDate: new Date()}, {where: { id: id }});
+  if (updatedCount === 0) {
+    throw new Error('Vehicle update failed - no rows affected');
+  }
+  const vehicle = await getVehicleById(id);
+  return vehicle;
+};
+
 export default {
   createVehicle,
   getVehicleByVin,
@@ -194,4 +203,5 @@ export default {
   updateVehicleByCustomerId,
   getAllVehicleLocationsAndCounts,
   deleteVehicle,
+  updateVehicle,
 };
