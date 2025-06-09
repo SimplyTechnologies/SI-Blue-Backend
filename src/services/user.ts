@@ -88,8 +88,8 @@ const updateUser = async (
   if (updatedData.phoneNumber !== undefined) user.phoneNumber = updatedData.phoneNumber;
   if (updatedData.password !== undefined) user.password = updatedData.password;
   await user.save();
-  const { password, ...userWithoutPassword } = user.dataValues;
-  return userWithoutPassword;
+
+  return user.dataValues;
 };
 
 const getUserByEmail = async (email: string, includeDeleted: boolean = false) => {
@@ -145,8 +145,8 @@ const updateUserPasswordActiveStatus = async (updatedUser: User) => {
   if (updatedUser.isActive !== undefined) user.isActive = updatedUser.isActive;
   
   await user.save();
-  const { password, ...userWithoutPassword } = user.dataValues;
-  return userWithoutPassword;
+  
+  return user.dataValues;
 };
 
 export default {

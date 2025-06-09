@@ -14,6 +14,7 @@ import config from '../configs/config';
 import { User } from '../models/usersModel';
 import { RegisterInput, UserRoleType } from '../schemas/usersSchema';
 import { sendEmail } from '../helpers/sendEmail';
+import { SerializedUser, serializeUser } from '../serializer/userSerializer';
 
 const resetPasswordTemplatePath = join(__dirname, '../templates/resetPassword.html');
 const resetPasswordTemplateSource = readFileSync(resetPasswordTemplatePath, 'utf8');
@@ -51,7 +52,7 @@ const login = (req: Request, res: Response, next: NextFunction) => {
       return res.status(401).json({ message: info?.message || 'Unauthorized' });
     }
 
-    const { password, ...loggedUser } = user;
+    const loggedUser: SerializedUser | null = serializeUser(user);
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user, req.body.remember);
@@ -122,12 +123,18 @@ const activateAccount = async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const userWithoutPassword = await userService.updateUserPasswordActiveStatus(user);
+    const updatedUser = await userService.updateUserPasswordActiveStatus(user);
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const formattedUser: SerializedUser | null = serializeUser(updatedUser);
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user, req.body.remember);
 
-    res.status(201).json({ user: { ...userWithoutPassword }, tokens: { accessToken, refreshToken } });
+    res.status(201).json({ user: { ...formattedUser }, tokens: { accessToken, refreshToken } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal server error' });
