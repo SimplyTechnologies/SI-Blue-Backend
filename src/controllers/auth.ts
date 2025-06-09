@@ -113,17 +113,23 @@ const resetPassword = async (req: Request, res: Response) => {
 };
 
 const activateAccount = async (req: Request, res: Response) => {
-  const user = req.user as User;
+  try {
+    const user = req.user as User;
 
-  if (!user) {
-   return res.status(404).json({ message: 'User not found' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const userWithoutPassword = await userService.updateUserPasswordActiveStatus(user);
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user, req.body.remember);
+
+    res.status(201).json({ user: { ...userWithoutPassword }, tokens: { accessToken, refreshToken } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
   }
-
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user, req.body.remember);
-  const loggedUser = { firstName: user.firstName, lastName: user.lastName, email: user.email };
-
-  res.status(201).json({ user: { ...loggedUser }, tokens: { accessToken, refreshToken } });
 };
 
 export default {

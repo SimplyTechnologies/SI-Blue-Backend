@@ -159,41 +159,43 @@ export const validateAccountActivation = async (req: Request, res: Response, nex
       });
     }
 
-    const { email, password, token } = result.data;
+    const { password, token } = result.data;
 
     try {
       const decodedJWT = verifyAccessToken(token) as JwtPayload;
-      
+      const userId = decodedJWT.sub as string;
+
       if (!decodedJWT) {
         return res.status(403).json({ message: 'Invalid token' });
       }
+
+      const existingUser = await userService.getUserById(parseInt(userId));
+
+      if (!existingUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (existingUser.isActive) {
+        return res.status(409).json({ message: 'Your account is already active. Try logging in.' });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      existingUser.password = hashedPassword;
+      existingUser.isActive = true;
+
+      req.user = existingUser;
+
+      next();
     } catch (err) {
       if (err instanceof Error && err.message === 'jwt expired') {
         return res.status(401).json({ message: 'Activation link expired' });
       }
       return res.status(500).json({ err: err instanceof Error ? err.message : err });
     }
-
-    const existingUser = await userService.getUserByEmail(email);
-
-    if (!existingUser) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    if (existingUser.isActive) {
-      return res.status(409).json({ message: 'Account already active' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    existingUser.password = hashedPassword;
-    existingUser.isActive = true;
-
-    req.user = existingUser;
-
-    next();
   } catch (error) {
     console.error('Account Activation error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
+

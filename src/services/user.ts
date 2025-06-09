@@ -71,6 +71,18 @@ const getUserByEmail = async (email: string) => {
 
 const getUserProfile = async () => {};
 
+const updateUserPasswordActiveStatus = async (updatedUser: User) => {
+  const user = await User.findByPk(updatedUser.id);
+  if (!user) return null;
+  
+  if (updatedUser.password !== undefined) user.password = updatedUser.password;
+  if (updatedUser.isActive !== undefined) user.isActive = updatedUser.isActive;
+  
+  await user.save();
+  const { password, ...userWithoutPassword } = user.dataValues;
+  return userWithoutPassword;
+};
+
 export default {
   createUser,
   getAllUsers,
@@ -78,4 +90,5 @@ export default {
   updateUser,
   deleteUserById,
   getUserByEmail,
+  updateUserPasswordActiveStatus,
 };
