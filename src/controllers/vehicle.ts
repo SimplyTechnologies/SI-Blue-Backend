@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { format } from 'fast-csv';
 import { vehicleService } from '../services';
 import favoritesService from '../services/favorite';
+import { SerializedVehicle, serializeVehicleFromService } from '../serializer/vehicleSerializer';
 
 declare global {
   namespace Express {
@@ -58,7 +59,12 @@ const getVehicleById = async (req: Request, res: Response) => {
     if (!vehicleId) {
       return res.status(400).json({ message: 'Vehicle ID missing' });
     }
-    const vehicle = await vehicleService.getVehicleById(Number(vehicleId));
+
+    const vehicle: SerializedVehicle | null = await serializeVehicleFromService(
+      Number(vehicleId),
+      vehicleService,
+      req.userId
+    );
 
     if (!vehicle) {
       return res.status(404).json({ message: 'Vehicle not found' });
