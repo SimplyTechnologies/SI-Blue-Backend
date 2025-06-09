@@ -60,7 +60,7 @@ const getAllUsers = async (options: { search?: string; page?: number; offset?: n
 
   let where = {};
   if (search) {
-    where = sequelizeWhere(fn('concat', col('first_name'), ' ', col('last_name')), {
+    where = sequelizeWhere(fn('concat', col('firstName'), ' ', col('lastName')), {
       [Op.iLike]: `%${search}%`,
     });
   }
@@ -94,11 +94,11 @@ const updateUser = async (
 
 const getUserByEmail = async (email: string, includeDeleted: boolean = false) => {
   try {
-    const user = await User.findOne({ 
-      where: { email }, 
-      paranoid: !includeDeleted 
+    const user = await User.findOne({
+      where: { email },
+      paranoid: !includeDeleted
     });
-    
+
     if (!user) return null;
     return user.dataValues;
   } catch (err) {
