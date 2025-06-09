@@ -1,6 +1,9 @@
+import bcrypt from 'bcrypt';
+import { join } from 'path';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import { readFileSync } from 'fs';
+import { compile } from 'handlebars';
 import { Request, Response, NextFunction } from 'express';
 import { userService } from '../services';
 import { generateAccessToken, generateRefreshToken } from '../helpers/tokenUtils.js';
@@ -9,6 +12,10 @@ import config from '../configs/config';
 import { User } from '../models/usersModel';
 import { RegisterInput, UserRoleType } from '../schemas/usersSchema';
 import { sendEmail } from '../helpers/sendEmail';
+
+const resetPasswordTemplatePath = join(__dirname, '../templates/resetPassword.html');
+const resetPasswordTemplateSource = readFileSync(resetPasswordTemplatePath, 'utf8');
+const resetPasswordTemplate = compile(resetPasswordTemplateSource);
 
 const roles = ['user', 'superadmin'];
 
@@ -74,10 +81,9 @@ const forgotPassword = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    const token = generateAccessToken(user as User);
-    const link = `${config.frontendUrl}/reset-password?token=${token}`;
-    await sendEmail(email, 'Reset Password', `<a href="${link}">Click here to reset your password</a>`);
-
+    const token = generateAccessToken(user as User, '10m');
+    const html = resetPasswordTemplate({ FRONTEND_URL: config.frontendUrl, TOKEN: token });
+    await sendEmail(email, 'Reset Password', html);
     res.status(201).json({ message: 'Password reset email sent' });
   } catch (err) {
     res.status(500).json({ message: 'Internal server error' });

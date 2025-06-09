@@ -4,7 +4,7 @@ import { LocationData, Vehicle } from '../models/vehiclesModel';
 import { CarModel } from '../models/carModelsModel';
 import { Customer } from '../models/customersModel';
 import { SearchVehiclesParams } from '../types/vehicle';
-import { customerService } from '.';
+import { customerService, vehicleService } from '.';
 import {  User } from '../models/usersModel';
 
 interface CreateVehicleData {
@@ -186,6 +186,15 @@ const deleteVehicle = async (id: number) => {
   }
 };
 
+const updateVehicle = async (id: number, vehicleData: CreateVehicleData) => {
+  const [updatedCount] = await Vehicle.update({ ...vehicleData, assignedDate: new Date()}, {where: { id: id }});
+  if (updatedCount === 0) {
+    throw new Error('Vehicle update failed - no rows affected');
+  }
+
+  return updatedCount;
+};
+
 export default {
   createVehicle,
   getVehicleByVin,
@@ -194,4 +203,5 @@ export default {
   updateVehicleByCustomerId,
   getAllVehicleLocationsAndCounts,
   deleteVehicle,
+  updateVehicle,
 };
