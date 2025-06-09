@@ -11,5 +11,8 @@ router.post('/activate-account',pendingUserDataValidateUserData, userController.
 router.put('/update-user', userController.updateUser);
 
 router.delete('/user/:id', userController.deleteInactiveUser)
+router.get('/:userId', userController.getUserById);
+
+router.get('', userController.getUsers);
 
 export default router;

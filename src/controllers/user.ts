@@ -103,6 +103,22 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
+const getUsers = async (req: Request, res: Response) => {
+  try {
+    const { search, page, offset } = req.query;
+    const pageNum = page ? Math.max(Number(page), 1) : 1;
+    const limit = offset ? Number(offset) : 25;
+    const result = await userService.getAllUsers({
+      search: search as string,
+      page: pageNum,
+      offset: limit,
+    });
+    res.status(200).json(result);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const updateUser = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
@@ -151,6 +167,7 @@ const deleteInactiveUser = async (req: Request, res: Response) => {
 export default {
   getUserById,
   addNewUser,
+  getUsers,
   updateUser,
   deleteInactiveUser
 };
