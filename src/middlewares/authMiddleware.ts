@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 import { RegisterSchema, LoginSchema, AccountActivationSchema } from '../schemas/usersSchema';
 import { userService } from '../services/index';
 import { User } from '../models/usersModel';
-import { verifyRefreshToken } from '../helpers/tokenUtils';
+import { verifyAccessToken, verifyRefreshToken } from '../helpers/tokenUtils';
 import config from '../configs/config';
 
 declare global {
@@ -161,6 +161,18 @@ export const validateAccountActivation = async (req: Request, res: Response, nex
 
     const { email, password, token } = result.data;
 
+    try {
+      const decodedJWT = verifyAccessToken(token) as JwtPayload;
+      if (!decodedJWT) {
+        return res.status(403).json({ message: 'Invalid token' });
+      }
+    } catch (err) {
+      if (err instanceof Error && err.message === 'jwt expired') {
+        return res.status(401).json({ message: 'Activation link expired' });
+      }
+      return res.status(500).json({ err: err instanceof Error ? err.message : err });
+    }
+
     const existingUser = await userService.getUserByEmail(email);
 
     if (!existingUser) {
@@ -170,14 +182,14 @@ export const validateAccountActivation = async (req: Request, res: Response, nex
     if (existingUser.isActive) {
       return res.status(409).json({ message: 'Account already active' });
     }
-  
+
     const hashedPassword = await bcrypt.hash(password, 12);
 
     existingUser.password = hashedPassword;
     existingUser.isActive = true;
 
     req.user = existingUser;
-    
+
     next();
   } catch (error) {
     console.error('Account Activation error:', error);
