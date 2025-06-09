@@ -1,3 +1,4 @@
+import { col, fn, Op, where as sequelizeWhere } from 'sequelize';
 import { User } from '../models/usersModel.js';
 import { RegisterInput } from '../schemas/usersSchema.js';
 
@@ -21,8 +22,30 @@ const getUserById = async (id: number) => {
 
 const deleteUserById = async (id: number) => {};
 
-const getAllUsers = async () => {
-  return await User.findAll({ attributes: { exclude: ['password'] } });
+const getAllUsers = async (options: { search?: string; page?: number; offset?: number }) => {
+  const { search, page = 1, offset = 5 } = options;
+  const limit = offset;
+  const offsetNum = (page - 1) * limit;
+
+  const attributes = { exclude: ['password'] };
+
+  let where = {};
+  if (search) {
+    where = sequelizeWhere(fn('concat', col('first_name'), ' ', col('last_name')), {
+      [Op.iLike]: `%${search}%`,
+    });
+  }
+
+  const total = await User.count({ where });
+
+  const result = await User.findAll({
+    attributes,
+    where,
+    limit,
+    offset: offsetNum,
+    order: [['id', 'DESC']],
+  });
+  return await { users: result, total, page, pageSize: limit, totalPages: Math.ceil(total / limit) };
 };
 
 const updateUser = async (
