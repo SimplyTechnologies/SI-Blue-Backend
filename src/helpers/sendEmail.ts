@@ -7,7 +7,7 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
   
   const msg = {
     to,
-    from: "haykdarbinyan04@gmail.com",
+    from: process.env.EMAIL_FROM,
     subject,
     html,
   };

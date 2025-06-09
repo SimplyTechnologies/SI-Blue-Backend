@@ -21,7 +21,7 @@ const createUser = async (userData: RegisterInput) => {
 };
 
 const addNewUser = async (userData: InputUser) => {
-  console.log(userData)
+
   const user = await User.create({
     firstName: userData.firstName,
     lastName: userData.lastName,
