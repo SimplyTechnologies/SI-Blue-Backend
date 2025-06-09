@@ -1,7 +1,12 @@
 import { col, fn, Op, where as sequelizeWhere } from 'sequelize';
-import { User } from '../models/usersModel.js';
+import { User } from '../models/usersModel';
 import { RegisterInput } from '../schemas/usersSchema.js';
-
+export interface InputUser {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+}
 const createUser = async (userData: RegisterInput) => {
   const user = await User.create({
     firstName: userData.firstName,
@@ -16,11 +21,35 @@ const createUser = async (userData: RegisterInput) => {
   return returnedUser;
 };
 
-const getUserById = async (id: number) => {
-  return await User.findByPk(id, { attributes: { exclude: ['password'] } });
+const createInactiveUser = async (userData: InputUser) => {
+  try {
+    const user = await User.create({
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      phoneNumber: userData.phoneNumber,
+      isActive: false,
+      password: null,
+      role: 'user',
+    });
+
+    const { password, ...returnedUser } = user.dataValues;
+    return returnedUser;
+  } catch (err) {
+    return Error('Failed to create user account');
+  }
 };
 
-const deleteUserById = async (id: number) => {};
+const getUserById = async (id: number) => {
+  try {
+    const user = await User.findOne({ where: { id } });
+
+    return user;
+  } catch (err) {
+    console.log(err);
+    throw Error('Error fetching data');
+  }
+};
 
 const getAllUsers = async (options: { search?: string; page?: number; offset?: number }) => {
   const { search, page = 1, offset = 5 } = options;
@@ -63,19 +92,58 @@ const updateUser = async (
   return userWithoutPassword;
 };
 
-const getUserByEmail = async (email: string) => {
-  const user = await User.findOne({ where: { email } });
-  if (!user) return null;
-  return user.dataValues;
+const getUserByEmail = async (email: string, includeDeleted: boolean = false) => {
+  try {
+    const user = await User.findOne({ 
+      where: { email }, 
+      paranoid: !includeDeleted 
+    });
+    
+    if (!user) return null;
+    return user.dataValues;
+  } catch (err) {
+    console.error('Error fetching user by email:', err);
+    throw new Error('Error fetching user data');
+  }
 };
 
-const getUserProfile = async () => {};
+
+const softDeleteUser = async (userId: number) => {
+  try {
+    const deletedRows = await User.destroy({ where: { id: userId } });
+    return deletedRows > 0;
+  } catch (error) {
+    console.error('Error soft deleting user:', error);
+    throw error;
+  }
+};
+
+const restoreUser = async (userId: number) => {
+  try {
+    const user = await User.findByPk(userId, { paranoid: false });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (!user.deletedAt) {
+      throw new Error('User is not deleted');
+    }
+
+    await user.restore();
+    return true;
+  } catch (error) {
+    console.error('Error restoring user:', error);
+    throw error;
+  }
+};
 
 export default {
   createUser,
   getAllUsers,
   getUserById,
   updateUser,
-  deleteUserById,
   getUserByEmail,
+  createInactiveUser,
+  softDeleteUser,
+  restoreUser
 };
