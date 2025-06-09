@@ -18,38 +18,64 @@ declare global {
 
 const addNewUser = async (req: Request, res: Response) => {
   try {
+    
+    if (req.restoredUser) {
+      const restoredUser = req.restoredUser;
+    
+      const token = generateTokenForAccountActivation(restoredUser as User);
+      const link = `${config.frontendUrl}/account-activation?token=${token}`;
+      const emailSubject = `Welcome Back – Activate Your Account`;
 
+      const emailHtml = loadEmailTemplate('activateAccount.html', {
+        firstName: restoredUser.firstName,
+        productInfo: config.productInfo,
+        link
+      });
+
+      await sendEmail(restoredUser.email, emailSubject, emailHtml);
+
+      return res.status(200).json({  
+        message: 'Account restored and activation email sent',
+
+      });
+    }
+
+   
     const pendingUser = req.pendingUser as InputUser;
 
     if (!pendingUser) {
       return res.status(400).json({ message: 'User data missing' });
     }
+    
     if (!pendingUser.email) {
       return res.status(400).json({ message: 'Email is required' });
     }
 
-   
     const newUser = { ...pendingUser, isActive: false };
     const inactiveUser = await userService.createInactiveUser(newUser);
     const token = generateTokenForAccountActivation(inactiveUser as User);
     const link = `${config.frontendUrl}/account-activation?token=${token}`;
     const emailSubject = `You've Been Invited – Activate Your Account`;
-   
-    
+
     const emailHtml = loadEmailTemplate('activateAccount.html', {
       firstName: pendingUser.firstName,
-      productInfo:config.productInfo,
+      productInfo: config.productInfo,
       link
     });
 
-    
     await sendEmail(pendingUser.email, emailSubject, emailHtml);
-    
 
-    res.status(200).json({token, message: 'Account activation email sent' });
+    res.status(200).json({ 
+      message: 'Account activation email sent',
+    });
 
   } catch (error) {
     console.error('Error in addNewUser:', error);
+    
+    if (error instanceof Error) {
+      return res.status(400).json({ message: error.message });
+    }
+    
     res.status(500).json({ message: 'Failed to send activation email' });
   }
 };

@@ -4,16 +4,16 @@ import { pendingUserDataValidateUserData } from '../middlewares/pendingUsersData
 import { authenticateToken } from '../middlewares/authMiddleware';
 
 const router = Router();
-router.use(authenticateToken);
+
 
 router.post('/add-user',pendingUserDataValidateUserData, userController.addNewUser)
 
-router.put('/update-user', userController.updateUser);
+router.put('/update-user',authenticateToken, userController.updateUser);
 
-router.delete('/deactivate-user/:id', userController.deleteInactiveUser)
-router.get('/:userId', userController.getUserById);
+router.delete('/deactivate-user/:id',userController.deleteInactiveUser)
+router.get('/:userId',authenticateToken, userController.getUserById);
 
-router.get('', userController.getUsers);
+router.get('',authenticateToken, userController.getUsers);
 router.get('/user/:token', userController.getUserById)
 
 export default router;

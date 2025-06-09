@@ -92,15 +92,21 @@ const updateUser = async (
   return userWithoutPassword;
 };
 
-const getUserByEmail = async (email: string) => {
+const getUserByEmail = async (email: string, includeDeleted: boolean = false) => {
   try {
-    const user = await User.findOne({ where: { email }, paranoid: true });
+    const user = await User.findOne({ 
+      where: { email }, 
+      paranoid: !includeDeleted 
+    });
+    
     if (!user) return null;
     return user.dataValues;
   } catch (err) {
-    throw Error('Error fetch user data');
+    console.error('Error fetching user by email:', err);
+    throw new Error('Error fetching user data');
   }
 };
+
 
 const softDeleteUser = async (userId: number) => {
   try {
@@ -108,6 +114,25 @@ const softDeleteUser = async (userId: number) => {
     return deletedRows > 0;
   } catch (error) {
     console.error('Error soft deleting user:', error);
+    throw error;
+  }
+};
+
+const restoreUser = async (userId: number) => {
+  try {
+    const user = await User.findByPk(userId, { paranoid: false });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (!user.deletedAt) {
+      throw new Error('User is not deleted');
+    }
+
+    await user.restore();
+    return true;
+  } catch (error) {
+    console.error('Error restoring user:', error);
     throw error;
   }
 };
@@ -120,4 +145,5 @@ export default {
   getUserByEmail,
   createInactiveUser,
   softDeleteUser,
+  restoreUser
 };

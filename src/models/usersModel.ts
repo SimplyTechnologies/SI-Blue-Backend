@@ -91,7 +91,6 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       timestamps: true,
       underscored: true,
       paranoid: true,
-      deletedAt: 'deleted_at',
       indexes: [
         { 
           unique: true, 
