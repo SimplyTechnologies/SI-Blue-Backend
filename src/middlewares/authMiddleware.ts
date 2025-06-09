@@ -163,13 +163,13 @@ export const validateAccountActivation = async (req: Request, res: Response, nex
 
     try {
       const decodedJWT = verifyAccessToken(token) as JwtPayload;
-      const userId = decodedJWT.sub as string;
+      const userId = decodedJWT.id as number;
 
       if (!decodedJWT) {
         return res.status(403).json({ message: 'Invalid token' });
       }
 
-      const existingUser = await userService.getUserById(parseInt(userId));
+      const existingUser = await userService.getUserById(userId);
 
       if (!existingUser) {
         return res.status(404).json({ message: 'User not found' });
