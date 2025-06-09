@@ -6,13 +6,14 @@ import { authenticateToken } from '../middlewares/authMiddleware';
 const router = Router();
 router.use(authenticateToken);
 
-router.post('/activate-account',pendingUserDataValidateUserData, userController.addNewUser)
+router.post('/add-user',pendingUserDataValidateUserData, userController.addNewUser)
 
 router.put('/update-user', userController.updateUser);
 
-router.delete('/user/:id', userController.deleteInactiveUser)
+router.delete('/deactivate-user/:id', userController.deleteInactiveUser)
 router.get('/:userId', userController.getUserById);
 
 router.get('', userController.getUsers);
+router.get('/user/:token', userController.getUserById)
 
 export default router;

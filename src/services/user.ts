@@ -1,11 +1,11 @@
 import { col, fn, Op, where as sequelizeWhere } from 'sequelize';
-import { User } from '../models/usersModel.js';
+import { User } from '../models/usersModel';
 import { RegisterInput } from '../schemas/usersSchema.js';
 export interface InputUser {
   firstName: string;
-  lastName: string,
-  email: string,
-  phoneNumber:string
+  lastName: string;
+  email: string;
+  phoneNumber: string;
 }
 const createUser = async (userData: RegisterInput) => {
   const user = await User.create({
@@ -21,28 +21,35 @@ const createUser = async (userData: RegisterInput) => {
   return returnedUser;
 };
 
-const addNewUser = async (userData: InputUser) => {
+const createInactiveUser = async (userData: InputUser) => {
+  try {
+    const user = await User.create({
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      phoneNumber: userData.phoneNumber,
+      isActive: false,
+      password: null,
+      role: 'user',
+    });
 
-  const user = await User.create({
-    firstName: userData.firstName,
-    lastName: userData.lastName,
-    email: userData.email,
-    phoneNumber: userData.phoneNumber,
-    isActive: false,
-    password: null,
-    role: 'user'
-  })
-
-  const { password, ...returnedUser } = user.dataValues;
-  return returnedUser;
-
-}
-
-const getUserById = async (id: number) => {
-  return await User.findByPk(id, { attributes: { exclude: ['password'] } });
+    const { password, ...returnedUser } = user.dataValues;
+    return returnedUser;
+  } catch (err) {
+    return Error('Failed to create user account');
+  }
 };
 
+const getUserById = async (id: number) => {
+  try {
+    const user = await User.findOne({ where: { id } });
 
+    return user;
+  } catch (err) {
+    console.log(err);
+    throw Error('Error fetching data');
+  }
+};
 
 const getAllUsers = async (options: { search?: string; page?: number; offset?: number }) => {
   const { search, page = 1, offset = 5 } = options;
@@ -86,12 +93,16 @@ const updateUser = async (
 };
 
 const getUserByEmail = async (email: string) => {
-  const user = await User.findOne({ where: { email } });
-  if (!user) return null;
-  return user.dataValues;
+  try {
+    const user = await User.findOne({ where: { email }, paranoid: true });
+    if (!user) return null;
+    return user.dataValues;
+  } catch (err) {
+    throw Error('Error fetch user data');
+  }
 };
 
-const  softDeleteUser = async (userId: number) => {
+const softDeleteUser = async (userId: number) => {
   try {
     const deletedRows = await User.destroy({ where: { id: userId } });
     return deletedRows > 0;
@@ -99,9 +110,7 @@ const  softDeleteUser = async (userId: number) => {
     console.error('Error soft deleting user:', error);
     throw error;
   }
-}
-
-
+};
 
 export default {
   createUser,
@@ -109,6 +118,6 @@ export default {
   getUserById,
   updateUser,
   getUserByEmail,
-  addNewUser,
-  softDeleteUser
+  createInactiveUser,
+  softDeleteUser,
 };

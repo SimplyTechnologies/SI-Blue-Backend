@@ -25,6 +25,7 @@ interface BaseConfig {
     secret: string | undefined;
   };
   frontendUrl: string | undefined;
+  productInfo: string | undefined
 }
 
 interface Config extends BaseConfig {
@@ -48,6 +49,7 @@ const baseConfig = {
     secret: process.env.JWT_SECRET,
   },
   frontendUrl: process.env.FRONTEND_URL,
+  productInfo: process.env.PRODUCT_NAME
 };
 
 const envConfig: EnvConfig = {

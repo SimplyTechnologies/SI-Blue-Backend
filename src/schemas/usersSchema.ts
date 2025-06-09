@@ -40,7 +40,7 @@ export const UserSchema = z.object({
         'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
   
     role: UserRole.default('user'),
-    isActive: z.boolean().default(true)
+    isActive: z.boolean().default(false)
   });
   
 

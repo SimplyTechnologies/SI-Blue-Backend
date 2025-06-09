@@ -12,8 +12,10 @@ export const pendingUserDataValidateUserData = async (req: Request, res: Respons
             });
           }
           const {firstName, lastName, phoneNumber, email} = result.data
+        
 
           const founded = await userService.getUserByEmail(email)
+         
           if(founded){
             return res.status(400).json({message: 'User already exists'})
           }
@@ -24,6 +26,7 @@ export const pendingUserDataValidateUserData = async (req: Request, res: Respons
             phoneNumber
 
           }
+         
           req.pendingUser = pendingUser
           
 
