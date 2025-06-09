@@ -89,7 +89,6 @@ const serializeSingleVehicle = async (
   userId?: number
 ) => {
   const favoriteVehicleIds = await getUserFavoriteIds(userId);
- 
   return serializeVehicle(vehicle, favoriteVehicleIds);
 };
 
