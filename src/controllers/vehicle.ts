@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { format } from 'fast-csv';
 import { vehicleService } from '../services';
 import favoritesService from '../services/favorite';
+import { SerializedVehicle, serializeVehicleFromService } from '../serializer/vehicleSerializer';
 
 declare global {
   namespace Express {
@@ -58,7 +59,12 @@ const getVehicleById = async (req: Request, res: Response) => {
     if (!vehicleId) {
       return res.status(400).json({ message: 'Vehicle ID missing' });
     }
-    const vehicle = await vehicleService.getVehicleById(Number(vehicleId));
+
+    const vehicle: SerializedVehicle | null = await serializeVehicleFromService(
+      Number(vehicleId),
+      vehicleService,
+      req.userId
+    );
 
     if (!vehicle) {
       return res.status(404).json({ message: 'Vehicle not found' });
@@ -305,9 +311,16 @@ const updateVehicle = async (req: Request, res: Response) => {
       return;
     }
 
-    const result = await vehicleService.updateVehicle(parseInt(req.params.id), req.vehicle);
+    const vehicleId = parseInt(req.params.id);
+    await vehicleService.updateVehicle(vehicleId, req.vehicle);
 
-    res.status(200).json(result);
+    const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
+      vehicleId,
+      vehicleService,
+      req.user as number
+    );
+
+    res.status(200).json(formattedVehicle);
   } catch (error: unknown) {
     console.error('Error updating vehicle:', error);
 

@@ -4,7 +4,7 @@ import { LocationData, Vehicle } from '../models/vehiclesModel';
 import { CarModel } from '../models/carModelsModel';
 import { Customer } from '../models/customersModel';
 import { SearchVehiclesParams } from '../types/vehicle';
-import { customerService } from '.';
+import { customerService, vehicleService } from '.';
 import {  User } from '../models/usersModel';
 
 interface CreateVehicleData {
@@ -191,8 +191,8 @@ const updateVehicle = async (id: number, vehicleData: CreateVehicleData) => {
   if (updatedCount === 0) {
     throw new Error('Vehicle update failed - no rows affected');
   }
-  const vehicle = await getVehicleById(id);
-  return vehicle;
+
+  return updatedCount;
 };
 
 export default {
