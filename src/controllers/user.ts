@@ -12,7 +12,7 @@ declare global {
       pendingUser?: User;
     }
   }
-}
+};
 
 const addNewUser = async (req: Request, res: Response) => {
   try {
@@ -103,9 +103,54 @@ const getUserById = async (req: Request, res: Response) => {
   }
 };
 
+const updateUser = async (req: Request, res: Response) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const updatedUser = await userService.updateUser(userId, req.body);
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({ user: updatedUser });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
+const deleteInactiveUser = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await userService.getUserById(parseInt(userId));
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.isActive) {
+      return res.status(400).json({ message: 'Cannot delete active user' });
+    }
+
+    const deleted = await userService.softDeleteUser(user.id);
+    
+    if (!deleted) {
+      return res.status(500).json({ message: 'Failed to delete user' });
+    }
+
+    return res.status(200).json({ message: 'User deleted successfully' });
+
+  } catch (err) {
+    console.error('Error in deleteInactiveUser:', err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
 
 export default {
   getUserById,
-  addNewUser
+  addNewUser,
+  updateUser,
+  deleteInactiveUser
 };

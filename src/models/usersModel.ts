@@ -1,12 +1,10 @@
 import {
-  BelongsToManyAddAssociationMixin,
-  BelongsToManyGetAssociationsMixin,
   DataTypes,
   Model,
   Sequelize,
 } from 'sequelize';
 import { UserRoleType } from '../schemas/usersSchema';
-import { Vehicle } from './vehiclesModel';
+
 
 export interface UserAttributes {
   id: number;
@@ -19,33 +17,25 @@ export interface UserAttributes {
   isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  deletedAt?: Date | null;
 }
 
-export interface UserCreationAttributes extends Omit<UserAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface UserCreationAttributes extends Omit<UserAttributes, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'> {}
 
 export class User extends Model<UserAttributes, UserCreationAttributes> {
-  declare id: number;
-  declare firstName: string;
-  declare lastName: string;
-  declare email: string;
-  declare phoneNumber: string;
-  declare password: string | null
-  declare role: UserRoleType;
-  declare isActive: boolean;
-  declare createdAt: Date;
-  declare updatedAt: Date;
-  public addFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
-  public getFavorite!: BelongsToManyGetAssociationsMixin<Vehicle>;
-  public removeFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
+  public id!: number;
+  public firstName!: string;
+  public lastName!: string;
+  public email!: string;
+  public phoneNumber!: string;
+  public password!: string | null;
+  public role!: UserRoleType;
+  public isActive!: boolean;
+  public createdAt!: Date;
+  public updatedAt!: Date;
+  public deletedAt!: Date | null;
 
-  static associate() {
-    User.belongsToMany(Vehicle, {
-      through: 'favorites',
-      as: 'favorite',
-      foreignKey: 'userId',
-      otherKey: 'vehicleId',
-    });
-  }
+  
 }
 
 export const defineUserModel = (sequelize: Sequelize): typeof User => {
@@ -69,7 +59,6 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       email: {
         type: DataTypes.STRING(100),
         allowNull: false,
-        unique: true,
         validate: {
           isEmail: true,
         },
@@ -101,7 +90,14 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       tableName: 'users',
       timestamps: true,
       underscored: true,
-      indexes: [{ unique: true, fields: ['email'] }, { fields: ['role'] }, { fields: ['is_active'] }],
+      paranoid: true,
+      deletedAt: 'deleted_at',
+      indexes: [
+        { 
+          unique: true, 
+          fields: ['email', 'deleted_at'],
+        }
+      ],
     },
   );
 

@@ -14,7 +14,6 @@ export interface VehicleAttributes {
   year: number;
   vin: string;
   location: LocationData;
-  sold: boolean;
   userId: number;
   modelId: number;
   createdAt?: Date;
@@ -28,7 +27,6 @@ export class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes>
   public year!: number;
   public vin!: string;
   public location!: LocationData;
-  public sold!: boolean;
   public userId!: number;
   public modelId!: number;
   public readonly createdAt!: Date;
