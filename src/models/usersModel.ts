@@ -2,8 +2,11 @@ import {
   DataTypes,
   Model,
   Sequelize,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
 } from 'sequelize';
 import { UserRoleType } from '../schemas/usersSchema';
+import { Vehicle } from './vehiclesModel';
 
 
 export interface UserAttributes {
@@ -34,6 +37,18 @@ export class User extends Model<UserAttributes, UserCreationAttributes> {
   public createdAt!: Date;
   public updatedAt!: Date;
   public deletedAt!: Date | null;
+  public addFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
+  public getFavorite!: BelongsToManyGetAssociationsMixin<Vehicle>;
+  public removeFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
+
+  static associate() {
+    User.belongsToMany(Vehicle, {
+      through: 'favorites',
+      as: 'favorite',
+      foreignKey: 'userId',
+      otherKey: 'vehicleId',
+    });
+  }
 
   
 }
