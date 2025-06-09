@@ -39,7 +39,6 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
   public assignedDate?: Date;
   public favorite?: User[];
   public model?: any;
-
   static associate() {
     Vehicle.belongsToMany(User, {
       through: 'favorites',
@@ -48,6 +47,7 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
       otherKey: 'userId',
     });
   }
+
 }
 
 const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
