@@ -5,7 +5,7 @@ import { CarModel } from '../models/carModelsModel';
 import { Customer } from '../models/customersModel';
 import { SearchVehiclesParams } from '../types/vehicle';
 import { customerService, vehicleService } from '.';
-import {  User } from '../models/usersModel';
+import { User } from '../models/usersModel';
 
 interface CreateVehicleData {
   modelId: number;
@@ -21,10 +21,8 @@ interface CreateVehicleData {
     lng?: number;
   };
   userId?: number;
-  createdAt?:Date
+  createdAt?: Date;
 }
-
-
 
 const createVehicle = async (vehicleData: CreateVehicleData) => {
   try {
@@ -108,21 +106,20 @@ const getVehicleById = async (id: number, userId?: number) => {
         {
           model: CarModel,
           as: 'model',
-          include: [{ model: Make, as: 'make' }]
-        } ,
+          include: [{ model: Make, as: 'make' }],
+        },
         {
           model: User,
           as: 'favorite',
           attributes: ['id'],
-          through: { attributes: [] }
-        }
-      ]
+          through: { attributes: [] },
+        },
+      ],
     });
 
     if (!vehicle) return null;
 
-    return vehicle.dataValues
-
+    return vehicle.dataValues;
   } catch (error) {
     console.error(error);
     throw new Error('Failed to fetch vehicle');
@@ -146,7 +143,7 @@ const updateVehicleByCustomerId = async (customerId: number, vehicleId: number) 
     }
 
     const [updatedCount] = await Vehicle.update(
-      { customerId , assignedDate: new Date()},
+      { customerId, assignedDate: new Date() },
       {
         where: { id: vehicleId },
       },
@@ -165,13 +162,41 @@ const updateVehicleByCustomerId = async (customerId: number, vehicleId: number) 
 
 const getAllVehicleLocationsAndCounts = async () => {
   const vehicles = await Vehicle.findAll({
-    attributes: ['id', 'location', 'customerId'],
-    raw: true,
+    attributes: ['id', 'year', 'vin', 'sold', 'location', 'customerId', 'assignedDate'],
+    include: [
+      {
+        model: CarModel,
+        as: 'model',
+        include: [{ model: Make, as: 'make' }],
+      },
+      {
+        model: Customer,
+        as: 'customer',
+      },
+    ],
   });
   const vehicleLocations = vehicles.map((v: any) => ({
     id: v.id,
+    year: v.year,
+    vin: v.vin,
+    sold: v.sold,
     lat: v.location.lat ? v.location.lat : null,
     lng: v.location.lng ? v.location.lng : null,
+    model: v.model
+      ? {
+          id: v.model.id,
+          name: v.model.name,
+        }
+      : null,
+    make:
+      v.model && v.model.make
+        ? {
+            id: v.model.make.id,
+            name: v.model.make.name,
+          }
+        : null,
+    customer: v.customer,
+    assignedDate: v.assignedDate,
   }));
   const totalCount = vehicles.length;
   const totalSoldVehicles = vehicles.filter((v: any) => v.customerId).length;
@@ -187,7 +212,7 @@ const deleteVehicle = async (id: number) => {
 };
 
 const updateVehicle = async (id: number, vehicleData: CreateVehicleData) => {
-  const [updatedCount] = await Vehicle.update({ ...vehicleData, assignedDate: new Date()}, {where: { id: id }});
+  const [updatedCount] = await Vehicle.update({ ...vehicleData, assignedDate: new Date() }, { where: { id: id } });
   if (updatedCount === 0) {
     throw new Error('Vehicle update failed - no rows affected');
   }
