@@ -40,7 +40,7 @@ export const UserSchema = z.object({
         'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
   
     role: UserRole.default('user'),
-    isActive: z.boolean().default(true)
+    isActive: z.boolean().default(false)
   });
   
 
@@ -75,6 +75,7 @@ export type UserInput = z.infer<typeof UserSchema>;
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>;
+export const UserSchemaWithoutPassword = UserSchema.omit({ password: true });
 
 
 

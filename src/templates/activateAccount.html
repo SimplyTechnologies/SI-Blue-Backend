@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Activate Your Account</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 0;
+      }
+
+      .email-container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+      }
+
+      .email-content {
+        padding: 40px;
+        color: #636777;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      h2 {
+        color: #192252;
+        margin-bottom: 16px;
+      }
+
+      .button {
+        display: inline-block;
+        padding: 12px 32px;
+        background: #403c89;
+        color: #fff !important;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 16px;
+        margin-top: 12px;
+        transition: background 0.2s;
+      }
+
+      .button:hover {
+        background: #534fb1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="email-content">
+        <h2>Hi ${firstName},</h2>
+        <p>You’ve been added to <strong>${productInfo}</strong> by administrator.</p>
+        <p>To access your account, please activate it by clicking the link below:</p>
+        <p>
+          <a href="${link}" class="button">👉 Activate My Account</a>
+        </p>
+        <p>This link is valid for <strong>24 hours</strong>. After that, it will expire for security reasons.</p>
+        <p>
+          Once you click the link, you’ll be taken to a secure page to set your password and complete the activation
+          process.
+        </p>
+        <p>If you weren’t expecting this invitation, you can safely ignore this message.</p>
+        <p>Looking forward to having you with us!</p>
+
+        <p>
+          Best regards,<br />
+          The <strong>${productInfo}</strong> Team
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
+

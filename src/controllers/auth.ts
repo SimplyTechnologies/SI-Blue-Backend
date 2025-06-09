@@ -1,8 +1,10 @@
+import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
 import bcrypt from 'bcrypt';
-import { join } from 'path';
+
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
-import { readFileSync } from 'fs';
+
 import { compile } from 'handlebars';
 import { Request, Response, NextFunction } from 'express';
 import { userService } from '../services';

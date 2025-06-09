@@ -120,9 +120,8 @@ const getVehicleById = async (id: number, userId?: number) => {
     });
 
     if (!vehicle) return null;
-
+    
     return vehicle.dataValues
-
   } catch (error) {
     console.error(error);
     throw new Error('Failed to fetch vehicle');
