@@ -46,7 +46,7 @@ const addNewUser = async (req: Request, res: Response) => {
     await sendEmail(pendingUser.email, emailSubject, emailHtml);
     
 
-    res.status(200).json({ message: 'Account activation email sent' });
+    res.status(200).json({token, message: 'Account activation email sent' });
 
   } catch (error) {
     console.error('Error in addNewUser:', error);
@@ -58,20 +58,25 @@ const addNewUser = async (req: Request, res: Response) => {
 
 const getUserById = async (req: Request, res: Response) => {
   try {
-    const accessToken = req.cookies.accessToken;
-    if (!accessToken) {
-      return res.status(401).json({ message: 'Access token not found' });
+    const {token} = req.params;
+    if (!token) {
+      return res.status(401).json({ message: 'token not found' });
     }
 
-    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET as string) as User;
+    const decoded = jwt.verify(token, config.jwt.secret as string) as User;
     const user = await userService.getUserById(decoded.id);
 
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }
 
-    const { password, ...userWithoutPassword } = user;
-    res.status(200).json({ user: userWithoutPassword.dataValues });
+    const {firstName, lastName, email} = user
+    const serializerUser = {
+      email,
+      firstName,
+      lastName
+      }
+    res.status(200).json({ user:serializerUser});
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.log(err.message);
@@ -120,10 +125,6 @@ const deleteInactiveUser = async (req: Request, res: Response) => {
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
-    }
-
-    if (user.isActive) {
-      return res.status(400).json({ message: 'Cannot delete active user' });
     }
 
     const deleted = await userService.softDeleteUser(user.id);
