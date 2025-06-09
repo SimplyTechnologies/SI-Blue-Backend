@@ -3,10 +3,10 @@ import passport from 'passport';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import config from './configs/config.js';
-import { usersRouter, vehiclesRouter, customerRoutes} from './routes/index.js';
+import { usersRouter, vehiclesRouter, customerRoutes,authRoutes} from './routes/index.js';
 import { syncDatabase } from './configs/sync.js';
 import { configurePassport } from './configs/passport.js';
-import authRoutes from './routes/auth.js';
+
 import favoriteRoutes from './routes/favorite.js';
 
 

@@ -136,7 +136,7 @@ export const validateLogin = async (req: Request, res: Response, next: NextFunct
       return res.status(403).json({ message: 'Account is inactive' });
     }
 
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(password, user.password as string);
     if (!isValidPassword) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }

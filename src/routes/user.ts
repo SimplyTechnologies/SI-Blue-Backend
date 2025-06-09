@@ -1,17 +1,19 @@
 import { Router } from 'express';
-import userController from '../controllers/user';
+import userController from '../controllers/user'
+import { pendingUserDataValidateUserData } from '../middlewares/pendingUsersDataValidator';
 import { authenticateToken } from '../middlewares/authMiddleware';
 
 const router = Router();
 
-router.use(authenticateToken);
 
-router.post('user', userController.createUser);
+router.post('/add-user',pendingUserDataValidateUserData, userController.addNewUser)
 
-router.put('/update-user', userController.updateUser);
+router.put('/update-user',authenticateToken, userController.updateUser);
 
-router.get('/:userId', userController.getUserById);
+router.delete('/deactivate-user/:id',authenticateToken,userController.deleteInactiveUser)
+router.get('/:userId',authenticateToken, userController.getUserById);
 
-router.get('', userController.getUsers);
+router.get('',authenticateToken, userController.getUsers);
+router.get('/user/:token', userController.getUserById)
 
 export default router;
