@@ -311,9 +311,16 @@ const updateVehicle = async (req: Request, res: Response) => {
       return;
     }
 
-    const result = await vehicleService.updateVehicle(parseInt(req.params.id), req.vehicle);
+    const vehicleId = parseInt(req.params.id);
+    await vehicleService.updateVehicle(vehicleId, req.vehicle);
 
-    res.status(200).json(result);
+    const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
+      vehicleId,
+      vehicleService,
+      req.user as number
+    );
+
+    res.status(200).json(formattedVehicle);
   } catch (error: unknown) {
     console.error('Error updating vehicle:', error);
 
