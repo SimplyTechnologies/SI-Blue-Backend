@@ -162,7 +162,7 @@ const updateVehicleByCustomerId = async (customerId: number, vehicleId: number) 
 
 const getAllVehicleLocationsAndCounts = async () => {
   const vehicles = await Vehicle.findAll({
-    attributes: ['id', 'year', 'vin', 'sold', 'location', 'customerId', 'assignedDate'],
+    attributes: ['id', 'year', 'vin', 'sold', 'location', 'sold', 'customerId', 'assignedDate'],
     include: [
       {
         model: CarModel,
@@ -179,9 +179,9 @@ const getAllVehicleLocationsAndCounts = async () => {
     id: v.id,
     year: v.year,
     vin: v.vin,
-    sold: v.sold,
     lat: v.location.lat ? v.location.lat : null,
     lng: v.location.lng ? v.location.lng : null,
+    sold: v.sold ? 'Sold' : 'In Stock',
     model: v.model
       ? {
           id: v.model.id,
