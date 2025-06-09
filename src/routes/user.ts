@@ -10,7 +10,7 @@ router.post('/add-user',pendingUserDataValidateUserData, userController.addNewUs
 
 router.put('/update-user',authenticateToken, userController.updateUser);
 
-router.delete('/deactivate-user/:id',userController.deleteInactiveUser)
+router.delete('/deactivate-user/:id',authenticateToken,userController.deleteInactiveUser)
 router.get('/:userId',authenticateToken, userController.getUserById);
 
 router.get('',authenticateToken, userController.getUsers);
