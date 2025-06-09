@@ -22,6 +22,10 @@ const addNewUser = async (req: Request, res: Response) => {
     if (!pendingUser) {
       return res.status(400).json({ message: 'User data missing' });
     }
+    const userWithInactiveStatus = {
+      ...pendingUser,
+      isActive: false,
+    };
 
     const token = generateAccessToken(pendingUser as User);
     const link = `${config.frontendUrl}/account-activation?token=${token}`;
@@ -64,7 +68,7 @@ const addNewUser = async (req: Request, res: Response) => {
 
     try {
       await sendEmail(email, emailSubject, emailTemplate);
-      await userService.addNewUser(pendingUser)
+      await userService.addNewUser(userWithInactiveStatus)
       return res.status(200).json({ message: 'Account activation email sent' });
     } catch (emailError) {
       console.error('SendGrid error:', emailError);

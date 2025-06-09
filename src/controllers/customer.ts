@@ -1,20 +1,32 @@
 import { Request, Response } from 'express';
 import { customerService, vehicleService } from '../services';
+import { SerializedVehicle, serializeVehicleFromService } from '../serializer/vehicleSerializer';
 
-const createCustomer = async (req: Request, res: Response) => {
+const createCustomer = async (req: Request, res:Response) => {
   try {
     if (req.customerId) {
       const customerId = req.customerId;
-      const vehicleId = req.vehicleId;
+      const vehicleId = req.vehicleId!;
 
-      const updatedRow  =  await vehicleService.updateVehicleByCustomerId(customerId, vehicleId);
-      if(!updatedRow) {
-        return res.status(500).json({message: 'Failed to update vehicle' })
+      const updatedCount: number = await vehicleService.updateVehicleByCustomerId(customerId, vehicleId);
+      if (updatedCount === 0) {
+        return res.status(500).json({ message: 'Failed to update vehicle' });
       }
-      const updatedCar = await vehicleService.getVehicleById(vehicleId)
-      console.log(updatedCar)
 
-      return res.status(200).json({updatedCar, message: 'Vehicle updated successfully for existing customer' });
+      const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
+        vehicleId,
+        vehicleService,
+        req.user as number
+      );
+
+      if (!formattedVehicle) {
+        return res.status(404).json({ message: 'Vehicle not found after update' });
+      }
+
+      return res.status(200).json({
+        vehicle: formattedVehicle,
+        message: 'Vehicle updated successfully for existing customer'
+      });
     }
 
     const customer = req.customer;
@@ -23,17 +35,30 @@ const createCustomer = async (req: Request, res: Response) => {
     }
 
     const newCustomer = await customerService.createCustomer(customer);
-    await vehicleService.updateVehicleByCustomerId(newCustomer.id, req.body.vehicleId);
+    const vehicleId = req.body.vehicleId;
+    
+    await vehicleService.updateVehicleByCustomerId(newCustomer.id, vehicleId);
+    
+    
+    const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
+      vehicleId,
+      vehicleService,
+      req.user as number
+    );
+
+    if (!formattedVehicle) {
+      return res.status(404).json({ message: 'Vehicle not found after assignment' });
+    }
+
     res.status(201).json({
       message: 'Customer created successfully',
-      customer: newCustomer,
+      vehicle: formattedVehicle,
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 const getCustomer = async (req: Request, res: Response) => {
   try {
     const { email } = req.query;
