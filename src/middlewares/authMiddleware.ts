@@ -163,6 +163,7 @@ export const validateAccountActivation = async (req: Request, res: Response, nex
 
     try {
       const decodedJWT = verifyAccessToken(token) as JwtPayload;
+      
       if (!decodedJWT) {
         return res.status(403).json({ message: 'Invalid token' });
       }

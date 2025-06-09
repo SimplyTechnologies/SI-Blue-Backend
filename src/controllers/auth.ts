@@ -113,11 +113,17 @@ const resetPassword = async (req: Request, res: Response) => {
 };
 
 const activateAccount = async (req: Request, res: Response) => {
-  const { user } = req.body;
+  const user = req.user as User;
+
+  if (!user) {
+   return res.status(404).json({ message: 'User not found' });
+  }
 
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user, req.body.remember);
-  res.status(201).json({ user: { ...user }, tokens: { accessToken, refreshToken } });
+  const loggedUser = { firstName: user.firstName, lastName: user.lastName, email: user.email };
+
+  res.status(201).json({ user: { ...loggedUser }, tokens: { accessToken, refreshToken } });
 };
 
 export default {
