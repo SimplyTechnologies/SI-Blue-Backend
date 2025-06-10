@@ -2,10 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import passport from 'passport';
 import bcrypt from 'bcrypt';
-import { RegisterSchema, LoginSchema } from '../schemas/usersSchema';
+import { RegisterSchema, LoginSchema, AccountActivationSchema } from '../schemas/usersSchema';
 import { userService } from '../services/index';
 import { User } from '../models/usersModel';
-import { verifyRefreshToken } from '../helpers/tokenUtils';
+import { verifyAccessToken, verifyRefreshToken } from '../helpers/tokenUtils';
 import config from '../configs/config';
 
 declare global {
@@ -148,3 +148,54 @@ export const validateLogin = async (req: Request, res: Response, next: NextFunct
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const validateAccountActivation = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = AccountActivationSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        errors: result.error.errors.map(err => err.message),
+      });
+    }
+
+    const { password, token } = result.data;
+
+    try {
+      const decodedJWT = verifyAccessToken(token) as JwtPayload;
+      const userId = decodedJWT.id as number;
+
+      if (!decodedJWT) {
+        return res.status(403).json({ message: 'Invalid token' });
+      }
+
+      const existingUser = await userService.getUserById(userId);
+
+      if (!existingUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (existingUser.isActive) {
+        return res.status(409).json({ message: 'Your account is already active. Try logging in.' });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 12);
+
+      existingUser.password = hashedPassword;
+      existingUser.isActive = true;
+
+      req.user = existingUser;
+
+      next();
+    } catch (err) {
+      if (err instanceof Error && err.message === 'jwt expired') {
+        return res.status(401).json({ message: 'Activation link expired' });
+      }
+      return res.status(500).json({ err: err instanceof Error ? err.message : err });
+    }
+  } catch (error) {
+    console.error('Account Activation error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+

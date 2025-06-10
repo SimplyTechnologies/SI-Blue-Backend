@@ -14,6 +14,7 @@ import config from '../configs/config';
 import { User } from '../models/usersModel';
 import { RegisterInput, UserRoleType } from '../schemas/usersSchema';
 import { sendEmail } from '../helpers/sendEmail';
+import { SerializedUser, serializeUser } from '../serializer/userSerializer';
 import { forceLogoutUser } from '../index.js';
 
 const resetPasswordTemplatePath = join(__dirname, '../templates/resetPassword.html');
@@ -52,7 +53,7 @@ const login = (req: Request, res: Response, next: NextFunction) => {
       return res.status(401).json({ message: info?.message || 'Unauthorized' });
     }
 
-    const { password, ...loggedUser } = user;
+    const loggedUser: SerializedUser | null = serializeUser(user);
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user, req.body.remember);
@@ -116,10 +117,38 @@ const resetPassword = async (req: Request, res: Response) => {
   }
 };
 
+const activateAccount = async (req: Request, res: Response) => {
+  try {
+    const user = req.user as User;
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const updatedUser = await userService.updateUserPasswordActiveStatus(user);
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const formattedUser: SerializedUser | null = serializeUser(updatedUser);
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user, req.body.remember);
+
+    res.status(201).json({ user: { ...formattedUser }, tokens: { accessToken, refreshToken } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export default {
   registerUser,
   login,
   refreshToken,
   forgotPassword,
   resetPassword,
+  activateAccount,
 };
+
