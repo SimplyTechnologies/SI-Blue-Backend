@@ -8,6 +8,7 @@ import { sendEmail } from '../helpers/sendEmail';
 import { InputUser } from '../services/user';
 import { loadEmailTemplate } from '../services/emailTemplate';
 import { SerializedAccountActivateData, SerializedUser, serializeUser, serializeAccountActivateData } from '../serializer/userSerializer';
+import { ResponseHandler } from '../handlers/errorHandler';
 declare global {
   namespace Express {
     interface Request {
@@ -32,20 +33,17 @@ const addNewUser = async (req: Request, res: Response) => {
       });
 
       await sendEmail(restoredUser.email, emailSubject, emailHtml);
-
-      return res.status(200).json({
-        message: 'Account restored and activation email sent',
-      });
+      return ResponseHandler.success(res, 'Account restored and activation email sent')
     }
 
     const pendingUser = req.pendingUser as InputUser;
 
     if (!pendingUser) {
-      return res.status(400).json({ message: 'User data missing' });
+      return ResponseHandler.badRequest(res,'User data missing' )
     }
 
     if (!pendingUser.email) {
-      return res.status(400).json({ message: 'Email is required' });
+      return ResponseHandler.badRequest(res, 'Email is required'  )
     }
 
     const newUser = { ...pendingUser, isActive: false };
@@ -62,17 +60,14 @@ const addNewUser = async (req: Request, res: Response) => {
 
     await sendEmail(pendingUser.email, emailSubject, emailHtml);
 
-    res.status(200).json({
-      message: 'Account activation email sent',
-    });
+    ResponseHandler.success(res,'Account activation email sent' )
   } catch (error) {
     console.error('Error in addNewUser:', error);
 
     if (error instanceof Error) {
       return res.status(400).json({ message: error.message });
     }
-
-    res.status(500).json({ message: 'Failed to send activation email' });
+    ResponseHandler.serverError(res, 'Failed to send activation email')
   }
 };
 
@@ -80,24 +75,24 @@ const getUserById = async (req: Request, res: Response) => {
   try {
     const { token } = req.params;
     if (!token) {
-      return res.status(401).json({ message: 'token not found' });
+      return ResponseHandler.notFound(res,'token not found' )
     }
 
     const decoded = jwt.verify(token, config.jwt.secret as string) as User;
     const user = await userService.getUserById(decoded.id);
 
     if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+      return ResponseHandler.notFound(res,'User not found' )
     }
 
     const formattedUser: SerializedAccountActivateData | null = serializeAccountActivateData(user);
 
-    res.status(200).json({ user: formattedUser });
+    ResponseHandler.success(res, 'User retrieved successfully', {user: formattedUser})
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.log(err.message);
     } else console.log('An unknown error occurred ');
-    res.status(500).json({ message: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
@@ -121,20 +116,21 @@ const updateUser = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
     if (!userId) {
-      return res.status(401).json({ message: 'Unauthorized' });
+
+     return ResponseHandler.unauthorized(res, 'Unauthorized')
     }
     const updatedUser = await userService.updateUser(userId, req.body);
 
     if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
+     return ResponseHandler.notFound(res, 'User not found')
     }
 
     const formattedUser: SerializedUser | null = serializeUser(updatedUser);
 
-    res.status(200).json({ user: formattedUser });
+    ResponseHandler.success(res, 'User updated successfully', {user: formattedUser})
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
@@ -144,13 +140,13 @@ const deleteInactiveUser = async (req: Request, res: Response) => {
     const user = (await userService.getUserById(parseInt(id))) as User;
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      ResponseHandler.notFound(res, 'User not found')
     }
 
     const deleted = await userService.softDeleteUser(user.id);
 
     if (!deleted) {
-      return res.status(500).json({ message: 'Failed to delete user' });
+     return ResponseHandler.serverError(res, 'Internal server error')
     }
     const emailSubject = `Your Account with ${config.productInfo} Has Been Deleted`
     const emailHtml = loadEmailTemplate('deleteAccount.html', {
@@ -161,10 +157,10 @@ const deleteInactiveUser = async (req: Request, res: Response) => {
 
     await sendEmail(user.email, emailSubject, emailHtml);
 
-    return res.status(200).json({ message: 'User deleted successfully' });
+    ResponseHandler.success(res, 'User deleted successfully')
   } catch (err) {
     console.error('Error in deleteInactiveUser:', err);
-    res.status(500).json({ message: 'Internal server error' });
+  ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
