@@ -23,7 +23,7 @@ interface VehicleAttributes {
   customerId?: number;
   assignedDate?: Date;
   favorite?: User[];
-  model?: CarModel
+  model?: CarModel;
 }
 
 interface VehicleCreationAttributes extends Optional<VehicleAttributes, 'id'> {}
@@ -104,7 +104,7 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
           model: 'customers',
           key: 'id',
         },
-        onDelete: 'CASCADE',
+        onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       },
     },
@@ -118,8 +118,8 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
         {
           unique: true,
           fields: ['vin', 'deletedAt'],
-        }
-      ]
+        },
+      ],
     },
   );
 

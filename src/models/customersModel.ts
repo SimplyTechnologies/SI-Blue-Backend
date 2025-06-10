@@ -6,6 +6,9 @@ export interface CustomerAttributes {
   lastName: string;
   email: string;
   phoneNumber: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  deletedAt?: Date;
 }
 
 export interface CustomerCreationAttributes extends Optional<CustomerAttributes, 'id'> {}
@@ -16,6 +19,9 @@ export class Customer extends Model<CustomerAttributes, CustomerCreationAttribut
   public lastName!: string;
   public email!: string;
   public phoneNumber!: string;
+  public createdAt?: Date;
+  public updatedAt?: Date;
+  public deletedAt?: Date;
 }
 
 export const defineCustomerModel = (sequelize: Sequelize): typeof Customer => {
@@ -49,12 +55,11 @@ export const defineCustomerModel = (sequelize: Sequelize): typeof Customer => {
     {
       sequelize,
       tableName: 'customers',
-      timestamps: false,
+      timestamps: true,
+      paranoid: true,
       underscored: false,
-    }
+    },
   );
 
   return Customer;
 };
-
-export type CustomerModelType = typeof Customer;
