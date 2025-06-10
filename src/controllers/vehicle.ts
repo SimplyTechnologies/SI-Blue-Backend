@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { format } from 'fast-csv';
-import { vehicleService } from '../services';
+import { customerService, vehicleService } from '../services';
 import favoritesService from '../services/favorite';
 import { SerializedVehicle, serializeVehicleFromService } from '../serializer/vehicleSerializer';
 
@@ -63,7 +63,7 @@ const getVehicleById = async (req: Request, res: Response) => {
     const vehicle: SerializedVehicle | null = await serializeVehicleFromService(
       Number(vehicleId),
       vehicleService,
-      req.userId
+      req.userId,
     );
 
     if (!vehicle) {
@@ -317,7 +317,7 @@ const updateVehicle = async (req: Request, res: Response) => {
     const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
       vehicleId,
       vehicleService,
-      req.user as number
+      req.user as number,
     );
 
     res.status(200).json(formattedVehicle);
@@ -328,7 +328,41 @@ const updateVehicle = async (req: Request, res: Response) => {
       message: 'Failed to update vehicle',
     });
   }
-}
+};
+
+const unassignVehicle = async (req: Request, res: Response) => {
+  try {
+    const { vehicleId, customerId, unassignAll } = req.body;
+    if (!customerId) {
+      return res.status(400).json({ message: 'Customer ID is required' });
+    }
+
+    const customer = await customerService.findCustomerById(customerId);
+    if (!customer) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
+
+    if (unassignAll) {
+      await vehicleService.unassignVehicle(undefined, customerId);
+      return res.status(200).json({ message: 'All vehicles unassigned successfully' });
+    }
+
+    if (!vehicleId) {
+      return res.status(400).json({ message: 'Vehicle ID is required to unassign a single vehicle' });
+    }
+
+    const vehicle = await vehicleService.getVehicleById(vehicleId);
+    if (!vehicle) {
+      return res.status(404).json({ message: 'Vehicle not found' });
+    }
+
+    await vehicleService.unassignVehicle(vehicleId);
+    return res.status(200).json({ message: 'Vehicle unassigned successfully' });
+  } catch (error) {
+    console.error('Error unassigning vehicle:', error);
+    res.status(500).json({ message: 'Failed to unassign vehicle' });
+  }
+};
 
 export default {
   createVehicle,
@@ -339,4 +373,5 @@ export default {
   getAllVehicleLocations,
   deleteVehicle,
   updateVehicle,
+  unassignVehicle,
 };

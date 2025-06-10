@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import { Make } from '../models/carMakesModel';
-import { LocationData, Vehicle } from '../models/vehiclesModel';
+import { Vehicle } from '../models/vehiclesModel';
 import { CarModel } from '../models/carModelsModel';
 import { Customer } from '../models/customersModel';
 import { SearchVehiclesParams } from '../types/vehicle';
@@ -220,6 +220,35 @@ const updateVehicle = async (id: number, vehicleData: CreateVehicleData) => {
   return updatedCount;
 };
 
+const unassignVehicle = async (vehicleId?: number, customerId?: number) => {
+  if (customerId && !vehicleId) {
+    const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, { where: { customerId } });
+    if (updatedCount === 0) {
+      throw new Error('No vehicles were unassigned');
+    }
+    return updatedCount;
+  }
+
+  if (!vehicleId) {
+    throw new Error('Vehicle ID is required when unassigning a single vehicle');
+  }
+
+  const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, { where: { id: vehicleId } });
+
+  if (updatedCount === 0) {
+    throw new Error('Vehicle update failed - no rows affected');
+  }
+
+  return updatedCount;
+};
+
+const getVehiclesByCustomerId = async (customerId: number) => {
+  const vehicles = await Vehicle.findAll({
+    where: { customerId },
+  });
+  return vehicles;
+};
+
 export default {
   createVehicle,
   getVehicleByVin,
@@ -229,4 +258,6 @@ export default {
   getAllVehicleLocationsAndCounts,
   deleteVehicle,
   updateVehicle,
+  unassignVehicle,
+  getVehiclesByCustomerId,
 };
