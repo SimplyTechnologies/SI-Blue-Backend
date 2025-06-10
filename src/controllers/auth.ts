@@ -14,6 +14,7 @@ import config from '../configs/config';
 import { User } from '../models/usersModel';
 import { RegisterInput, UserRoleType } from '../schemas/usersSchema';
 import { sendEmail } from '../helpers/sendEmail';
+import { forceLogoutUser } from '../index.js';
 
 const resetPasswordTemplatePath = join(__dirname, '../templates/resetPassword.html');
 const resetPasswordTemplateSource = readFileSync(resetPasswordTemplatePath, 'utf8');
@@ -86,6 +87,7 @@ const forgotPassword = async (req: Request, res: Response) => {
     const token = generateAccessToken(user as User, '10m');
     const html = resetPasswordTemplate({ FRONTEND_URL: config.frontendUrl, TOKEN: token });
     await sendEmail(email, 'Reset Password', html);
+    forceLogoutUser(user.id);
     res.status(201).json({ message: 'Password reset email sent' });
   } catch (err) {
     res.status(500).json({ message: 'Internal server error' });
