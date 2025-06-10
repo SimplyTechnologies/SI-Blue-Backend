@@ -26,6 +26,7 @@ export const pendingUserDataValidateUserData = async (
         errors: result.error.errors,
       });
     }
+ 
 
     const { firstName, lastName, phoneNumber, email } = result.data;
 
@@ -33,7 +34,7 @@ export const pendingUserDataValidateUserData = async (
     
     if (activeUser) {
       return res.status(400).json({ 
-        message: 'User with this email already exists and is active' 
+        message: 'User with this email already exists.' 
       });
     }
 
