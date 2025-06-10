@@ -49,7 +49,7 @@ const registerUser = async (req: Request, res: Response) => {
 const login = (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate('local', { session: false }, (err: unknown, user: User, info: any) => {
     if (err) return next(err);
-    if (!user) {
+    if (!user || !user.isActive) {
       return res.status(401).json({ message: info?.message || 'Unauthorized' });
     }
 
@@ -65,7 +65,7 @@ const refreshToken = (req: Request, res: Response) => {
   try {
     const user = req.user as User;
 
-    if (!user) {
+    if (!user || !user.isActive) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
@@ -105,7 +105,7 @@ const resetPassword = async (req: Request, res: Response) => {
     const decoded = jwt.verify(token as string, config.jwt.secret as string) as { id: number };
     const user = await userService.getUserById(decoded.id);
 
-    if (!user) {
+    if (!user || !user.isActive) {
       return res.status(404).json({ message: 'User not found' });
     }
 
