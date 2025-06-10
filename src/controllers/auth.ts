@@ -49,7 +49,7 @@ const registerUser = async (req: Request, res: Response) => {
 const login = (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate('local', { session: false }, (err: unknown, user: User, info: any) => {
     if (err) return next(err);
-    if (!user || !user.isActive) {
+    if (!user) {
       return res.status(401).json({ message: info?.message || 'Unauthorized' });
     }
 
