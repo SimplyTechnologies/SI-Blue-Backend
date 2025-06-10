@@ -152,6 +152,14 @@ const deleteInactiveUser = async (req: Request, res: Response) => {
     if (!deleted) {
       return res.status(500).json({ message: 'Failed to delete user' });
     }
+    const emailSubject = `Your Account with ${config.productInfo} Has Been Deleted`
+    const emailHtml = loadEmailTemplate('deleteAccount.html', {
+      firstName: user.firstName,
+      productInfo: config.productInfo,
+
+    });
+
+    await sendEmail(user.email, emailSubject, emailHtml);
 
     return res.status(200).json({ message: 'User deleted successfully' });
   } catch (err) {

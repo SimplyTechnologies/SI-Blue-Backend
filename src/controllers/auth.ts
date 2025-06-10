@@ -65,7 +65,7 @@ const refreshToken = (req: Request, res: Response) => {
   try {
     const user = req.user as User;
 
-    if (!user) {
+    if (!user || !user.isActive) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
@@ -82,7 +82,7 @@ const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
     const user = await userService.getUserByEmail(email);
-    if (!user) {
+    if (!user || !user.isActive) {
       return res.status(404).json({ message: 'User not found' });
     }
     const token = generateAccessToken(user as User, '10m');
@@ -105,7 +105,7 @@ const resetPassword = async (req: Request, res: Response) => {
     const decoded = jwt.verify(token as string, config.jwt.secret as string) as { id: number };
     const user = await userService.getUserById(decoded.id);
 
-    if (!user) {
+    if (!user || !user.isActive) {
       return res.status(404).json({ message: 'User not found' });
     }
 
