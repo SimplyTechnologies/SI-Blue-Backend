@@ -7,6 +7,7 @@ import { userService } from '../services/index';
 import { User } from '../models/usersModel';
 import { verifyAccessToken, verifyRefreshToken } from '../helpers/tokenUtils';
 import config from '../configs/config';
+import { ResponseHandler } from '../handlers/errorHandler';
 
 declare global {
   namespace Express {

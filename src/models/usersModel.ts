@@ -59,6 +59,7 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       },
       email: {
         type: DataTypes.STRING(100),
+        unique:true,
         allowNull: false,
         validate: {
           isEmail: true,
@@ -90,12 +91,7 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       timestamps: true,
       underscored: false,
       paranoid: true,
-      indexes: [
-        {
-          unique: true,
-          fields: ['email', 'deletedAt'],
-        },
-      ],
+      
     },
   );
 

@@ -1,11 +1,12 @@
 import { Request, Response } from 'express';
 import { modelService } from '../services/index.js';
+import { ResponseHandler } from '../handlers/errorHandler.js';
 
 const getModelsByMakeId = async (req: Request, res: Response) => {
   try {
     const makeId = Number(req.query.makeId);
     if (!makeId) {
-      return res.status(400).json({ error: 'makeId is required' });
+      return ResponseHandler.badRequest(res, 'MakeID is required')
     }
     const models = await modelService.getModelsByMakeId(makeId);
 
@@ -13,9 +14,9 @@ const getModelsByMakeId = async (req: Request, res: Response) => {
       id: model.id,
       name: model.name,
     }));
-    res.json(modelsWithoutMakeId);
+    ResponseHandler.success(res, 'Models fetched successfully', modelsWithoutMakeId);
   } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
