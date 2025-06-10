@@ -23,7 +23,7 @@ interface VehicleAttributes {
   customerId?: number;
   assignedDate?: Date;
   favorite?: User[];
-  model?: CarModel
+  model?: CarModel;
 }
 
 interface VehicleCreationAttributes extends Optional<VehicleAttributes, 'id'> {}
@@ -39,6 +39,7 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
   public assignedDate?: Date;
   public favorite?: User[];
   public model?: any;
+
   static associate() {
     Vehicle.belongsToMany(User, {
       through: 'favorites',
@@ -47,7 +48,6 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
       otherKey: 'userId',
     });
   }
-
 }
 
 const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
@@ -104,7 +104,7 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
           model: 'customers',
           key: 'id',
         },
-        onDelete: 'CASCADE',
+        onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       },
     },
@@ -118,8 +118,8 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
         {
           unique: true,
           fields: ['vin', 'deletedAt'],
-        }
-      ]
+        },
+      ],
     },
   );
 

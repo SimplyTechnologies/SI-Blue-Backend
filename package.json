@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "tsx watch --clear-screen=false src/index.ts",
     "migrate": "sequelize-cli db:migrate",
-    "build": "tsc "
+    "db:seed": "npx sequelize-cli db:seed:all",
+    "db:seed:undo": "npx sequelize-cli db:seed:undo:all",
+    "build": "tsc"
   },
   "keywords": [
     "vehicle",

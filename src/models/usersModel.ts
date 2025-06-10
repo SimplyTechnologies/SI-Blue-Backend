@@ -8,7 +8,6 @@ import {
 import { UserRoleType } from '../schemas/usersSchema';
 import { Vehicle } from './vehiclesModel';
 
-
 export interface UserAttributes {
   id: number;
   firstName: string;
@@ -40,17 +39,6 @@ export class User extends Model<UserAttributes, UserCreationAttributes> {
   public addFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
   public getFavorite!: BelongsToManyGetAssociationsMixin<Vehicle>;
   public removeFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
-
-  static associate() {
-    User.belongsToMany(Vehicle, {
-      through: 'favorites',
-      as: 'favorite',
-      foreignKey: 'userId',
-      otherKey: 'vehicleId',
-    });
-  }
-
-  
 }
 
 export const defineUserModel = (sequelize: Sequelize): typeof User => {
@@ -64,12 +52,10 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       firstName: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        field: 'first_name',
       },
       lastName: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        field: 'last_name',
       },
       email: {
         type: DataTypes.STRING(100),
@@ -81,7 +67,6 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       phoneNumber: {
         type: DataTypes.STRING(15),
         allowNull: false,
-        field: 'phone_number',
       },
       password: {
         type: DataTypes.STRING(255),
@@ -97,20 +82,19 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
-        field: 'is_active',
       },
     },
     {
       sequelize,
       tableName: 'users',
       timestamps: true,
-      underscored: true,
+      underscored: false,
       paranoid: true,
       indexes: [
-        { 
-          unique: true, 
-          fields: ['email', 'deleted_at'],
-        }
+        {
+          unique: true,
+          fields: ['email', 'deletedAt'],
+        },
       ],
     },
   );
