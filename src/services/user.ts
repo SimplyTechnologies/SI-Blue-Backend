@@ -129,7 +129,7 @@ const restoreUser = async (userId: number) => {
       throw new Error('User is not deleted');
     }
 
-    await user.restore();
+     await user.restore();
     return true;
   } catch (error) {
     console.error('Error restoring user:', error);
