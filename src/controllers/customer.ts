@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { customerService, vehicleService } from '../services';
 import { SerializedVehicle, serializeVehicleFromService } from '../serializer/vehicleSerializer';
 
-const createCustomer = async (req: Request, res:Response) => {
+const createCustomer = async (req: Request, res: Response) => {
   try {
     if (req.customerId) {
       const customerId = req.customerId;
@@ -16,7 +16,7 @@ const createCustomer = async (req: Request, res:Response) => {
       const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
         vehicleId,
         vehicleService,
-        req.user as number
+        req.user as number,
       );
 
       if (!formattedVehicle) {
@@ -25,7 +25,7 @@ const createCustomer = async (req: Request, res:Response) => {
 
       return res.status(200).json({
         vehicle: formattedVehicle,
-        message: 'Vehicle updated successfully for existing customer'
+        message: 'Vehicle updated successfully for existing customer',
       });
     }
 
@@ -36,14 +36,13 @@ const createCustomer = async (req: Request, res:Response) => {
 
     const newCustomer = await customerService.createCustomer(customer);
     const vehicleId = req.body.vehicleId;
-    
+
     await vehicleService.updateVehicleByCustomerId(newCustomer.id, vehicleId);
-    
-    
+
     const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
       vehicleId,
       vehicleService,
-      req.user as number
+      req.user as number,
     );
 
     if (!formattedVehicle) {
@@ -113,9 +112,33 @@ const getCustomers = async (req: Request, res: Response) => {
   }
 };
 
+const deleteCustomer = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    console.log();
+    if (!id) {
+      return res.status(400).json({ message: 'Bad request' });
+    }
+    const customer = await customerService.findCustomerById(parseInt(id));
+    if (!customer) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
+    const vehicles = await vehicleService.getVehiclesByCustomerId(customer.id);
+    if (vehicles.length > 0) {
+      return res.status(409).json({ message: `Customer can't be deleted` });
+    }
+    await customerService.deleteCustomer(parseInt(id));
+    res.status(204).send();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Failed to delete customer' });
+  }
+};
+
 export default {
   createCustomer,
   getCustomerByEmail,
   getCustomer,
   getCustomers,
+  deleteCustomer,
 };

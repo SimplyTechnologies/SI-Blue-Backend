@@ -106,10 +106,18 @@ const getCustomers = async (options: { search?: string; page?: number; offset?: 
   };
 };
 
+const deleteCustomer = async (id: number) => {
+  const customer = await Customer.findByPk(id);
+  if (customer) {
+    return await customer.destroy();
+  }
+}
+
 export default {
   getCustomers,
   createCustomer,
   getCustomerByEmail,
   searchDatabase,
   findCustomerById,
+  deleteCustomer
 };
