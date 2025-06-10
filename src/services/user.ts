@@ -60,7 +60,7 @@ const getAllUsers = async (options: { search?: string; page?: number; offset?: n
 
   let where = {};
   if (search) {
-    where = sequelizeWhere(fn('concat', col('first_name'), ' ', col('last_name')), {
+    where = sequelizeWhere(fn('concat', col('firstName'), ' ', col('lastName')), {
       [Op.iLike]: `%${search}%`,
     });
   }
@@ -88,17 +88,17 @@ const updateUser = async (
   if (updatedData.phoneNumber !== undefined) user.phoneNumber = updatedData.phoneNumber;
   if (updatedData.password !== undefined) user.password = updatedData.password;
   await user.save();
-  const { password, ...userWithoutPassword } = user.dataValues;
-  return userWithoutPassword;
+
+  return user.dataValues;
 };
 
 const getUserByEmail = async (email: string, includeDeleted: boolean = false) => {
   try {
-    const user = await User.findOne({ 
-      where: { email }, 
-      paranoid: !includeDeleted 
+    const user = await User.findOne({
+      where: { email },
+      paranoid: !includeDeleted
     });
-    
+
     if (!user) return null;
     return user.dataValues;
   } catch (err) {
@@ -137,12 +137,25 @@ const restoreUser = async (userId: number) => {
   }
 };
 
+const updateUserPasswordActiveStatus = async (updatedUser: User) => {
+  const user = await User.findByPk(updatedUser.id);
+  if (!user) return null;
+  
+  if (updatedUser.password !== undefined) user.password = updatedUser.password;
+  if (updatedUser.isActive !== undefined) user.isActive = updatedUser.isActive;
+  
+  await user.save();
+  
+  return user.dataValues;
+};
+
 export default {
   createUser,
   getAllUsers,
   getUserById,
   updateUser,
   getUserByEmail,
+  updateUserPasswordActiveStatus,
   createInactiveUser,
   softDeleteUser,
   restoreUser
