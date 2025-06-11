@@ -168,5 +168,5 @@ export default {
   forgotPassword,
   resetPassword,
   activateAccount,
-};
+}
 
