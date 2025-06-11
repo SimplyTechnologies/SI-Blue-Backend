@@ -16,6 +16,7 @@ interface SerializedAccountActivateData {
   firstName: string;
   lastName: string;
   email: string;
+  isActive: boolean;
 }
 
 export const serializeUser = (user: UserAttributes): SerializedUser => {
@@ -37,6 +38,7 @@ export const serializeAccountActivateData = (user: UserAttributes): SerializedAc
     firstName: user.firstName,
     lastName: user.lastName,
     email: user.email,
+    isActive: user.isActive
   };
 };
 
