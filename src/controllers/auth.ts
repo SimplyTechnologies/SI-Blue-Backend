@@ -72,7 +72,7 @@ const refreshToken = (req: Request, res: Response) => {
     const user = req.user as User;
 
     if (!user || !user.isActive) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return ResponseHandler.unauthorized(res, 'Unauthorized')
     }
 
     const accessToken = generateAccessToken(user);

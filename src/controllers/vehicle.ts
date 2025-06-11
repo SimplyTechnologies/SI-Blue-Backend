@@ -82,14 +82,14 @@ const getVehicles = async (req: Request, res: Response) => {
     const offsetNum = (pageNum - 1) * limit;
 
     if (availability && !['Sold', 'In Stock'].includes(availability as string)) {
-      res.json({
+      const vehicles = {
         vehicles: [],
         total: 0,
         page: pageNum,
         pageSize: limit,
         totalPages: 0,
-      });
-      return;
+      }
+      return ResponseHandler.success(res, 'Vehicles retrieves successfully', vehicles)
     }
 
     if (modelIds) {
