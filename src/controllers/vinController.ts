@@ -30,14 +30,14 @@ export const decodeVin = async (req: Request, res: Response) => {
       return ResponseHandler.badRequest(res, 'Vehicle model not found in database')
     }
     const { makeId, ...modelWithoutMakeId } = vehicleInfo.vehicleModel;
-
-    return res.status(200).json({
-      data: {
-        vehicleMake: vehicleInfo.vehicleMake,
-        vehicleModel: modelWithoutMakeId,
-        year: vehicleInfo.year,
-      },
-    });
+    const  data = {
+      vehicleMake: vehicleInfo.vehicleMake,
+      vehicleModel: modelWithoutMakeId,
+      year: vehicleInfo.year,
+    }
+    ResponseHandler.success(res, 'Vehicle info fetched successfully', data);
+     
+    
   } catch (error: any) {
     console.error('Error decoding VIN:', error);
     return ResponseHandler.badRequest(res, 'Failed to decode VIN')

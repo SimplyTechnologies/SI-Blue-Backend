@@ -130,7 +130,7 @@ const getVehicleById = async (id: number, userId?: number) => {
 
 const updateVehicleByCustomerId = async (customerId: number, vehicleId: number) => {
   try {
-    if (!vehicleId || !customerId) {
+    if (!customerId || !vehicleId) {
       throw new Error('Customer ID or vehicle ID missing');
     }
 

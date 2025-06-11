@@ -82,14 +82,14 @@ const getVehicles = async (req: Request, res: Response) => {
     const offsetNum = (pageNum - 1) * limit;
 
     if (availability && !['Sold', 'In Stock'].includes(availability as string)) {
-      res.json({
+      const vehicles = {
         vehicles: [],
         total: 0,
         page: pageNum,
         pageSize: limit,
         totalPages: 0,
-      });
-      return;
+      }
+      return ResponseHandler.success(res, 'Vehicles retrieves successfully', vehicles)
     }
 
     if (modelIds) {
@@ -146,12 +146,14 @@ const getVehicles = async (req: Request, res: Response) => {
               }
             : null,
       }));
-      res.json({
+      const pagination = {
         vehicles: result,
         previousId: pageNum === 1 ? null : pageNum - 1,
         nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
-      });
-      return;
+      };
+      
+      return ResponseHandler.success(res, 'Vehicles fetched successfully', pagination);
+     
     }
 
     const { rows, count } = await vehicleService.getVehicles({
@@ -186,12 +188,13 @@ const getVehicles = async (req: Request, res: Response) => {
             }
           : null,
     }));
-
-    res.json({
+    const paginationData = {
       vehicles: result,
       previousId: pageNum === 1 ? null : pageNum - 1,
       nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
-    });
+    };
+    
+    return ResponseHandler.success(res, 'Vehicles fetched successfully', paginationData);
   } catch (err) {
   ResponseHandler.serverError(res, 'Internal server error')
   }
@@ -260,12 +263,12 @@ const getAllVehicleLocations = async (req: Request, res: Response) => {
   try {
     const { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount } =
       await vehicleService.getAllVehicleLocationsAndCounts();
-    res.json({
-      vehicles: vehicleLocations,
-      totalCount,
-      totalSoldVehicles,
-      totalCustomerCount,
-    });
+      return ResponseHandler.success(res, 'Vehicle stats fetched successfully', {
+        vehicles: vehicleLocations,
+        totalCount,
+        totalSoldVehicles,
+        totalCustomerCount,
+      });
   } catch (error) {
     ResponseHandler.serverError(res, 'Failed to fetch vehicle locations')
     

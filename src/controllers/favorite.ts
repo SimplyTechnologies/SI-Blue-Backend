@@ -20,10 +20,8 @@ export const createFavorite = async (req: Request, res: Response) => {
     }
 
     const favorite = await favoritesService.createFavorite(userId, vehicleId);
+    ResponseHandler.created(res, 'Favorite created successfully', favorite)
 
-    return res.status(201).json({
-      favorite,
-    });
   } catch (error) {
     console.error('Error creating favorite:', error);
     ResponseHandler.serverError(res, 'Internal server error')
@@ -59,10 +57,7 @@ export const getFavoritesByUserId = async (req: Request, res: Response) => {
             }
           : null,
     }));
-
-    return res.status(200).json({
-      result,
-    });
+    ResponseHandler.success(res, 'Retrieve favorite successfully', result)
   } catch (error) {
     console.error('Error retrieving favorites:', error);
     ResponseHandler.serverError(res, 'Internal server error')

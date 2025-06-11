@@ -1,6 +1,7 @@
 import { Response, Request, NextFunction } from "express";
 import { UserSchemaWithoutPassword } from "../schemas/usersSchema";
 import { userService } from "../services";
+import { ResponseHandler } from "../handlers/errorHandler";
 
 
 declare global {
@@ -21,21 +22,14 @@ export const pendingUserDataValidateUserData = async (
     const result = UserSchemaWithoutPassword.safeParse(req.body);
     
     if (!result.success) {
-      return res.status(400).json({
-        message: 'Validation failed',
-        errors: result.error.errors,
-      });
+      return ResponseHandler.badRequest(res, 'Validation failed', result.error.errors)
     }
- 
-
     const { firstName, lastName, phoneNumber, email } = result.data;
 
     const activeUser = await userService.getUserByEmail(email, false);
     
     if (activeUser) {
-      return res.status(400).json({ 
-        message: 'User with this email already exists.' 
-      });
+      return ResponseHandler.badRequest(res,'User with this email already exists.')
     }
 
     const deletedUser = await userService.getUserByEmail(email, true);
@@ -57,9 +51,8 @@ export const pendingUserDataValidateUserData = async (
         
       } catch (error) {
         console.error('Error restoring user:', error);
-        return res.status(500).json({ 
-          message: 'Failed to restore user account' 
-        });
+        ResponseHandler.serverError(res,'Failed to restore user account');
+
       }
     }
 
@@ -76,6 +69,6 @@ export const pendingUserDataValidateUserData = async (
 
   } catch (err) {
     console.error('Error in pending user data validation', err);
-    res.status(500).json({ message: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
