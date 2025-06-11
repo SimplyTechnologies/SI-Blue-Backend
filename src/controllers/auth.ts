@@ -71,7 +71,7 @@ const refreshToken = (req: Request, res: Response) => {
   try {
     const user = req.user as User;
 
-    if (!user || !user.isActive) {
+    if (!user) {
       return ResponseHandler.unauthorized(res, 'Unauthorized')
     }
 
