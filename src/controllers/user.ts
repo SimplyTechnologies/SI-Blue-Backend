@@ -66,7 +66,7 @@ const addNewUser = async (req: Request, res: Response) => {
     console.error('Error in addNewUser:', error);
 
     if (error instanceof Error) {
-      return ResponseHandler.badRequest(res, 'Bad request')
+      return ResponseHandler.badRequest(res, error.message);
     }
     ResponseHandler.serverError(res, 'Failed to send activation email')
   }

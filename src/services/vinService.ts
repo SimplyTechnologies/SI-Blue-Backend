@@ -11,14 +11,13 @@ interface NHTSAResponse {
   Results: VehicleResult[];
 }
 
-
 const BASE_URL = process.env.BASE_URL as string;
 
 export const getVehicleInfo = async (vin: string) => {
   try {
     const response = await axios.get<NHTSAResponse>(`${BASE_URL}/vehicles/DecodeVin/${vin}?format=json`);
 
-    const results = response.data?.Results;
+    const results = response.data.Results;
 
     if (!results || !Array.isArray(results)) {
       throw new Error('Invalid response from NHTSA API');

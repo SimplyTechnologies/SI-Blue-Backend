@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import { Make } from '../models/carMakesModel';
-import { LocationData, Vehicle } from '../models/vehiclesModel';
+import { Vehicle } from '../models/vehiclesModel';
 import { CarModel } from '../models/carModelsModel';
 import { Customer } from '../models/customersModel';
 import { SearchVehiclesParams } from '../types/vehicle';
@@ -121,9 +121,15 @@ const getVehicleById = async (id: number, userId?: number) => {
     if (!vehicle) return null;
 
     return vehicle.dataValues;
+<<<<<<< HEAD
   } catch (err) {
     console.error('Failed to fetch vehicle', err);
     throw err;
+=======
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to fetch vehicle');
+>>>>>>> c9b3aef52d423275edab256df24331ebb96bbea3
   }
 };
 
@@ -163,13 +169,40 @@ const updateVehicleByCustomerId = async (customerId: number, vehicleId: number) 
 
 const getAllVehicleLocationsAndCounts = async () => {
   const vehicles = await Vehicle.findAll({
-    attributes: ['id', 'location', 'customerId'],
-    raw: true,
+    attributes: ['id', 'year', 'vin', 'location', 'customerId', 'assignedDate'],
+    include: [
+      {
+        model: CarModel,
+        as: 'model',
+        include: [{ model: Make, as: 'make' }],
+      },
+      {
+        model: Customer,
+        as: 'customer',
+      },
+    ],
   });
   const vehicleLocations = vehicles.map((v: any) => ({
     id: v.id,
+    year: v.year,
+    vin: v.vin,
     lat: v.location.lat ? v.location.lat : null,
     lng: v.location.lng ? v.location.lng : null,
+    model: v.model
+      ? {
+          id: v.model.id,
+          name: v.model.name,
+        }
+      : null,
+    make:
+      v.model && v.model.make
+        ? {
+            id: v.model.make.id,
+            name: v.model.make.name,
+          }
+        : null,
+    customer: v.customer,
+    assignedDate: v.assignedDate,
   }));
   const totalCount = vehicles.length;
   const totalSoldVehicles = vehicles.filter((v: any) => v.customerId).length;
@@ -201,6 +234,35 @@ const updateVehicle = async (id: number, vehicleData: CreateVehicleData) => {
   }
 };
 
+const unassignVehicle = async (vehicleId?: number, customerId?: number) => {
+  if (customerId && !vehicleId) {
+    const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, { where: { customerId } });
+    if (updatedCount === 0) {
+      throw new Error('No vehicles were unassigned');
+    }
+    return updatedCount;
+  }
+
+  if (!vehicleId) {
+    throw new Error('Vehicle ID is required when unassigning a single vehicle');
+  }
+
+  const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, { where: { id: vehicleId } });
+
+  if (updatedCount === 0) {
+    throw new Error('Vehicle update failed - no rows affected');
+  }
+
+  return updatedCount;
+};
+
+const getVehiclesByCustomerId = async (customerId: number) => {
+  const vehicles = await Vehicle.findAll({
+    where: { customerId },
+  });
+  return vehicles;
+};
+
 export default {
   createVehicle,
   getVehicleByVin,
@@ -210,4 +272,6 @@ export default {
   getAllVehicleLocationsAndCounts,
   deleteVehicle,
   updateVehicle,
+  unassignVehicle,
+  getVehiclesByCustomerId,
 };

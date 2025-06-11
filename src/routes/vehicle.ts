@@ -8,7 +8,7 @@ import { decodeVin } from '../controllers/vinController';
 
 const router = Router();
 
-//router.use(authenticateToken);
+router.use(authenticateToken);
 
 router.post('/vehicle', validateInputVehicle, vehicleController.createVehicle);
 
@@ -31,5 +31,7 @@ router.get('/dashboard-data', vehicleController.getAllVehicleLocations);
 router.post('/decode/vin', decodeVin);
 
 router.delete('/vehicle/:id', vehicleController.deleteVehicle);
+
+router.post('/unassign', vehicleController.unassignVehicle);
 
 export default router;
