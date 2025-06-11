@@ -5,7 +5,7 @@ import { ResponseHandler } from '../handlers/errorHandler.js';
 const getAllMakes = async (req: Request, res: Response) => {
   try {
     const makes = await makeService.getAllMakes();
-    res.json(makes);
+    ResponseHandler.success(res, 'Makes retrieves successfully', makes)
   } catch (err) {
     ResponseHandler.serverError(res, 'Internal server error')
   }
