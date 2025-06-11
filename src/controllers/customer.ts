@@ -35,7 +35,10 @@ const createCustomer = async (req: Request, res: Response) => {
 
     const newCustomer = await customerService.createCustomer(customer);
     const vehicleId = req.body.vehicleId;
-
+    if(!newCustomer?.id){
+      throw new Error('Customer Id missing')
+    }
+    
     await vehicleService.updateVehicleByCustomerId(newCustomer.id, vehicleId);
 
     const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
@@ -45,7 +48,7 @@ const createCustomer = async (req: Request, res: Response) => {
     );
 
     if (!formattedVehicle) {
-      return res.status(404).json({ message: 'Vehicle not found after assignment' });
+      return ResponseHandler.notFound(res,'Vehicle not found after assignment' )
     }
     ResponseHandler.created(res, 'Customer created successfully', { vehicle: formattedVehicle });
   } catch (err) {

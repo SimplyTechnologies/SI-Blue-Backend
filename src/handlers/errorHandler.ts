@@ -1,4 +1,3 @@
-import { error } from 'console';
 import { Response } from 'express';
 
 export class ResponseHandler {
@@ -18,7 +17,7 @@ export class ResponseHandler {
     });
   };
 
-  static badRequest = (res: Response, message = 'Bad request', errors = []) => {
+  static badRequest = (res: Response, message = 'Bad request', errors: any = []) => {
     return res.status(400).json({
       success: false,
       message,

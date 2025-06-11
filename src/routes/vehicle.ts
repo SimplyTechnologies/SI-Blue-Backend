@@ -8,7 +8,7 @@ import { decodeVin } from '../controllers/vinController';
 
 const router = Router();
 
-router.use(authenticateToken);
+//router.use(authenticateToken);
 
 router.post('/vehicle', validateInputVehicle, vehicleController.createVehicle);
 

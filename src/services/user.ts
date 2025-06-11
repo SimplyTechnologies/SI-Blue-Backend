@@ -1,6 +1,7 @@
 import { col, fn, Op, where as sequelizeWhere } from 'sequelize';
 import { User } from '../models/usersModel';
 import { RegisterInput } from '../schemas/usersSchema.js';
+import { number } from 'zod';
 export interface InputUser {
   firstName: string;
   lastName: string;
@@ -8,17 +9,23 @@ export interface InputUser {
   phoneNumber: string;
 }
 const createUser = async (userData: RegisterInput) => {
-  const user = await User.create({
-    firstName: userData.firstName,
-    lastName: userData.lastName,
-    phoneNumber: userData.phoneNumber,
-    password: userData.password,
-    email: userData.email,
-    role: userData.role == 'superadmin' ? 'superadmin' : 'user',
-    isActive: true,
-  });
-  const { password, ...returnedUser } = user.dataValues;
-  return returnedUser;
+  try {
+    const user = await User.create({
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      phoneNumber: userData.phoneNumber,
+      password: userData.password,
+      email: userData.email,
+      role: userData.role == 'superadmin' ? 'superadmin' : 'user',
+      isActive: true,
+    });
+    const { password, ...returnedUser } = user.dataValues;
+    return returnedUser;
+
+  } catch(err){
+    console.log(err)
+    throw new Error('failed to create user')
+  }
 };
 
 const createInactiveUser = async (userData: InputUser) => {
@@ -36,7 +43,7 @@ const createInactiveUser = async (userData: InputUser) => {
     const { password, ...returnedUser } = user.dataValues;
     return returnedUser;
   } catch (err) {
-    return Error('Failed to create user account');
+    return new Error('Failed to create user account');
   }
 };
 
@@ -47,7 +54,7 @@ const getUserById = async (id: number) => {
     return user;
   } catch (err) {
     console.log(err);
-    throw Error('Error fetching data');
+    throw new Error('Error fetching data');
   }
 };
 
@@ -110,6 +117,13 @@ const getUserByEmail = async (email: string, includeDeleted: boolean = false) =>
 
 const softDeleteUser = async (userId: number) => {
   try {
+    const user = await User.findByPk(userId)
+    if(!user) {
+      throw Error('User not found')
+    }
+    user.isActive = false;
+    user.password = null;
+    await user.save()
     const deletedRows = await User.destroy({ where: { id: userId } });
     return deletedRows > 0;
   } catch (error) {
@@ -129,7 +143,8 @@ const restoreUser = async (userId: number) => {
       throw new Error('User is not deleted');
     }
 
-     await user.restore();
+    await user.restore();
+  
     return true;
   } catch (error) {
     console.error('Error restoring user:', error);

@@ -88,7 +88,6 @@ const getVehicles = async (req: Request, res: Response) => {
         pageSize: limit,
         totalPages: 0,
       });
-      return;
     }
 
     if (modelIds) {
@@ -149,8 +148,7 @@ const getVehicles = async (req: Request, res: Response) => {
         vehicles: result,
         previousId: pageNum === 1 ? null : pageNum - 1,
         nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
-      });
-      return;
+      })     
     }
 
     const { rows, count } = await vehicleService.getVehicles({
@@ -191,7 +189,7 @@ const getVehicles = async (req: Request, res: Response) => {
       previousId: pageNum === 1 ? null : pageNum - 1,
       nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
     });
-  } catch (err) {
+      } catch (err) {
     ResponseHandler.serverError(res, 'Internal server error');
   }
 };

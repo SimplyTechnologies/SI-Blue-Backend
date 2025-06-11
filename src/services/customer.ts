@@ -6,37 +6,69 @@ import { CarModel } from '../models/carModelsModel';
 import { CustomerSchema } from '../schemas/customersSchema';
 
 const createCustomer = async (customerData: CustomerSchema) => {
-  const createdCustomer = {
-    vehicleId: customerData.vehicleId,
-    firstName: customerData.firstName,
-    lastName: customerData.lastName,
-    phoneNumber: customerData.phoneNumber,
-    email: customerData.email,
-  };
-  const returnedCustomer = await Customer.create(createdCustomer);
-  return returnedCustomer.dataValues;
+  try {
+    if (!customerData) {
+      throw new Error('Customer data are required');
+    }
+    const createdCustomer = {
+      vehicleId: customerData.vehicleId,
+      firstName: customerData.firstName,
+      lastName: customerData.lastName,
+      phoneNumber: customerData.phoneNumber,
+      email: customerData.email,
+    };
+    const returnedCustomer = await Customer.create(createdCustomer);
+    return returnedCustomer.dataValues;
+  } catch (err) {
+    console.error('Failed to create customer', err);
+    throw err
+  }
 };
-
 
 const findCustomerById = async (id: number) => {
-  const customer = await Customer.findByPk(id);
-  return customer;
+  try {
+    if (!id) {
+      throw new Error('Valid Id is required');
+    }
+    const customer = await Customer.findByPk(id);
+    return customer;
+  } catch (err) {
+    console.error('Failed to get customer by Id', err);
+    throw err;
+  }
 };
+
 const searchDatabase = async (email: string) => {
-  return await Customer.findAll({
-    where: {
-      email: {
-        [Op.iLike]: `%${email.toLowerCase()}%`,
+  try {
+    if (!email) {
+      throw new Error('Email is required');
+    }
+    return await Customer.findAll({
+      where: {
+        email: {
+          [Op.iLike]: `%${email.toLowerCase()}%`,
+        },
       },
-    },
-    limit: 10,
-  });
+      limit: 10,
+    });
+  } catch (err) {
+    console.error('Failed to get customers', err);
+    throw err;
+  }
 };
 
 const getCustomerByEmail = async (email: string) => {
-  const customer = await Customer.findOne({ where: { email } });
-  if (!customer) return null;
-  return customer.dataValues;
+  try {
+    if (!email) {
+      throw new Error('Email is required');
+    }
+    const customer = await Customer.findOne({ where: { email } });
+    if (!customer) return null;
+    return customer.dataValues;
+  } catch (err) {
+    console.error('Failed to get customer by email', err);
+    throw err;
+  }
 };
 
 const getCustomers = async (options: { search?: string; page?: number; offset?: number }) => {

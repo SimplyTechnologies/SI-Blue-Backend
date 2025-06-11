@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import vehicleService from '../services/vehicle.js';
+import { ResponseHandler } from '../handlers/errorHandler.js';
 
 
 declare global {
@@ -53,13 +54,12 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
     const existedCar = await vehicleService.getVehicleByVin(vin);
 
     if (existedCar) {
-      return res.status(400).json({ message: 'Vehicle already exists' });
+      return ResponseHandler.badRequest(res, 'Vehicle already exists')
     }
 
     const validation = validateInput(req.body);
     if (!validation.isValid) {
-      res.status(400).json({ message: validation.message });
-      return;
+     return ResponseHandler.badRequest(res, 'Validation failed', validation.message)
     }
 
     req.vehicle = {
@@ -72,9 +72,7 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
     next();
   } catch (error: any) {
     console.error('Vehicle validation middleware error:', error);
-    res.status(500).json({
-      message: 'Internal server error',
-    });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
@@ -87,13 +85,12 @@ export const validateInputVehicleUpdate = async (req: Request, res: Response, ne
     const vehicle = await vehicleService.getVehicleById(parseInt(id));
 
     if (!vehicle) {
-      return res.status(404).json({ message: 'Vehicle not found' });
+      return ResponseHandler.notFound(res, 'Vehicle not found')
     }
 
     const validation = validateInput(req.body);
     if (!validation.isValid) {
-      res.status(400).json({ message: validation.message });
-      return;
+      return ResponseHandler.badRequest(res, 'Validation failed', validation.message)
     }
 
     req.vehicle = {
@@ -107,8 +104,6 @@ export const validateInputVehicleUpdate = async (req: Request, res: Response, ne
     next();
   } catch (error: any) {
     console.error('Vehicle validation middleware error:', error);
-    res.status(500).json({
-      message: 'Internal server error',
-    });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };

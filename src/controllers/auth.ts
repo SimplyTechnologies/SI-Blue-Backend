@@ -29,7 +29,7 @@ const registerUser = async (req: Request, res: Response) => {
     const registerUser = req.user as RegisterInput;
 
     const role = registerUser.role as UserRoleType;
-
+    
     if (!role) {
       registerUser.role = 'user';
     }
@@ -37,8 +37,10 @@ const registerUser = async (req: Request, res: Response) => {
 
       return ResponseHandler.badRequest(res, 'Invalid role')
     }
+  
 
     const user = await userService.createUser(registerUser);
+   
     ResponseHandler.created(res, 'User registered successfully', {user})
   } catch (err: unknown) {
     if (err instanceof Error) {
@@ -70,7 +72,7 @@ const refreshToken = (req: Request, res: Response) => {
     const user = req.user as User;
 
     if (!user || !user.isActive) {
-      return res.status(401).json({ message: 'Unauthorized' });
+      return ResponseHandler.unauthorized(res, 'Unauthorized')
     }
 
     const accessToken = generateAccessToken(user);
