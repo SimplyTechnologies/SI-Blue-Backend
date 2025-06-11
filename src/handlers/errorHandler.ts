@@ -44,6 +44,14 @@ export class ResponseHandler {
       message,
     });
   };
+
+  static conflict = (res: Response, message = 'Conflict') => {
+    return res.status(409).json({
+      success: false,
+      message,
+    });
+  };
+
   static serverError = (res: Response, message = 'Internal server error') => {
     return res.status(500).json({
       success: false,
@@ -51,4 +59,3 @@ export class ResponseHandler {
     });
   };
 }
-

@@ -32,4 +32,6 @@ router.post('/decode/vin', decodeVin);
 
 router.delete('/vehicle/:id', vehicleController.deleteVehicle);
 
+router.post('/unassign', vehicleController.unassignVehicle);
+
 export default router;

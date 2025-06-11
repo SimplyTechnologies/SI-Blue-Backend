@@ -20,8 +20,8 @@ interface VehicleAttributes {
   location: LocationData;
   userId?: number;
   modelId: number;
-  customerId?: number;
-  assignedDate?: Date;
+  customerId?: number | null;
+  assignedDate?: Date | null;
   favorite?: User[];
   model?: CarModel;
 }
