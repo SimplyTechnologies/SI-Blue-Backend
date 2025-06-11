@@ -11,7 +11,7 @@ const createCustomer = async (req: Request, res: Response) => {
 
       const updatedCount: number = await vehicleService.updateVehicleByCustomerId(customerId, vehicleId);
       if (updatedCount === 0) {
-        return ResponseHandler.serverError(res, 'Failed to update vehicle')
+        return ResponseHandler.serverError(res, 'Failed to update vehicle');
       }
 
       const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
@@ -21,16 +21,16 @@ const createCustomer = async (req: Request, res: Response) => {
       );
 
       if (!formattedVehicle) {
-        return res.status(404).json({ message: 'Vehicle not found after update' });
+        return ResponseHandler.notFound(res, 'Vehicle not found after update');
       }
-      return ResponseHandler.success(res, 'Vehicle updated successfully for existing customer',
-                                     {vehicle: formattedVehicle}
-      )
+      return ResponseHandler.success(res, 'Vehicle updated successfully for existing customer', {
+        vehicle: formattedVehicle,
+      });
     }
 
     const customer = req.customer;
     if (!customer) {
-      return ResponseHandler.badRequest(res, 'Customer data missing')
+      return ResponseHandler.badRequest(res, 'Customer data missing');
     }
 
     const newCustomer = await customerService.createCustomer(customer);
@@ -47,11 +47,10 @@ const createCustomer = async (req: Request, res: Response) => {
     if (!formattedVehicle) {
       return res.status(404).json({ message: 'Vehicle not found after assignment' });
     }
-    ResponseHandler.created(res, 'Customer created successfully', {vehicle: formattedVehicle})
-
+    ResponseHandler.created(res, 'Customer created successfully', { vehicle: formattedVehicle });
   } catch (err) {
     console.error(err);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 const getCustomer = async (req: Request, res: Response) => {
@@ -59,18 +58,18 @@ const getCustomer = async (req: Request, res: Response) => {
     const { email } = req.query;
 
     if (!email) {
-      return ResponseHandler.badRequest(res, 'Email is required')
+      return ResponseHandler.badRequest(res, 'Email is required');
     }
 
     const customers = await customerService.searchDatabase(email as string);
 
     if (!customers) {
-      return ResponseHandler.notFound(res, 'Customer not found')
+      return ResponseHandler.notFound(res, 'Customer not found');
     }
 
-    ResponseHandler.success(res,'Customers data retrieved successfully', {customers})
+    ResponseHandler.success(res, 'Customers data retrieved successfully', { customers });
   } catch (error: any) {
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -78,16 +77,16 @@ const getCustomerByEmail = async (req: Request, res: Response) => {
   try {
     const email = req.query.email as string;
     if (!email) {
-      return ResponseHandler.badRequest(res, 'Email is missing')
+      return ResponseHandler.badRequest(res, 'Email is missing');
     }
     const customer = await customerService.getCustomerByEmail(email);
     if (!customer) {
-      return ResponseHandler.notFound(res, 'Customer not found')
+      return ResponseHandler.notFound(res, 'Customer not found');
     }
-    ResponseHandler.success(res, 'Customer data retrieved successfully', {customer})
+    ResponseHandler.success(res, 'Customer data retrieved successfully', { customer });
   } catch (err) {
     console.error(err);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -101,33 +100,32 @@ const getCustomers = async (req: Request, res: Response) => {
       page: pageNum,
       offset: limit,
     });
-    ResponseHandler.success(res, 'Customers data retrieved successfully', result)
+    ResponseHandler.success(res, 'Customers data retrieved successfully', result);
   } catch (err) {
     console.error(err);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
 const deleteCustomer = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    console.log();
     if (!id) {
-      return res.status(400).json({ message: 'Bad request' });
+      return ResponseHandler.badRequest(res);
     }
     const customer = await customerService.findCustomerById(parseInt(id));
     if (!customer) {
-      return res.status(404).json({ message: 'Customer not found' });
+      return ResponseHandler.notFound(res, 'Customer not found');
     }
     const vehicles = await vehicleService.getVehiclesByCustomerId(customer.id);
     if (vehicles.length > 0) {
-      return res.status(409).json({ message: `Customer can't be deleted` });
+      return ResponseHandler.conflict(res, `Customer can't be deleted`);
     }
     await customerService.deleteCustomer(parseInt(id));
     res.status(204).send();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Failed to delete customer' });
+    ResponseHandler.serverError(res, 'Failed to delete customer');
   }
 };
 

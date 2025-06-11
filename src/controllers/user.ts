@@ -65,7 +65,7 @@ const addNewUser = async (req: Request, res: Response) => {
     console.error('Error in addNewUser:', error);
 
     if (error instanceof Error) {
-      return res.status(400).json({ message: error.message });
+      return ResponseHandler.badRequest(res, error.message);
     }
     ResponseHandler.serverError(res, 'Failed to send activation email')
   }
@@ -106,7 +106,7 @@ const getUsers = async (req: Request, res: Response) => {
       page: pageNum,
       offset: limit,
     });
-    res.status(200).json(result);
+    ResponseHandler.success(res, 'Users retrieved successfully', result);
   } catch (err) {
     console.log(err);
   }

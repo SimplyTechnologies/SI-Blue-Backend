@@ -64,6 +64,7 @@ const getCustomers = async (options: { search?: string; page?: number; offset?: 
         as: 'vehicles',
         required: false,
         attributes: ['id', 'vin', 'year', 'assignedDate'],
+        order: [['assignedDate', 'DESC']],
         include: [
           {
             model: CarModel,

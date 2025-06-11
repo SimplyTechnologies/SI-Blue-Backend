@@ -32,16 +32,16 @@ const PAGE_SIZE = 25;
 const createVehicle = async (req: Request, res: Response) => {
   try {
     if (!req.vehicle) {
-     return ResponseHandler.badRequest(res, 'Vehicle data')
+      return ResponseHandler.badRequest(res, 'Vehicle data');
     }
 
     await vehicleService.createVehicle(req.vehicle);
 
-    ResponseHandler.created(res, 'Vehicle created successfully')
+    ResponseHandler.created(res, 'Vehicle created successfully');
   } catch (error: unknown) {
     console.error('Error creating vehicle:', error);
 
-    ResponseHandler.serverError(res, 'Failed to create vehicle')
+    ResponseHandler.serverError(res, 'Failed to create vehicle');
   }
 };
 
@@ -51,8 +51,7 @@ const getVehicleById = async (req: Request, res: Response) => {
   try {
     const vehicleId = req.params.id;
     if (!vehicleId) {
-      return ResponseHandler.badRequest(res, 'Vehicle Id missing')
-      
+      return ResponseHandler.badRequest(res, 'Vehicle Id missing');
     }
 
     const vehicle: SerializedVehicle | null = await serializeVehicleFromService(
@@ -62,12 +61,12 @@ const getVehicleById = async (req: Request, res: Response) => {
     );
 
     if (!vehicle) {
-      return ResponseHandler.notFound(res,'Vehicle not found')
-    } 
+      return ResponseHandler.notFound(res, 'Vehicle not found');
+    }
 
-    ResponseHandler.success(res, 'Vehicle retrieved successfully', vehicle)
+    ResponseHandler.success(res, 'Vehicle retrieved successfully', vehicle);
   } catch (error: unknown) {
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -82,7 +81,7 @@ const getVehicles = async (req: Request, res: Response) => {
     const offsetNum = (pageNum - 1) * limit;
 
     if (availability && !['Sold', 'In Stock'].includes(availability as string)) {
-      res.json({
+      ResponseHandler.success(res, 'Availability not found', {
         vehicles: [],
         total: 0,
         page: pageNum,
@@ -146,7 +145,7 @@ const getVehicles = async (req: Request, res: Response) => {
               }
             : null,
       }));
-      res.json({
+      ResponseHandler.success(res, 'Vehicles retrieved successfully', {
         vehicles: result,
         previousId: pageNum === 1 ? null : pageNum - 1,
         nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
@@ -187,13 +186,13 @@ const getVehicles = async (req: Request, res: Response) => {
           : null,
     }));
 
-    res.json({
+    ResponseHandler.success(res, 'Vehicles retrieved successfully', {
       vehicles: result,
       previousId: pageNum === 1 ? null : pageNum - 1,
       nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
     });
   } catch (err) {
-  ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -252,7 +251,7 @@ const exportVehiclesCsv = async (req: Request, res: Response) => {
     csvRows.forEach(row => csvStream.write(row));
     csvStream.end();
   } catch (err) {
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -260,15 +259,14 @@ const getAllVehicleLocations = async (req: Request, res: Response) => {
   try {
     const { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount } =
       await vehicleService.getAllVehicleLocationsAndCounts();
-    res.json({
+    ResponseHandler.success(res, 'Vehicle locations retrieved successfully', {
       vehicles: vehicleLocations,
       totalCount,
       totalSoldVehicles,
       totalCustomerCount,
     });
   } catch (error) {
-    ResponseHandler.serverError(res, 'Failed to fetch vehicle locations')
-    
+    ResponseHandler.serverError(res, 'Failed to fetch vehicle locations');
   }
 };
 
@@ -276,27 +274,27 @@ export const deleteVehicle = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return ResponseHandler.badRequest(res, 'Id missing')
+      return ResponseHandler.badRequest(res, 'Id missing');
     }
     const vehicle = await vehicleService.getVehicleById(parseInt(id));
     if (!vehicle) {
-      return ResponseHandler.notFound(res, 'Vehicle not found')
+      return ResponseHandler.notFound(res, 'Vehicle not found');
     }
     if (vehicle.customerId) {
-      return ResponseHandler.badRequest(res, `Vehicle can't be deleted`)
+      return ResponseHandler.badRequest(res, `Vehicle can't be deleted`);
     }
 
     await vehicleService.deleteVehicle(parseInt(id));
-    ResponseHandler.success(res, 'Vehicle deleted successfully')
+    ResponseHandler.success(res, 'Vehicle deleted successfully');
   } catch (error) {
-    ResponseHandler.serverError(res, 'Failed to delete vehicle')
+    ResponseHandler.serverError(res, 'Failed to delete vehicle');
   }
 };
 
 const updateVehicle = async (req: Request, res: Response) => {
   try {
     if (!req.vehicle) {
-      return ResponseHandler.badRequest(res, 'Vehicle data is missing')
+      return ResponseHandler.badRequest(res, 'Vehicle data is missing');
     }
 
     const vehicleId = parseInt(req.params.id);
@@ -308,11 +306,11 @@ const updateVehicle = async (req: Request, res: Response) => {
       req.user as number,
     );
 
-    ResponseHandler.success(res, 'Updated successfully', formattedVehicle as SerializedVehicle)
+    ResponseHandler.success(res, 'Updated successfully', formattedVehicle as SerializedVehicle);
   } catch (error: unknown) {
     console.error('Error updating vehicle:', error);
 
-    ResponseHandler.serverError(res, 'Failed to update vehicle')
+    ResponseHandler.serverError(res, 'Failed to update vehicle');
   }
 };
 
@@ -320,33 +318,33 @@ const unassignVehicle = async (req: Request, res: Response) => {
   try {
     const { vehicleId, customerId, unassignAll } = req.body;
     if (!customerId) {
-      return res.status(400).json({ message: 'Customer ID is required' });
+      return ResponseHandler.badRequest(res, 'Customer ID is required');
     }
 
     const customer = await customerService.findCustomerById(customerId);
     if (!customer) {
-      return res.status(404).json({ message: 'Customer not found' });
+      return ResponseHandler.notFound(res, 'Customer not found');
     }
 
     if (unassignAll) {
       await vehicleService.unassignVehicle(undefined, customerId);
-      return res.status(200).json({ message: 'All vehicles unassigned successfully' });
+      return ResponseHandler.success(res, 'All vehicles unassigned successfully');
     }
 
     if (!vehicleId) {
-      return res.status(400).json({ message: 'Vehicle ID is required to unassign a single vehicle' });
+      return ResponseHandler.badRequest(res, 'Vehicle ID is required to unassign a single vehicle');
     }
 
     const vehicle = await vehicleService.getVehicleById(vehicleId);
     if (!vehicle) {
-      return res.status(404).json({ message: 'Vehicle not found' });
+      return ResponseHandler.notFound(res, 'Vehicle not found');
     }
 
     await vehicleService.unassignVehicle(vehicleId);
-    return res.status(200).json({ message: 'Vehicle unassigned successfully' });
+    return ResponseHandler.success(res, 'Vehicle unassigned successfully');
   } catch (error) {
     console.error('Error unassigning vehicle:', error);
-    res.status(500).json({ message: 'Failed to unassign vehicle' });
+    ResponseHandler.serverError(res, 'Failed to unassign vehicle');
   }
 };
 
