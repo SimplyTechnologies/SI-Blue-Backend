@@ -11,11 +11,6 @@ interface NHTSAResponse {
   Results: VehicleResult[];
 }
 
-interface VehicleInfo {
-  make: string | null;
-  model: string | null;
-  year: string | null;
-}
 
 const BASE_URL = process.env.BASE_URL as string;
 

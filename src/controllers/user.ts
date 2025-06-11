@@ -9,6 +9,7 @@ import { InputUser } from '../services/user';
 import { loadEmailTemplate } from '../services/emailTemplate';
 import { SerializedAccountActivateData, SerializedUser, serializeUser, serializeAccountActivateData } from '../serializer/userSerializer';
 import { ResponseHandler } from '../handlers/errorHandler';
+import { number } from 'zod';
 declare global {
   namespace Express {
     interface Request {
@@ -98,14 +99,18 @@ const getUserById = async (req: Request, res: Response) => {
 
 const getUsers = async (req: Request, res: Response) => {
   try {
+    const currentUserId = req.userId as number
     const { search, page, offset } = req.query;
     const pageNum = page ? Math.max(Number(page), 1) : 1;
     const limit = offset ? Number(offset) : 25;
     const result = await userService.getAllUsers({
       search: search as string,
       page: pageNum,
-      offset: limit,
-    });
+      offset: limit
+    }, currentUserId);
+   
+     
+
     ResponseHandler.success(res, 'Users retrieved successfully', result)
   } catch (err) {
     console.log(err);
