@@ -3,6 +3,7 @@ import { format } from 'fast-csv';
 import { vehicleService } from '../services';
 import favoritesService from '../services/favorite';
 import { SerializedVehicle, serializeVehicleFromService } from '../serializer/vehicleSerializer';
+import { ResponseHandler } from '../handlers/errorHandler';
 
 declare global {
   namespace Express {
@@ -31,23 +32,16 @@ const PAGE_SIZE = 25;
 const createVehicle = async (req: Request, res: Response) => {
   try {
     if (!req.vehicle) {
-      res.status(400).json({
-        message: 'Vehicle data is missing.',
-      });
-      return;
+     return ResponseHandler.badRequest(res, 'Vehicle data')
     }
 
     await vehicleService.createVehicle(req.vehicle);
 
-    res.status(201).json({
-      message: 'Vehicle created successfully',
-    });
+    ResponseHandler.created(res, 'Vehicle created successfully')
   } catch (error: unknown) {
     console.error('Error creating vehicle:', error);
 
-    res.status(500).json({
-      message: 'Failed to create vehicle',
-    });
+    ResponseHandler.serverError(res, 'Failed to create vehicle')
   }
 };
 
@@ -57,7 +51,8 @@ const getVehicleById = async (req: Request, res: Response) => {
   try {
     const vehicleId = req.params.id;
     if (!vehicleId) {
-      return res.status(400).json({ message: 'Vehicle ID missing' });
+      return ResponseHandler.badRequest(res, 'Vehicle Id missing')
+      
     }
 
     const vehicle: SerializedVehicle | null = await serializeVehicleFromService(
@@ -67,17 +62,12 @@ const getVehicleById = async (req: Request, res: Response) => {
     );
 
     if (!vehicle) {
-      return res.status(404).json({ message: 'Vehicle not found' });
-    }
+      return ResponseHandler.notFound(res,'Vehicle not found')
+    } 
 
-    res.status(200).json({
-      vehicle,
-    });
+    ResponseHandler.success(res, 'Vehicle retrieved successfully', vehicle)
   } catch (error: unknown) {
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get vehicle by id',
-    });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
@@ -203,7 +193,7 @@ const getVehicles = async (req: Request, res: Response) => {
       nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
     });
   } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
+  ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
@@ -262,7 +252,7 @@ const exportVehiclesCsv = async (req: Request, res: Response) => {
     csvRows.forEach(row => csvStream.write(row));
     csvStream.end();
   } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
@@ -277,7 +267,8 @@ const getAllVehicleLocations = async (req: Request, res: Response) => {
       totalCustomerCount,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch vehicle locations' });
+    ResponseHandler.serverError(res, 'Failed to fetch vehicle locations')
+    
   }
 };
 
@@ -285,30 +276,27 @@ export const deleteVehicle = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     if (!id) {
-      return res.status(400).json({ message: 'Bad request' });
+      return ResponseHandler.badRequest(res, 'Id missing')
     }
     const vehicle = await vehicleService.getVehicleById(parseInt(id));
     if (!vehicle) {
-      return res.status(404).json({ message: 'Vehicle not found' });
+      return ResponseHandler.notFound(res, 'Vehicle not found')
     }
     if (vehicle.customerId) {
-      return res.status(409).json({ message: `Vehicle can't be deleted` });
+      return ResponseHandler.badRequest(res, `Vehicle can't be deleted`)
     }
 
     await vehicleService.deleteVehicle(parseInt(id));
-    res.status(204).send();
+    ResponseHandler.success(res, 'Vehicle deleted successfully')
   } catch (error) {
-    res.status(500).json({ message: 'Failed to delete vehicle' });
+    ResponseHandler.serverError(res, 'Failed to delete vehicle')
   }
 };
 
 const updateVehicle = async (req: Request, res: Response) => {
   try {
     if (!req.vehicle) {
-      res.status(400).json({
-        message: 'Vehicle data is missing.',
-      });
-      return;
+      return ResponseHandler.badRequest(res, 'Vehicle data is missing')
     }
 
     const vehicleId = parseInt(req.params.id);
@@ -320,13 +308,11 @@ const updateVehicle = async (req: Request, res: Response) => {
       req.user as number
     );
 
-    res.status(200).json(formattedVehicle);
+    ResponseHandler.success(res, 'Updated successfully', formattedVehicle as SerializedVehicle)
   } catch (error: unknown) {
     console.error('Error updating vehicle:', error);
 
-    res.status(500).json({
-      message: 'Failed to update vehicle',
-    });
+    ResponseHandler.serverError(res, 'Failed to update vehicle')
   }
 }
 

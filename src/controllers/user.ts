@@ -137,10 +137,13 @@ const updateUser = async (req: Request, res: Response) => {
 const deleteInactiveUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    if(!id) {
+     return ResponseHandler.badRequest(res, 'id missing')
+    }
     const user = (await userService.getUserById(parseInt(id))) as User;
-
+    
     if (!user) {
-      ResponseHandler.notFound(res, 'User not found')
+     return ResponseHandler.notFound(res, 'User not found')
     }
 
     const deleted = await userService.softDeleteUser(user.id);

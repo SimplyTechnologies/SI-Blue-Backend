@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { customerService, vehicleService } from '../services';
 import { SerializedVehicle, serializeVehicleFromService } from '../serializer/vehicleSerializer';
+import { ResponseHandler } from '../handlers/errorHandler';
 
 const createCustomer = async (req: Request, res:Response) => {
   try {
@@ -10,7 +11,7 @@ const createCustomer = async (req: Request, res:Response) => {
 
       const updatedCount: number = await vehicleService.updateVehicleByCustomerId(customerId, vehicleId);
       if (updatedCount === 0) {
-        return res.status(500).json({ message: 'Failed to update vehicle' });
+        return ResponseHandler.serverError(res, 'Failed to update vehicle')
       }
 
       const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
@@ -22,16 +23,14 @@ const createCustomer = async (req: Request, res:Response) => {
       if (!formattedVehicle) {
         return res.status(404).json({ message: 'Vehicle not found after update' });
       }
-
-      return res.status(200).json({
-        vehicle: formattedVehicle,
-        message: 'Vehicle updated successfully for existing customer'
-      });
+      return ResponseHandler.success(res, 'Vehicle updated successfully for existing customer',
+                                     {vehicle: formattedVehicle}
+      )
     }
 
     const customer = req.customer;
     if (!customer) {
-      return res.status(400).json({ message: 'Customer data missing' });
+      return ResponseHandler.badRequest(res, 'Customer data missing')
     }
 
     const newCustomer = await customerService.createCustomer(customer);
@@ -49,14 +48,11 @@ const createCustomer = async (req: Request, res:Response) => {
     if (!formattedVehicle) {
       return res.status(404).json({ message: 'Vehicle not found after assignment' });
     }
+    ResponseHandler.created(res, 'Customer created successfully', {vehicle: formattedVehicle})
 
-    res.status(201).json({
-      message: 'Customer created successfully',
-      vehicle: formattedVehicle,
-    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 const getCustomer = async (req: Request, res: Response) => {
@@ -64,18 +60,18 @@ const getCustomer = async (req: Request, res: Response) => {
     const { email } = req.query;
 
     if (!email) {
-      return res.status(400).json({ error: 'Email required' });
+      return ResponseHandler.badRequest(res, 'Email is required')
     }
 
     const customers = await customerService.searchDatabase(email as string);
 
     if (!customers) {
-      return res.status(404).json({ error: 'Customer not found' });
+      return ResponseHandler.notFound(res, 'Customer not found')
     }
 
-    res.json({ customers });
+    ResponseHandler.success(res,'Customers data retrieved successfully', {customers})
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
@@ -83,16 +79,16 @@ const getCustomerByEmail = async (req: Request, res: Response) => {
   try {
     const email = req.query.email as string;
     if (!email) {
-      return res.status(400).json({ message: 'Email missing' });
+      return ResponseHandler.badRequest(res, 'Email is missing')
     }
     const customer = await customerService.getCustomerByEmail(email);
     if (!customer) {
-      return res.status(404).json({ message: 'Customer not found' });
+      return ResponseHandler.notFound(res, 'Customer not found')
     }
-    res.status(200).json(customer);
+    ResponseHandler.success(res, 'Customer data retrieved successfully', {customer})
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
@@ -106,10 +102,10 @@ const getCustomers = async (req: Request, res: Response) => {
       page: pageNum,
       offset: limit,
     });
-    res.status(200).json(result);
+    ResponseHandler.success(res, 'Customers data retrieved successfully', result)
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
