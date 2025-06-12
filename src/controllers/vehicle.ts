@@ -57,7 +57,7 @@ const getVehicleById = async (req: Request, res: Response) => {
     const vehicle: SerializedVehicle | null = await serializeVehicleFromService(
       Number(vehicleId),
       vehicleService,
-      req.userId,
+      req.user?.id,
     );
 
     if (!vehicle) {
@@ -103,9 +103,9 @@ const getVehicles = async (req: Request, res: Response) => {
 
     let favoriteVehicleIds: Set<number> = new Set();
     let favorites: any[] = [];
-    if (req.user) {
+    if (req.user?.id) {
       try {
-        favorites = await favoritesService.getFavoritesByUserId(Number(req.user));
+        favorites = await favoritesService.getFavoritesByUserId(Number(req.user.id));
         favoriteVehicleIds = new Set(favorites.map((fav: any) => fav.id));
       } catch {}
     }
@@ -213,8 +213,8 @@ const exportVehiclesCsv = async (req: Request, res: Response) => {
     else if (availability === 'In Stock') sold = false;
 
     let rows: any[] = [];
-    if (favorite === '1' && req.user) {
-      const favorites = await favoritesService.getFavoritesByUserId(Number(req.user));
+    if (favorite === '1' && req.user?.id) {
+      const favorites = await favoritesService.getFavoritesByUserId(Number(req.user.id));
       const favoriteVehicleIds = new Set(favorites.map((fav: any) => fav.id));
 
       const allVehicles = await vehicleService.getVehicles({
@@ -303,7 +303,7 @@ const updateVehicle = async (req: Request, res: Response) => {
     const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
       vehicleId,
       vehicleService,
-      req.user as number,
+      req.user?.id as number,
     );
 
     ResponseHandler.success(res, 'Updated successfully', formattedVehicle as SerializedVehicle);

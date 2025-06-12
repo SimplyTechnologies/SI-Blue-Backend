@@ -17,7 +17,7 @@ const createCustomer = async (req: Request, res: Response) => {
       const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
         vehicleId,
         vehicleService,
-        req.user as number,
+        req.user?.id as number,
       );
 
       if (!formattedVehicle) {
@@ -38,13 +38,13 @@ const createCustomer = async (req: Request, res: Response) => {
     if(!newCustomer?.id){
       throw new Error('Customer Id missing')
     }
-    
+
     await vehicleService.updateVehicleByCustomerId(newCustomer.id, vehicleId);
 
     const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
       vehicleId,
       vehicleService,
-      req.user as number,
+      req.user?.id as number,
     );
 
     if (!formattedVehicle) {

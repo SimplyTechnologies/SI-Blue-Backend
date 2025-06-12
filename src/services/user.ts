@@ -85,13 +85,13 @@ const getAllUsers = async (options: { search?: string; page?: number; offset?: n
     order: [['id', 'DESC']],
   });
   const data = result.filter(u => u.dataValues.id != currentUserId)
-  
+
   return await { users: data, total, page, pageSize: limit, totalPages: Math.ceil(total / limit) };
 };
 
 const updateUser = async (
   id: number,
-  updatedData: Partial<Pick<User, 'firstName' | 'lastName' | 'phoneNumber' | 'password'>>,
+  updatedData: Partial<Pick<User, 'firstName' | 'lastName' | 'phoneNumber' | 'password' | 'tokenInvalidatedAt'>>,
 ) => {
   try {
     const user = await User.findByPk(id);
@@ -100,6 +100,7 @@ const updateUser = async (
     if (updatedData.lastName !== undefined) user.lastName = updatedData.lastName;
     if (updatedData.phoneNumber !== undefined) user.phoneNumber = updatedData.phoneNumber;
     if (updatedData.password !== undefined) user.password = updatedData.password;
+    if (updatedData.tokenInvalidatedAt !== undefined) user.tokenInvalidatedAt = updatedData.tokenInvalidatedAt;
     await user.save();
 
     return user.dataValues;
@@ -135,6 +136,7 @@ const softDeleteUser = async (userId: number) => {
     }
     user.isActive = false;
     user.password = null;
+    user.tokenInvalidatedAt = new Date();
     await user.save();
     const deletedRows = await User.destroy({ where: { id: userId } });
     return deletedRows > 0;

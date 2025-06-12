@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { userService } from '../services';
+import { forceLogoutUser } from '../index';
 import { Request, Response } from 'express';
 import { User } from '../models/usersModel';
 import { generateTokenForAccountActivation } from '../helpers/tokenUtils';
@@ -9,11 +10,11 @@ import { InputUser } from '../services/user';
 import { loadEmailTemplate } from '../services/emailTemplate';
 import { SerializedAccountActivateData, SerializedUser, serializeUser, serializeAccountActivateData } from '../serializer/userSerializer';
 import { ResponseHandler } from '../handlers/errorHandler';
-import { number } from 'zod';
+
 declare global {
   namespace Express {
     interface Request {
-      pendingUser?: User;
+      pendingUser?: InputUser;
     }
   }
 }
@@ -99,7 +100,7 @@ const getUserById = async (req: Request, res: Response) => {
 
 const getUsers = async (req: Request, res: Response) => {
   try {
-    const currentUserId = req.userId as number
+    const currentUserId = req.user?.id as number
     const { search, page, offset } = req.query;
     const pageNum = page ? Math.max(Number(page), 1) : 1;
     const limit = offset ? Number(offset) : 25;
@@ -108,8 +109,8 @@ const getUsers = async (req: Request, res: Response) => {
       page: pageNum,
       offset: limit
     }, currentUserId);
-   
-     
+
+
 
     ResponseHandler.success(res, 'Users retrieved successfully', result)
   } catch (err) {
@@ -119,7 +120,7 @@ const getUsers = async (req: Request, res: Response) => {
 
 const updateUser = async (req: Request, res: Response) => {
   try {
-    const userId = req.userId;
+    const userId = req.user?.id;
     if (!userId) {
 
      return ResponseHandler.unauthorized(res, 'Unauthorized')
@@ -146,7 +147,7 @@ const deleteInactiveUser = async (req: Request, res: Response) => {
      return ResponseHandler.badRequest(res, 'id missing')
     }
     const user = (await userService.getUserById(parseInt(id))) as User;
-    
+
     if (!user) {
      return ResponseHandler.notFound(res, 'User not found')
     }
@@ -164,7 +165,7 @@ const deleteInactiveUser = async (req: Request, res: Response) => {
     });
 
     await sendEmail(user.email, emailSubject, emailHtml);
-
+    forceLogoutUser(user.id);
     ResponseHandler.success(res, 'User deleted successfully')
   } catch (err) {
     console.error('Error in deleteInactiveUser:', err);
