@@ -60,14 +60,14 @@ export const authenticateRefreshToken = (req: Request, res: Response, next: Next
   })(req, res, next);
 };
 
-export const requireRole = (...roles: string[]) => {
+export const requireRole = (userRole:string) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
      return  ResponseHandler.unauthorized(res, 'Authentication required')
     }
-    const role = { ...req.user } as string;
+    const {role} = req.user  as User;
 
-    if (!roles.includes(role)) {
+    if (role != userRole) {
       return ResponseHandler.forbidden(res, 'Insufficient permission')
     }
 
