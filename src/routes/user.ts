@@ -5,11 +5,11 @@ import { authenticateToken, requireAdmin } from '../middlewares/authMiddleware';
 
 const router = Router();
 
-router.post('/add-user', pendingUserDataValidateUserData, userController.addNewUser);
+router.post('/add-user',authenticateToken, pendingUserDataValidateUserData, userController.addNewUser);
 
 router.put('/update-user', authenticateToken, userController.updateUser);
 
-router.delete('/deactivate-user/:id',requireAdmin, userController.deleteInactiveUser);
+router.delete('/deactivate-user/:id',authenticateToken,requireAdmin, userController.deleteInactiveUser);
 router.get('/:userId', authenticateToken, userController.getUserById);
 
 router.get('', authenticateToken, userController.getUsers);
