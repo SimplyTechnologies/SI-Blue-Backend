@@ -6,12 +6,12 @@ import { ResponseHandler } from '../handlers/errorHandler';
 
 export const createFavorite = async (req: Request, res: Response) => {
   try {
-    const userId = req.userId;
+    const userId = req.user?.id;
     const vehicleId = req.body.vehicleId;
 
     if (!userId || !vehicleId) {
       return ResponseHandler.badRequest(res, 'UserId and vehicleId are required')
-     
+
     }
 
     const vehicle = await vehicleService.getVehicleById(vehicleId);
@@ -66,7 +66,7 @@ export const getFavoritesByUserId = async (req: Request, res: Response) => {
 
 export const deleteFavoriteById = async (req: Request, res: Response) => {
   try {
-    const userId = req.userId;
+    const userId = req.user?.id;
     const { vehicleId } = req.params;
 
     if (!userId || !vehicleId) {
