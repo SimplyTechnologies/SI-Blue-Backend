@@ -33,9 +33,9 @@ const createVehicle = async (vehicleData: CreateVehicleData) => {
       location: vehicleData.location,
     });
     return savedVehicle.dataValues;
-  } catch (error: any) {
-    console.log(error.message);
-    throw new Error('Failed to create vehicle');
+  } catch (err: any) {
+    console.log('Failed to create vehicle', err);
+    throw err;
   }
 };
 
@@ -94,8 +94,9 @@ const getVehicleByVin = async (vin: string) => {
       where: { vin },
     });
     return vehicle?.dataValues || null;
-  } catch (error) {
-    throw new Error('Failed to fetch vehicle');
+  } catch (err) {
+    console.error('Failed to fetch vehicle', err);
+    throw err;
   }
 };
 
@@ -120,9 +121,9 @@ const getVehicleById = async (id: number, userId?: number) => {
     if (!vehicle) return null;
 
     return vehicle.dataValues;
-  } catch (error) {
-    console.error(error);
-    throw new Error('Failed to fetch vehicle');
+  } catch (err) {
+    console.error('Failed to fetch vehicle', err);
+    throw err;
   }
 };
 
@@ -155,8 +156,8 @@ const updateVehicleByCustomerId = async (customerId: number, vehicleId: number) 
 
     return updatedCount;
   } catch (err: any) {
-    console.error('Error in updateVehicleByCustomerId:', err.message);
-    throw new Error('Failed to update vehicle');
+    console.error('Error in updateVehicleByCustomerId:', err);
+    throw err;
   }
 };
 
@@ -204,41 +205,56 @@ const getAllVehicleLocationsAndCounts = async () => {
 };
 
 const deleteVehicle = async (id: number) => {
-  const vehicle = await Vehicle.findByPk(id);
-  if (vehicle) {
-    return await vehicle.destroy();
+  try {
+    const vehicle = await Vehicle.findByPk(id);
+    if (vehicle) {
+      return await vehicle.destroy();
+    }
+  } catch (err) {
+    console.error('Fail to delete vehicle', err);
+    throw err;
   }
 };
 
 const updateVehicle = async (id: number, vehicleData: CreateVehicleData) => {
-  const [updatedCount] = await Vehicle.update({ ...vehicleData, assignedDate: new Date() }, { where: { id: id } });
-  if (updatedCount === 0) {
-    throw new Error('Vehicle update failed - no rows affected');
-  }
+  try {
+    const [updatedCount] = await Vehicle.update({ ...vehicleData, assignedDate: new Date() }, { where: { id: id } });
+    if (updatedCount === 0) {
+      throw new Error('Vehicle update failed - no rows affected');
+    }
 
-  return updatedCount;
+    return updatedCount;
+  } catch (err) {
+    console.error('Failed to update vehicle', err);
+    throw err;
+  }
 };
 
 const unassignVehicle = async (vehicleId?: number, customerId?: number) => {
-  if (customerId && !vehicleId) {
-    const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, { where: { customerId } });
-    if (updatedCount === 0) {
-      throw new Error('No vehicles were unassigned');
+  try {
+    if (customerId && !vehicleId) {
+      const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, { where: { customerId } });
+      if (updatedCount === 0) {
+        throw new Error('No vehicles were unassigned');
+      }
+      return updatedCount;
     }
+
+    if (!vehicleId) {
+      throw new Error('Vehicle ID is required when unassigning a single vehicle');
+    }
+
+    const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, { where: { id: vehicleId } });
+
+    if (updatedCount === 0) {
+      throw new Error('Vehicle update failed - no rows affected');
+    }
+
     return updatedCount;
+  } catch (err) {
+    console.error('Failed to unassign vehicle', err);
+    throw err;
   }
-
-  if (!vehicleId) {
-    throw new Error('Vehicle ID is required when unassigning a single vehicle');
-  }
-
-  const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, { where: { id: vehicleId } });
-
-  if (updatedCount === 0) {
-    throw new Error('Vehicle update failed - no rows affected');
-  }
-
-  return updatedCount;
 };
 
 const getVehiclesByCustomerId = async (customerId: number) => {

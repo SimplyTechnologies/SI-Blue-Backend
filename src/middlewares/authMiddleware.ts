@@ -118,21 +118,22 @@ export const validateLogin = async (req: Request, res: Response, next: NextFunct
     const { email, password } = result.data;
 
     const user = await userService.getUserByEmail(email);
+    
    
    
     if (!user) {
-      return ResponseHandler.unauthorized(res,'Invalid credentials' );
+      return ResponseHandler.unauthorized(res,'Invalid email or password' );
     }
 
     if (!user.isActive) {
-      return ResponseHandler.unauthorized(res,'Invalid credentials' );
+      return ResponseHandler.unauthorized(res,'Invalid email or password' );
     }
     
 
     const isValidPassword = await bcrypt.compare(password, user.password as string);
-    
+   
     if (!isValidPassword) {
-      return ResponseHandler.unauthorized(res,'Invalid credentials' );
+      return ResponseHandler.unauthorized(res,'Invalid email or password' );
     }
 
     req.user = user;

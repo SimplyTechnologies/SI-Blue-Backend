@@ -113,8 +113,4 @@ export const serializeVehicleFromService = async (
   }
 };
 
-
-
-
-
 export type { SerializedVehicle, RawVehicle };
