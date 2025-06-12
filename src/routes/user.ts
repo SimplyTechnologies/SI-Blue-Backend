@@ -12,7 +12,7 @@ router.put('/update-user', authenticateToken, userController.updateUser);
 router.delete('/deactivate-user/:id',authenticateToken,requireAdmin, userController.deleteInactiveUser);
 router.get('/:userId', authenticateToken, userController.getUserById);
 
-router.get('', authenticateToken, userController.getUsers);
+router.get('', authenticateToken,requireAdmin, userController.getUsers);
 router.get('/user/:token', userController.getUserById);
 
 export default router;
