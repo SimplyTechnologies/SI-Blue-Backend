@@ -20,9 +20,11 @@ export interface UserAttributes {
   createdAt?: Date;
   updatedAt?: Date;
   deletedAt?: Date | null;
+  tokenInvalidatedAt?: Date | null;
 }
 
-export interface UserCreationAttributes extends Omit<UserAttributes, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'> {}
+export interface UserCreationAttributes
+  extends Omit<UserAttributes, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'tokenInvalidatedAt'> {}
 
 export class User extends Model<UserAttributes, UserCreationAttributes> {
   public id!: number;
@@ -36,6 +38,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> {
   public createdAt!: Date;
   public updatedAt!: Date;
   public deletedAt!: Date | null;
+  public tokenInvalidatedAt!: Date | null;
   public addFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
   public getFavorite!: BelongsToManyGetAssociationsMixin<Vehicle>;
   public removeFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
@@ -59,7 +62,7 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       },
       email: {
         type: DataTypes.STRING(100),
-        unique:true,
+        unique: true,
         allowNull: false,
         validate: {
           isEmail: true,
@@ -84,6 +87,11 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
         allowNull: false,
         defaultValue: false,
       },
+      tokenInvalidatedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
+      },
     },
     {
       sequelize,
@@ -91,7 +99,6 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       timestamps: true,
       underscored: false,
       paranoid: true,
-      
     },
   );
 

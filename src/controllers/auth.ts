@@ -27,7 +27,7 @@ const roles = ['user', 'superadmin'];
 
 const registerUser = async (req: Request, res: Response) => {
   try {
-    const registerUser = req.user as RegisterInput;
+    const registerUser = req.registeredUser as RegisterInput;
 
     const role = registerUser.role as UserRoleType;
 
@@ -92,6 +92,7 @@ const forgotPassword = async (req: Request, res: Response) => {
     if (!user || !user.isActive) {
       return ResponseHandler.notFound(res, 'No account found with this email address.');
     }
+    await userService.updateUser(user.id, { tokenInvalidatedAt: new Date() });
     const token = generateAccessToken(user as User, '10m');
     const html = resetPasswordTemplate({ FRONTEND_URL: config.frontendUrl, TOKEN: token });
     await sendEmail(email, 'Reset Password', html);
@@ -169,4 +170,3 @@ export default {
   resetPassword,
   activateAccount,
 }
-

@@ -2,19 +2,20 @@ import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import passport from 'passport';
 import bcrypt from 'bcrypt';
-import { RegisterSchema, LoginSchema, AccountActivationSchema } from '../schemas/usersSchema';
+import { RegisterSchema, LoginSchema, AccountActivationSchema, RegisterInput } from '../schemas/usersSchema';
 import { userService } from '../services/index';
-import { User } from '../models/usersModel';
+import { User as DbUser } from '../models/usersModel';
 import { verifyAccessToken, verifyRefreshToken } from '../helpers/tokenUtils';
 import config from '../configs/config';
 import { ResponseHandler } from '../handlers/errorHandler';
 
 declare global {
   namespace Express {
+    interface User extends DbUser {}
+
     interface Request {
-      user?: User;
-      userId?: number;
-      validatedData?: any;
+      user?: DbUser;
+      registeredUser?: RegisterInput;
     }
   }
 }
@@ -34,8 +35,15 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
       return ResponseHandler.unauthorized(res, 'Invalid token');
     }
 
-    req.user = decode.id;
-    req.userId = decode.id;
+    const user = await userService.getUserById(decode.id);
+    if (!user) {
+      return ResponseHandler.unauthorized(res, 'User not found');
+    }
+    if (user.tokenInvalidatedAt && decode.iat && new Date(decode.iat * 1000) < new Date(user.tokenInvalidatedAt)) {
+      return ResponseHandler.unauthorized(res, 'Token expired due to password reset');
+    }
+
+    req.user = user;
     next();
   } catch (err) {
     if (err instanceof Error && err.message === 'jwt expired') {
@@ -46,7 +54,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
 };
 
 export const authenticateRefreshToken = (req: Request, res: Response, next: NextFunction) => {
-  passport.authenticate('jwt-refresh', { session: false }, (err: any, user: User) => {
+  passport.authenticate('jwt-refresh', { session: false }, async (err: any) => {
     const decodedJWT = verifyRefreshToken(req.body.refreshToken) as JwtPayload;
 
     if (err) return next(err);
@@ -55,7 +63,19 @@ export const authenticateRefreshToken = (req: Request, res: Response, next: Next
       return ResponseHandler.forbidden(res, 'Invalid refresh token')
     }
 
-    req.user = decodedJWT;
+    const user = await userService.getUserById(decodedJWT.id);
+    if (!user) {
+      return ResponseHandler.unauthorized(res, 'User not found');
+    }
+    if (
+      user.tokenInvalidatedAt &&
+      decodedJWT.iat &&
+      new Date(decodedJWT.iat * 1000) < new Date(user.tokenInvalidatedAt)
+    ) {
+      return ResponseHandler.unauthorized(res, 'Refresh token expired due to password reset');
+    }
+
+    req.user = user;
     next();
   })(req, res, next);
 };
@@ -65,7 +85,7 @@ export const requireRole = (userRole:string) => {
     if (!req.user) {
      return  ResponseHandler.unauthorized(res, 'Authentication required')
     }
-    const {role} = req.user  as User;
+    const { role } = req.user  as DbUser;
 
     if (role != userRole) {
       return ResponseHandler.forbidden(res, 'Insufficient permission')
@@ -93,13 +113,11 @@ export const validateRegistration = async (req: Request, res: Response, next: Ne
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    const user = {
+    req.registeredUser =  {
       ...userData,
       email,
       password: hashedPassword,
     };
-
-    req.user = user;
 
     next();
   } catch (error) {
@@ -118,9 +136,9 @@ export const validateLogin = async (req: Request, res: Response, next: NextFunct
     const { email, password } = result.data;
 
     const user = await userService.getUserByEmail(email);
-    
-   
-   
+
+
+
     if (!user) {
       return ResponseHandler.unauthorized(res,'Invalid email or password' );
     }
@@ -128,16 +146,16 @@ export const validateLogin = async (req: Request, res: Response, next: NextFunct
     if (!user.isActive) {
       return ResponseHandler.unauthorized(res,'Invalid email or password' );
     }
-    
+
 
     const isValidPassword = await bcrypt.compare(password, user.password as string);
-   
+
     if (!isValidPassword) {
       return ResponseHandler.unauthorized(res,'Invalid email or password' );
     }
 
-    req.user = user;
-    
+    req.user = user as DbUser;
+
     next();
   } catch (error) {
     console.error('Login validation error:', error);
