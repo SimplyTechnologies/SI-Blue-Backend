@@ -72,9 +72,9 @@ const getAllUsers = async (options: { search?: string; page?: number; offset?: n
   let where = {};
   if (search) {
     where = sequelizeWhere(fn('concat', col('firstName'), ' ', col('lastName')), {
-      [Op.iLike]: `%${search}%,`});
+      [Op.iLike]: `%${search}%`,
+    });
   }
-
   const total = await User.count({ where });
 
   const result = await User.findAll({
@@ -84,7 +84,7 @@ const getAllUsers = async (options: { search?: string; page?: number; offset?: n
     offset: offsetNum,
     order: [['id', 'DESC']],
   });
-  const data = result.filter(u => u.dataValues.id != currentUserId)
+  const data = result.filter(u => u.dataValues.id != currentUserId);
 
   return await { users: data, total, page, pageSize: limit, totalPages: Math.ceil(total / limit) };
 };

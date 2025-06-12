@@ -1,4 +1,4 @@
-import { Op } from 'sequelize';
+import { col, fn, Op, where as sequelizeWhere } from 'sequelize';
 import { Make } from '../models/carMakesModel';
 import { Vehicle } from '../models/vehiclesModel';
 import { Customer } from '../models/customersModel';
@@ -21,7 +21,7 @@ const createCustomer = async (customerData: CustomerSchema) => {
     return returnedCustomer.dataValues;
   } catch (err) {
     console.error('Failed to create customer', err);
-    throw err
+    throw err;
   }
 };
 
@@ -78,9 +78,9 @@ const getCustomers = async (options: { search?: string; page?: number; offset?: 
 
   let where = {};
   if (search) {
-    where = {
-      [Op.or]: [{ firstName: { [Op.iLike]: `%${search}%` } }, { lastName: { [Op.iLike]: `%${search}%` } }],
-    };
+    where = sequelizeWhere(fn('concat', col('firstName'), ' ', col('lastName')), {
+      [Op.iLike]: `%${search}%`,
+    });
   }
 
   const total = await Customer.count({ where });
@@ -144,7 +144,7 @@ const deleteCustomer = async (id: number) => {
   if (customer) {
     return await customer.destroy();
   }
-}
+};
 
 export default {
   getCustomers,
@@ -152,5 +152,5 @@ export default {
   getCustomerByEmail,
   searchDatabase,
   findCustomerById,
-  deleteCustomer
+  deleteCustomer,
 };
