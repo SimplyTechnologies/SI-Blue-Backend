@@ -6,10 +6,6 @@ export interface CarModelAttributes {
   name: string;
   makeId: number;
 }
-export interface CarModelAttributesWithoutId {
-  name: string;
-  makeId: number;
-}
 
 export interface CarModelCreationAttributes extends Optional<CarModelAttributes, 'id'> {}
 
@@ -17,6 +13,7 @@ export class CarModel extends Model<CarModelAttributes, CarModelCreationAttribut
   public id!: number;
   public name!: string;
   public makeId!: number;
+  public make?: Make;
 }
 
 export const defineCarModel = (sequelize: Sequelize): typeof CarModel => {
@@ -44,7 +41,7 @@ export const defineCarModel = (sequelize: Sequelize): typeof CarModel => {
     },
     {
       sequelize,
-      tableName: 'car_model',
+      tableName: 'models',
       timestamps: false,
       underscored: false,
     },
@@ -52,5 +49,3 @@ export const defineCarModel = (sequelize: Sequelize): typeof CarModel => {
 
   return CarModel;
 };
-
-export type CarModelType = typeof CarModel;

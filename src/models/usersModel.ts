@@ -1,9 +1,9 @@
 import {
-  BelongsToManyAddAssociationMixin,
-  BelongsToManyGetAssociationsMixin,
   DataTypes,
   Model,
   Sequelize,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
 } from 'sequelize';
 import { UserRoleType } from '../schemas/usersSchema';
 import { Vehicle } from './vehiclesModel';
@@ -14,38 +14,34 @@ export interface UserAttributes {
   lastName: string;
   email: string;
   phoneNumber: string;
-  password: string;
+  password: string | null;
   role: UserRoleType;
   isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  deletedAt?: Date | null;
+  tokenInvalidatedAt?: Date | null;
 }
 
-export interface UserCreationAttributes extends Omit<UserAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface UserCreationAttributes
+  extends Omit<UserAttributes, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'tokenInvalidatedAt'> {}
 
 export class User extends Model<UserAttributes, UserCreationAttributes> {
-  declare id: number;
-  declare firstName: string;
-  declare lastName: string;
-  declare email: string;
-  declare phoneNumber: string;
-  declare password: string;
-  declare role: UserRoleType;
-  declare isActive: boolean;
-  declare createdAt: Date;
-  declare updatedAt: Date;
+  public id!: number;
+  public firstName!: string;
+  public lastName!: string;
+  public email!: string;
+  public phoneNumber!: string;
+  public password!: string | null;
+  public role!: UserRoleType;
+  public isActive!: boolean;
+  public createdAt!: Date;
+  public updatedAt!: Date;
+  public deletedAt!: Date | null;
+  public tokenInvalidatedAt!: Date | null;
   public addFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
   public getFavorite!: BelongsToManyGetAssociationsMixin<Vehicle>;
   public removeFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
-
-  static associate() {
-    User.belongsToMany(Vehicle, {
-      through: 'favorites',
-      as: 'favorite',
-      foreignKey: 'userId',
-      otherKey: 'vehicleId',
-    });
-  }
 }
 
 export const defineUserModel = (sequelize: Sequelize): typeof User => {
@@ -59,17 +55,15 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       firstName: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        field: 'first_name',
       },
       lastName: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        field: 'last_name',
       },
       email: {
         type: DataTypes.STRING(100),
-        allowNull: false,
         unique: true,
+        allowNull: false,
         validate: {
           isEmail: true,
         },
@@ -77,11 +71,11 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       phoneNumber: {
         type: DataTypes.STRING(15),
         allowNull: false,
-        field: 'phone_number',
       },
       password: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
+        defaultValue: null,
       },
       role: {
         type: DataTypes.ENUM('user', 'superadmin'),
@@ -91,16 +85,20 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
       isActive: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: true,
-        field: 'is_active',
+        defaultValue: false,
+      },
+      tokenInvalidatedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: null,
       },
     },
     {
       sequelize,
       tableName: 'users',
       timestamps: true,
-      underscored: true,
-      indexes: [{ unique: true, fields: ['email'] }, { fields: ['role'] }, { fields: ['is_active'] }],
+      underscored: false,
+      paranoid: true,
     },
   );
 

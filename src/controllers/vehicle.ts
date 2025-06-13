@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { format } from 'fast-csv';
-import { vehicleService } from '../services';
+import { customerService, vehicleService } from '../services';
 import favoritesService from '../services/favorite';
+import { SerializedVehicle, serializeVehicleFromService } from '../serializer/vehicleSerializer';
+import { ResponseHandler } from '../handlers/errorHandler';
 
 declare global {
   namespace Express {
@@ -10,6 +12,7 @@ declare global {
         modelId: number;
         year: number;
         vin: string;
+        createdAt?: Date;
         location: {
           country: string;
           city: string;
@@ -29,25 +32,16 @@ const PAGE_SIZE = 25;
 const createVehicle = async (req: Request, res: Response) => {
   try {
     if (!req.vehicle) {
-      res.status(400).json({
-        success: false,
-        message: 'Vehicle data is missing.',
-      });
-      return;
+      return ResponseHandler.badRequest(res, 'Vehicle data');
     }
 
     await vehicleService.createVehicle(req.vehicle);
 
-    res.status(201).json({
-      message: 'Vehicle created successfully',
-    });
+    ResponseHandler.created(res, 'Vehicle created successfully');
   } catch (error: unknown) {
     console.error('Error creating vehicle:', error);
 
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create vehicle',
-    });
+    ResponseHandler.serverError(res, 'Failed to create vehicle');
   }
 };
 
@@ -55,21 +49,24 @@ const getVehicleByVin = async (req: Request, res: Response) => {};
 
 const getVehicleById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const vehicle = await vehicleService.getVehicleById(parseInt(id));
-
-    if (!vehicle) {
-      return res.status(404).json({ message: 'Vehicle not found' });
+    const vehicleId = req.params.id;
+    if (!vehicleId) {
+      return ResponseHandler.badRequest(res, 'Vehicle Id missing');
     }
 
-    res.status(200).json({
-      vehicle,
-    });
+    const vehicle: SerializedVehicle | null = await serializeVehicleFromService(
+      Number(vehicleId),
+      vehicleService,
+      req.user?.id,
+    );
+
+    if (!vehicle) {
+      return ResponseHandler.notFound(res, 'Vehicle not found');
+    }
+
+    ResponseHandler.success(res, 'Vehicle retrieved successfully', vehicle);
   } catch (error: unknown) {
-    res.status(500).json({
-      success: false,
-      message: 'Failed to get vehicle by id',
-    });
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -84,7 +81,7 @@ const getVehicles = async (req: Request, res: Response) => {
     const offsetNum = (pageNum - 1) * limit;
 
     if (availability && !['Sold', 'In Stock'].includes(availability as string)) {
-      res.json({
+      ResponseHandler.success(res, 'Availability not found', {
         vehicles: [],
         total: 0,
         page: pageNum,
@@ -106,9 +103,9 @@ const getVehicles = async (req: Request, res: Response) => {
 
     let favoriteVehicleIds: Set<number> = new Set();
     let favorites: any[] = [];
-    if (req.user) {
+    if (req.user?.id) {
       try {
-        favorites = await favoritesService.getFavoritesByUserId(Number(req.user));
+        favorites = await favoritesService.getFavoritesByUserId(Number(req.user.id));
         favoriteVehicleIds = new Set(favorites.map((fav: any) => fav.id));
       } catch {}
     }
@@ -130,8 +127,9 @@ const getVehicles = async (req: Request, res: Response) => {
         year: v.year,
         vin: v.vin,
         location: v.location,
-        sold: v.sold,
+        customerId: v.customerId,
         userId: v.userId,
+        createdAt: v.createdAt,
         favorite: true,
         model: v.model
           ? {
@@ -147,12 +145,10 @@ const getVehicles = async (req: Request, res: Response) => {
               }
             : null,
       }));
-      res.json({
+      ResponseHandler.success(res, 'Vehicles retrieved successfully', {
         vehicles: result,
-        total: count,
-        page: pageNum,
-        pageSize: limit,
-        totalPages: Math.ceil(count / limit),
+        previousId: pageNum === 1 ? null : pageNum - 1,
+        nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
       });
       return;
     }
@@ -171,7 +167,7 @@ const getVehicles = async (req: Request, res: Response) => {
       year: v.year,
       vin: v.vin,
       location: v.location,
-      sold: v.sold,
+      customerId: v.customerId,
       userId: v.userId,
       createdAt: v.createdAt,
       favorite: favoriteVehicleIds.has(v.id),
@@ -190,15 +186,13 @@ const getVehicles = async (req: Request, res: Response) => {
           : null,
     }));
 
-    res.json({
+    ResponseHandler.success(res, 'Vehicles retrieved successfully', {
       vehicles: result,
-      total: count,
-      page: pageNum,
-      pageSize: limit,
-      totalPages: Math.ceil(count / limit),
+      previousId: pageNum === 1 ? null : pageNum - 1,
+      nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
     });
   } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -219,8 +213,8 @@ const exportVehiclesCsv = async (req: Request, res: Response) => {
     else if (availability === 'In Stock') sold = false;
 
     let rows: any[] = [];
-    if (favorite === '1' && req.user) {
-      const favorites = await favoritesService.getFavoritesByUserId(Number(req.user));
+    if (favorite === '1' && req.user?.id) {
+      const favorites = await favoritesService.getFavoritesByUserId(Number(req.user.id));
       const favoriteVehicleIds = new Set(favorites.map((fav: any) => fav.id));
 
       const allVehicles = await vehicleService.getVehicles({
@@ -246,7 +240,7 @@ const exportVehiclesCsv = async (req: Request, res: Response) => {
       Location: v.location
         ? `${v.location.street}, ${v.location.city}, ${v.location.state} ${v.location.zipcode}, ${v.location.country}`
         : '',
-      Availability: v.sold ? 'Sold' : 'In Stock',
+      Availability: !!v.customerId ? 'Sold' : 'In Stock',
     }));
 
     res.setHeader('Content-Type', 'text/csv');
@@ -257,7 +251,7 @@ const exportVehiclesCsv = async (req: Request, res: Response) => {
     csvRows.forEach(row => csvStream.write(row));
     csvStream.end();
   } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -265,14 +259,92 @@ const getAllVehicleLocations = async (req: Request, res: Response) => {
   try {
     const { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount } =
       await vehicleService.getAllVehicleLocationsAndCounts();
-    res.json({
+    ResponseHandler.success(res, 'Vehicle locations retrieved successfully', {
       vehicles: vehicleLocations,
       totalCount,
       totalSoldVehicles,
       totalCustomerCount,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch vehicle locations' });
+    ResponseHandler.serverError(res, 'Failed to fetch vehicle locations');
+  }
+};
+
+export const deleteVehicle = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return ResponseHandler.badRequest(res, 'Id missing');
+    }
+    const vehicle = await vehicleService.getVehicleById(parseInt(id));
+    if (!vehicle) {
+      return ResponseHandler.notFound(res, 'Vehicle not found');
+    }
+    if (vehicle.customerId) {
+      return ResponseHandler.badRequest(res, `Vehicle can't be deleted`);
+    }
+
+    await vehicleService.deleteVehicle(parseInt(id));
+    ResponseHandler.success(res, 'Vehicle deleted successfully');
+  } catch (error) {
+    ResponseHandler.serverError(res, 'Failed to delete vehicle');
+  }
+};
+
+const updateVehicle = async (req: Request, res: Response) => {
+  try {
+    if (!req.vehicle) {
+      return ResponseHandler.badRequest(res, 'Vehicle data is missing');
+    }
+
+    const vehicleId = parseInt(req.params.id);
+    await vehicleService.updateVehicle(vehicleId, req.vehicle);
+
+    const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
+      vehicleId,
+      vehicleService,
+      req.user?.id as number,
+    );
+
+    ResponseHandler.success(res, 'Updated successfully', formattedVehicle as SerializedVehicle);
+  } catch (error: unknown) {
+    console.error('Error updating vehicle:', error);
+
+    ResponseHandler.serverError(res, 'Failed to update vehicle');
+  }
+};
+
+const unassignVehicle = async (req: Request, res: Response) => {
+  try {
+    const { vehicleId, customerId, unassignAll } = req.body;
+    if (!customerId) {
+      return ResponseHandler.badRequest(res, 'Customer ID is required');
+    }
+
+    const customer = await customerService.findCustomerById(customerId);
+    if (!customer) {
+      return ResponseHandler.notFound(res, 'Customer not found');
+    }
+
+    if (unassignAll) {
+      await vehicleService.unassignVehicle(undefined, customerId);
+      return ResponseHandler.success(res, 'All vehicles unassigned successfully');
+    }
+
+    if (!vehicleId) {
+      return ResponseHandler.badRequest(res, 'Vehicle ID is required to unassign a single vehicle');
+    }
+
+    const vehicle = await vehicleService.getVehicleById(vehicleId);
+    if (!vehicle) {
+      return ResponseHandler.notFound(res, 'Vehicle not found');
+    }
+
+    await vehicleService.unassignVehicle(vehicleId);
+    return ResponseHandler.success(res, 'Vehicle unassigned successfully');
+  } catch (error) {
+    console.error('Error unassigning vehicle:', error);
+    ResponseHandler.serverError(res, 'Failed to unassign vehicle');
   }
 };
 
@@ -283,4 +355,7 @@ export default {
   getVehicleById,
   exportVehiclesCsv,
   getAllVehicleLocations,
+  deleteVehicle,
+  updateVehicle,
+  unassignVehicle,
 };

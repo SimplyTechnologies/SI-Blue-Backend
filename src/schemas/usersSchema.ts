@@ -27,7 +27,7 @@ export const UserSchema = z.object({
   
     phoneNumber: z
       .string({ required_error: 'Phone number is required' })
-      .min(10, 'Phone number must be at least 10 digits')
+      .min(5, 'Phone number must be at least 10 digits')
       .max(25, 'Phone number must be less than 25 digits')
       .regex(/^\+?[\d\s()-]+$/, 'Invalid phone number format')
       .transform(str => str.replace(/\s/g, '')),
@@ -40,7 +40,7 @@ export const UserSchema = z.object({
         'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'),
   
     role: UserRole.default('user'),
-    isActive: z.boolean().default(true)
+    isActive: z.boolean().default(false)
   });
   
 
@@ -70,11 +70,23 @@ export const ChangePasswordSchema = z.object({
   path: ["confirmPassword"]
 });
 
+export const AccountActivationSchema = z
+  .object({
+    token: z.string(),
+    password: z.string().min(8).max(128),
+    confirmPassword: z.string().min(1),
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 export type UserInput = z.infer<typeof UserSchema>;
 export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>;
+export type AccountActivationSchemaInput = z.infer<typeof AccountActivationSchema>;
+export const UserSchemaWithoutPassword = UserSchema.omit({ password: true });
 
 
 

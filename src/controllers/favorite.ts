@@ -2,29 +2,29 @@ import { Request, Response } from 'express';
 import { favoritesService } from '../services';
 import { userService } from '../services';
 import { vehicleService } from '../services';
+import { ResponseHandler } from '../handlers/errorHandler';
 
 export const createFavorite = async (req: Request, res: Response) => {
   try {
-    const userId = req.userId;
+    const userId = req.user?.id;
     const vehicleId = req.body.vehicleId;
 
     if (!userId || !vehicleId) {
-      return res.status(400).json({ message: 'userId and vehicleId are required' });
+      return ResponseHandler.badRequest(res, 'UserId and vehicleId are required')
+
     }
 
     const vehicle = await vehicleService.getVehicleById(vehicleId);
     if (!vehicle) {
-      return res.status(404).json({ message: 'Vehicle not found' });
+      return ResponseHandler.notFound(res, 'Vehicle not found')
     }
 
     const favorite = await favoritesService.createFavorite(userId, vehicleId);
+    ResponseHandler.created(res, 'Favorite created successfully', favorite)
 
-    return res.status(201).json({
-      favorite,
-    });
   } catch (error) {
     console.error('Error creating favorite:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
@@ -32,7 +32,7 @@ export const getFavoritesByUserId = async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.userId);
     if (!userId) {
-      return res.status(400).json({ message: 'userId is required' });
+      return ResponseHandler.badRequest(res, 'UserId is required')
     }
     const favorites = await favoritesService.getFavoritesByUserId(userId);
 
@@ -41,7 +41,7 @@ export const getFavoritesByUserId = async (req: Request, res: Response) => {
       year: v.year,
       vin: v.vin,
       location: v.location,
-      sold: v.sold,
+      customerId: v.customerId,
       userId: v.userId,
       model: v.model
         ? {
@@ -57,32 +57,27 @@ export const getFavoritesByUserId = async (req: Request, res: Response) => {
             }
           : null,
     }));
-
-    return res.status(200).json({
-      result,
-    });
+    ResponseHandler.success(res, 'Retrieve favorite successfully', result)
   } catch (error) {
     console.error('Error retrieving favorites:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };
 
 export const deleteFavoriteById = async (req: Request, res: Response) => {
   try {
-    const userId = req.userId;
+    const userId = req.user?.id;
     const { vehicleId } = req.params;
 
     if (!userId || !vehicleId) {
-      return res.status(400).json({ message: 'userId and vehicleId are required' });
+      return ResponseHandler.badRequest(res, 'UserId and vehicleId are required')
     }
 
     await favoritesService.deleteFavoriteById(userId, Number(vehicleId));
 
-    return res.status(200).json({
-      message: 'Favorite deleted successfully',
-    });
+    ResponseHandler.success(res, 'Favorite removed successfully')
   } catch (error) {
     console.error('Error deleting favorite:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    ResponseHandler.serverError(res, 'Internal server error')
   }
 };

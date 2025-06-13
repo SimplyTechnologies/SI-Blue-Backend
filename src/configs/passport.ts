@@ -3,6 +3,7 @@ import { VerifiedCallback } from 'passport-jwt';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import bcrypt from 'bcrypt';
+import { User } from '../models/usersModel';
 import userService from '../services/user.js';
 
 interface JwtPayload {
@@ -27,13 +28,13 @@ export const configurePassport = () => {
             return done(null, false, { message: 'Invalid email or password' });
           }
 
-          const isMatch = await bcrypt.compare(password, user.password);
+          const isMatch = await bcrypt.compare(password, user.password as string);
 
           if (!isMatch) {
             return done(null, false, { message: 'Invalid email or password' });
           }
 
-          return done(null, user);
+          return done(null, user as User);
         } catch (error) {
           return done(error);
         }

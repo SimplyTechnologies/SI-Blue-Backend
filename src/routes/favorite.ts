@@ -1,11 +1,15 @@
 import { Router } from 'express';
-import { createFavorite,  getFavoritesByUserId, deleteFavoriteById } from '../controllers/favorite';
-import { authenticateToken } from '../middlewares/vehicleDataValidator';
+import { createFavorite, getFavoritesByUserId, deleteFavoriteById } from '../controllers/favorite';
+import { authenticateToken } from '../middlewares/authMiddleware';
 
 const router = Router();
 
-router.post('/', authenticateToken, createFavorite);
+router.use(authenticateToken);
+
+router.post('/', createFavorite);
+
 router.get('/:userId', getFavoritesByUserId);
-router.delete('/:vehicleId', authenticateToken, deleteFavoriteById);
+
+router.delete('/:vehicleId', deleteFavoriteById);
 
 export default router;

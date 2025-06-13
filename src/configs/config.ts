@@ -24,6 +24,8 @@ interface BaseConfig {
   jwt: {
     secret: string | undefined;
   };
+  frontendUrl: string | undefined;
+  productInfo: string | undefined
 }
 
 interface Config extends BaseConfig {
@@ -31,6 +33,7 @@ interface Config extends BaseConfig {
 }
 
 type Environment = 'development' | 'production';
+export const productInfo = process.env.PRODUCT_NAME
 
 const isValidEnvironment = (env: string): env is Environment => {
   return env === 'development' || env === 'production';
@@ -45,6 +48,8 @@ const baseConfig = {
   jwt: {
     secret: process.env.JWT_SECRET,
   },
+  frontendUrl: process.env.FRONTEND_URL,
+  productInfo: process.env.PRODUCT_NAME
 };
 
 const envConfig: EnvConfig = {
@@ -73,5 +78,6 @@ const config: Config = {
   ...baseConfig,
   ...envConfig[environment],
 };
+
 
 export default config;
