@@ -2,6 +2,7 @@ import { Router } from 'express';
 import userController from '../controllers/user';
 import { pendingUserDataValidateUserData } from '../middlewares/pendingUsersDataValidator';
 import { authenticateToken, requireAdmin } from '../middlewares/authMiddleware';
+import { upload } from '../middlewares/imageUpload';
 
 const router = Router();
 
@@ -13,5 +14,7 @@ router.delete('/deactivate-user/:id', authenticateToken, requireAdmin, userContr
 
 router.get('', authenticateToken, requireAdmin, userController.getUsers);
 router.get('/user/:token', userController.getUserById);
+
+router.post('/upload-avatar/:id', upload.single('avatar'), userController.uploadAvatar);
 
 export default router;

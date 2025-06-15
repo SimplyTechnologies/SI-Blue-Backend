@@ -1,6 +1,9 @@
 import { col, fn, Op, where as sequelizeWhere } from 'sequelize';
+import { Readable } from 'stream';
 import { User } from '../models/usersModel';
 import { RegisterInput } from '../schemas/usersSchema.js';
+import { deleteCloudinaryFile } from '../helpers/deleteCloudinaryFile';
+import cloudinary from '../configs/cloudinary';
 export interface InputUser {
   firstName: string;
   lastName: string;
@@ -189,6 +192,48 @@ const updateUserPasswordActiveStatus = async (updatedUser: User) => {
   }
 };
 
+const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
+  try {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      throw Error('User not found');
+    }
+    // Upload to Cloudinary
+    const result: any = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'avatars',
+          resource_type: 'image',
+          public_id: `user_${userId}_${Date.now()}`,
+          transformation: [
+            { quality: 'auto', fetch_format: 'auto' }
+          ]
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        },
+      );
+
+      Readable.from(fileBuffer).pipe(stream);
+    });
+
+    // Delete old avatar
+    if (user.avatarPublicId) {
+      await deleteCloudinaryFile(user.avatarPublicId);
+    }
+
+    user.avatarPublicId = result.public_id;
+    await user.save();
+
+    return user.avatarPublicId;
+  } catch (err) {
+    console.error('Failed to upload user avatar', err);
+    throw err;
+  }
+};
+
 export default {
   createUser,
   getAllUsers,
@@ -199,4 +244,5 @@ export default {
   createInactiveUser,
   softDeleteUser,
   restoreUser,
+  uploadUserAvatar,
 };
