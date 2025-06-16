@@ -1,9 +1,13 @@
 import { col, fn, Op, where as sequelizeWhere } from 'sequelize';
 import { Readable } from 'stream';
+import dotenv from 'dotenv';
 import { User } from '../models/usersModel';
 import { RegisterInput } from '../schemas/usersSchema.js';
 import { deleteCloudinaryFile } from '../helpers/deleteCloudinaryFile';
 import cloudinary from '../configs/cloudinary';
+
+dotenv.config();
+
 export interface InputUser {
   firstName: string;
   lastName: string;
@@ -203,7 +207,7 @@ const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
     const result: any = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
-          folder: 'avatars',
+          folder: process.env.CLOUDINARY_AVATARS_FOLDER_NAME,
           resource_type: 'image',
           public_id: `user_${userId}_${Date.now()}`,
           transformation: [
@@ -234,6 +238,29 @@ const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
   }
 };
 
+const deleteUserAvatar = async (userId: number) => {
+   try {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      throw Error('User not found');
+    }
+    if (!user.avatarPublicId) {
+      throw Error('Avatar not found');
+    }
+
+    await deleteCloudinaryFile(user.avatarPublicId);
+
+    user.avatarPublicId = null;
+    await user.save();
+
+    return user.avatarPublicId;
+   } catch (err) {
+      console.error('Failed to delete user avatar', err);
+      throw err;
+   }
+} 
+
 export default {
   createUser,
   getAllUsers,
@@ -245,4 +272,5 @@ export default {
   softDeleteUser,
   restoreUser,
   uploadUserAvatar,
+  deleteUserAvatar,
 };
