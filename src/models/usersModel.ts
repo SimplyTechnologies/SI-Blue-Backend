@@ -21,6 +21,7 @@ export interface UserAttributes {
   updatedAt?: Date;
   deletedAt?: Date | null;
   tokenInvalidatedAt?: Date | null;
+  avatarPublicId?: string | null;
 }
 
 export interface UserCreationAttributes
@@ -39,6 +40,7 @@ export class User extends Model<UserAttributes, UserCreationAttributes> {
   public updatedAt!: Date;
   public deletedAt!: Date | null;
   public tokenInvalidatedAt!: Date | null;
+  public avatarPublicId!: string | null;
   public addFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
   public getFavorite!: BelongsToManyGetAssociationsMixin<Vehicle>;
   public removeFavorite!: BelongsToManyAddAssociationMixin<Vehicle, number>;
@@ -91,6 +93,10 @@ export const defineUserModel = (sequelize: Sequelize): typeof User => {
         type: DataTypes.DATE,
         allowNull: true,
         defaultValue: null,
+      },
+      avatarPublicId: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
     },
     {

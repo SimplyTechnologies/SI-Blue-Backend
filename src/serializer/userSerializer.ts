@@ -10,6 +10,7 @@ interface SerializedUser {
   isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  avatarPublicId?: string | null;
 }
 
 interface SerializedAccountActivateData {
@@ -30,6 +31,7 @@ export const serializeUser = (user: UserAttributes): SerializedUser => {
     isActive: user.isActive,
     createdAt: user.createdAt,
     updatedAt: user.createdAt,
+    avatarPublicId: user.avatarPublicId,
   };
 };
 
