@@ -234,6 +234,29 @@ const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
   }
 };
 
+const deleteUserAvatar = async () {
+   try {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      throw Error('User not found');
+    }
+    if (!user.avatarPublicId) {
+      throw Error('Avatar not found');
+    }
+
+    await deleteCloudinaryFile(user.avatarPublicId);
+
+    user.avatarPublicId = null;
+    await user.save();
+
+    return user.avatarPublicId;
+   } catch (err) {
+      console.error('Failed to delete user avatar', err);
+      throw err;
+   }
+} 
+
 export default {
   createUser,
   getAllUsers,
@@ -245,4 +268,5 @@ export default {
   softDeleteUser,
   restoreUser,
   uploadUserAvatar,
+  deleteUserAvatar,
 };
