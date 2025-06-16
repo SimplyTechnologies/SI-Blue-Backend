@@ -204,7 +204,7 @@ export const uploadAvatar = async (req: Request, res: Response) => {
   }
 };
 
-const deleteAvatar = async (req: Request, res: Response) {
+const deleteAvatar = async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.id);
   
