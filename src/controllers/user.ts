@@ -204,6 +204,21 @@ export const uploadAvatar = async (req: Request, res: Response) => {
   }
 };
 
+const deleteAvatar = async (req: Request, res: Response) {
+  try {
+    const userId = parseInt(req.params.id);
+  
+  if (isNaN(userId)) {
+    return ResponseHandler.badRequest(res, 'Invalid user ID');
+  }
+    const avatarUrl = await userService.deleteUserAvatar(userId);
+    ResponseHandler.success(res, 'Avatar successfully deleted', { avatarUrl });
+  } catch (err) {
+    console.error('Error in updating avatar:', err);
+    ResponseHandler.serverError(res, 'Internal server error');
+  }
+}
+
 export default {
   getUserById,
   addNewUser,
@@ -211,4 +226,5 @@ export default {
   updateUser,
   deleteInactiveUser,
   uploadAvatar,
+  deleteAvatar,
 };
