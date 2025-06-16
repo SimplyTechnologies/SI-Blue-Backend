@@ -17,4 +17,6 @@ router.get('/user/:token', userController.getUserById);
 
 router.post('/upload-avatar/:id', authenticateToken, upload.single('avatar'), userController.uploadAvatar);
 
+router.delete('/delete-avatar/:id', authenticateToken, userController.deleteAvatar);
+
 export default router;
