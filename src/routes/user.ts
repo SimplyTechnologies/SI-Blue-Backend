@@ -15,6 +15,6 @@ router.delete('/deactivate-user/:id', authenticateToken, requireAdmin, userContr
 router.get('', authenticateToken, requireAdmin, userController.getUsers);
 router.get('/user/:token', userController.getUserById);
 
-router.post('/upload-avatar/:id', upload.single('avatar'), userController.uploadAvatar);
+router.post('/upload-avatar/:id', authenticateToken, upload.single('avatar'), userController.uploadAvatar);
 
 export default router;
