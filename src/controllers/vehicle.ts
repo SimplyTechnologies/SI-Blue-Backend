@@ -9,13 +9,7 @@ import { join } from 'path';
 import { readFileSync } from 'fs';
 import { compile } from 'handlebars';
 import config from '../configs/config';
-
-const unassignNotificationTemplatePath = join(__dirname, '../templates/unassignment.html');
-const unassignNotificationTemplateSource = readFileSync(unassignNotificationTemplatePath, 'utf8');
-const unassignNotificationTemplate = compile(unassignNotificationTemplateSource);
-const unassignAllNotificationTemplatePath = join(__dirname, '../templates/unassignAll.html');
-const unassignAllNotificationTemplateSource = readFileSync(unassignAllNotificationTemplatePath, 'utf8');
-const unassignAllNotificationTemplate = compile(unassignAllNotificationTemplateSource);
+import { loadEmailTemplate } from '../services/emailTemplate';
 
 declare global {
   namespace Express {
@@ -342,7 +336,7 @@ const unassignVehicle = async (req: Request, res: Response) => {
 
     if (unassignAll) {
       await vehicleService.unassignVehicle(undefined, customerId);
-      const html = unassignAllNotificationTemplate({
+      const html = loadEmailTemplate('unassignAll.html', {
         FRONTEND_URL: config.frontendUrl,
         NAME: customer.firstName,
       });
@@ -360,7 +354,7 @@ const unassignVehicle = async (req: Request, res: Response) => {
     }
 
     await vehicleService.unassignVehicle(vehicleId);
-    const html = unassignNotificationTemplate({
+    const html = loadEmailTemplate('unassignment.html', {
       FRONTEND_URL: config.frontendUrl,
       MAKE: vehicle.model?.make?.name,
       MODEL: vehicle.model?.name,

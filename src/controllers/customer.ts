@@ -7,10 +7,7 @@ import { readFileSync } from 'fs';
 import { compile } from 'handlebars';
 import config from '../configs/config';
 import { sendEmail } from '../helpers/sendEmail';
-
-const assignNotificationTemplatePath = join(__dirname, '../templates/assignment.html');
-const assignNotificationTemplateSource = readFileSync(assignNotificationTemplatePath, 'utf8');
-const assignNotificationTemplate = compile(assignNotificationTemplateSource);
+import { loadEmailTemplate } from '../services/emailTemplate';
 
 const createCustomer = async (req: Request, res: Response) => {
   try {
@@ -36,7 +33,7 @@ const createCustomer = async (req: Request, res: Response) => {
       if (!formattedVehicle) {
         return ResponseHandler.notFound(res, 'Vehicle not found after update');
       }
-      const html = assignNotificationTemplate({
+      const html = loadEmailTemplate('assignment.html', {
         FRONTEND_URL: config.frontendUrl,
         YEAR: formattedVehicle.year,
         MAKE: formattedVehicle.make?.name,
@@ -73,7 +70,7 @@ const createCustomer = async (req: Request, res: Response) => {
     if (!formattedVehicle) {
       return ResponseHandler.notFound(res, 'Vehicle not found after assignment');
     }
-    const html = assignNotificationTemplate({
+    const html = loadEmailTemplate('assignment.html', {
       FRONTEND_URL: config.frontendUrl,
       YEAR: formattedVehicle.year,
       MAKE: formattedVehicle.make?.name,
