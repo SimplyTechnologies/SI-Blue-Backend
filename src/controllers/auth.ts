@@ -16,7 +16,6 @@ import { User } from '../models/usersModel';
 import { RegisterInput, UserRoleType } from '../schemas/usersSchema';
 import { sendEmail } from '../helpers/sendEmail';
 import { SerializedUser, serializeUser } from '../serializer/userSerializer';
-import { forceLogoutUser } from '../index.js';
 import { ResponseHandler } from '../handlers/errorHandler';
 
 const resetPasswordTemplatePath = join(__dirname, '../templates/resetPassword.html');
@@ -96,7 +95,6 @@ const forgotPassword = async (req: Request, res: Response) => {
     const token = generateAccessToken(user as User, '10m');
     const html = resetPasswordTemplate({ FRONTEND_URL: config.frontendUrl, TOKEN: token });
     await sendEmail(email, 'Reset Password', html);
-    forceLogoutUser(user.id);
     ResponseHandler.success(res, 'Password reset email send successfully');
   } catch (err) {
     ResponseHandler.serverError(res, 'Failed to process request');

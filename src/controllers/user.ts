@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 import { userService } from '../services';
-import { forceLogoutUser } from '../index';
 import { Request, Response } from 'express';
 import { User } from '../models/usersModel';
 import { generateTokenForAccountActivation } from '../helpers/tokenUtils';
@@ -170,7 +169,6 @@ const deleteInactiveUser = async (req: Request, res: Response) => {
     });
 
     await sendEmail(user.email, emailSubject, emailHtml);
-    forceLogoutUser(user.id);
     ResponseHandler.success(res, 'User deleted successfully');
   } catch (err) {
     console.error('Error in deleteInactiveUser:', err);
@@ -207,7 +205,7 @@ export const uploadAvatar = async (req: Request, res: Response) => {
 const deleteAvatar = async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.id);
-  
+
   if (isNaN(userId)) {
     return ResponseHandler.badRequest(res, 'Invalid user ID');
   }
