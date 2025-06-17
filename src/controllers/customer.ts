@@ -2,12 +2,26 @@ import { Request, Response } from 'express';
 import { customerService, vehicleService } from '../services';
 import { SerializedVehicle, serializeVehicleFromService } from '../serializer/vehicleSerializer';
 import { ResponseHandler } from '../handlers/errorHandler';
+import { join } from 'path';
+import { readFileSync } from 'fs';
+import { compile } from 'handlebars';
+import config from '../configs/config';
+import { sendEmail } from '../helpers/sendEmail';
+
+const assignNotificationTemplatePath = join(__dirname, '../templates/assignment.html');
+const assignNotificationTemplateSource = readFileSync(assignNotificationTemplatePath, 'utf8');
+const assignNotificationTemplate = compile(assignNotificationTemplateSource);
 
 const createCustomer = async (req: Request, res: Response) => {
   try {
     if (req.customerId) {
       const customerId = req.customerId;
       const vehicleId = req.vehicleId!;
+
+      const customer = await customerService.findCustomerById(customerId);
+      if (!customer) {
+        return ResponseHandler.notFound(res, 'Customer not found');
+      }
 
       const updatedCount: number = await vehicleService.updateVehicleByCustomerId(customerId, vehicleId);
       if (updatedCount === 0) {
@@ -19,10 +33,19 @@ const createCustomer = async (req: Request, res: Response) => {
         vehicleService,
         req.user?.id as number,
       );
-
       if (!formattedVehicle) {
         return ResponseHandler.notFound(res, 'Vehicle not found after update');
       }
+      const html = assignNotificationTemplate({
+        FRONTEND_URL: config.frontendUrl,
+        YEAR: formattedVehicle.year,
+        MAKE: formattedVehicle.make?.name,
+        MODEL: formattedVehicle.model?.name,
+        VIN: formattedVehicle.vin,
+        NAME: customer.firstName,
+      });
+      const customerEmail = customer.email;
+      await sendEmail(customerEmail, 'Vehicle Assignment Email', html);
       return ResponseHandler.success(res, 'Vehicle updated successfully for existing customer', {
         vehicle: formattedVehicle,
       });
@@ -35,8 +58,8 @@ const createCustomer = async (req: Request, res: Response) => {
 
     const newCustomer = await customerService.createCustomer(customer);
     const vehicleId = req.body.vehicleId;
-    if(!newCustomer?.id){
-      throw new Error('Customer Id missing')
+    if (!newCustomer?.id) {
+      throw new Error('Customer Id missing');
     }
 
     await vehicleService.updateVehicleByCustomerId(newCustomer.id, vehicleId);
@@ -48,8 +71,18 @@ const createCustomer = async (req: Request, res: Response) => {
     );
 
     if (!formattedVehicle) {
-      return ResponseHandler.notFound(res,'Vehicle not found after assignment' )
+      return ResponseHandler.notFound(res, 'Vehicle not found after assignment');
     }
+    const html = assignNotificationTemplate({
+      FRONTEND_URL: config.frontendUrl,
+      YEAR: formattedVehicle.year,
+      MAKE: formattedVehicle.make?.name,
+      MODEL: formattedVehicle.model?.name,
+      VIN: formattedVehicle.vin,
+      NAME: customer.firstName,
+    });
+    const customerEmail = newCustomer.email;
+    await sendEmail(customerEmail, 'Vehicle Assignment Email', html);
     ResponseHandler.created(res, 'Customer created successfully', { vehicle: formattedVehicle });
   } catch (err) {
     console.error(err);

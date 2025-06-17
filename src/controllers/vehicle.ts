@@ -4,6 +4,18 @@ import { customerService, vehicleService } from '../services';
 import favoritesService from '../services/favorite';
 import { SerializedVehicle, serializeVehicleFromService } from '../serializer/vehicleSerializer';
 import { ResponseHandler } from '../handlers/errorHandler';
+import { sendEmail } from '../helpers/sendEmail';
+import { join } from 'path';
+import { readFileSync } from 'fs';
+import { compile } from 'handlebars';
+import config from '../configs/config';
+
+const unassignNotificationTemplatePath = join(__dirname, '../templates/unassignment.html');
+const unassignNotificationTemplateSource = readFileSync(unassignNotificationTemplatePath, 'utf8');
+const unassignNotificationTemplate = compile(unassignNotificationTemplateSource);
+const unassignAllNotificationTemplatePath = join(__dirname, '../templates/unassignAll.html');
+const unassignAllNotificationTemplateSource = readFileSync(unassignAllNotificationTemplatePath, 'utf8');
+const unassignAllNotificationTemplate = compile(unassignAllNotificationTemplateSource);
 
 declare global {
   namespace Express {
@@ -326,8 +338,15 @@ const unassignVehicle = async (req: Request, res: Response) => {
       return ResponseHandler.notFound(res, 'Customer not found');
     }
 
+    const customerEmail = customer.email;
+
     if (unassignAll) {
       await vehicleService.unassignVehicle(undefined, customerId);
+      const html = unassignAllNotificationTemplate({
+        FRONTEND_URL: config.frontendUrl,
+        NAME: customer.firstName,
+      });
+      await sendEmail(customerEmail, 'Vehicles Unassignment Email', html);
       return ResponseHandler.success(res, 'All vehicles unassigned successfully');
     }
 
@@ -341,6 +360,15 @@ const unassignVehicle = async (req: Request, res: Response) => {
     }
 
     await vehicleService.unassignVehicle(vehicleId);
+    const html = unassignNotificationTemplate({
+      FRONTEND_URL: config.frontendUrl,
+      MAKE: vehicle.model?.make?.name,
+      MODEL: vehicle.model?.name,
+      VIN: vehicle.vin,
+      YEAR: vehicle.year,
+      NAME: customer.firstName,
+    });
+    await sendEmail(customerEmail, 'Vehicle Unassignment Email', html);
     return ResponseHandler.success(res, 'Vehicle unassigned successfully');
   } catch (error) {
     console.error('Error unassigning vehicle:', error);

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicles Unassignment Email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+            padding: 32px 24px 24px 24px;
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 24px auto;
+            width: 120px;
+            height: auto;
+        }
+
+        h2 {
+            color: #192252;
+            margin-bottom: 16px;
+        }
+
+        p {
+            color: #636777;
+            margin-bottom: 32px;
+            font-size: 16px;
+            line-height: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <img class="logo" src="{{FRONTEND_URL}}/logo.png" alt="Logo">
+        <h2>Update: Vehicles Unassigned from Your Account</h2>
+        <p>
+            Hi {{NAME}},<br />
+            We’d like to inform you that multiple vehicles have been unassigned from your account.<br />
+            For more details, please contact Dealer Dock Support.<br />
+            Best regards,<br />
+            Dealer Dock Support
+        </p>
+    </div>
+</body>
+
+</html>
