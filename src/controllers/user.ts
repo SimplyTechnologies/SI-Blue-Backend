@@ -14,7 +14,7 @@ import {
   serializeAccountActivateData,
 } from '../serializer/userSerializer';
 import { ResponseHandler } from '../handlers/errorHandler';
-import { validateFileBuffer } from '../middlewares/imageUpload';
+import { validateFileBuffer } from '../middlewares/avatarUpload';
 
 declare global {
   namespace Express {
