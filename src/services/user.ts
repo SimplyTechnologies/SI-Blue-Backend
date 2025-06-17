@@ -232,7 +232,9 @@ const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
     user.avatarPublicId = result.public_id;
     await user.save();
 
-    return `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,g_auto,q_auto,f_auto/${user.avatarPublicId}`;
+    const avatarUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,g_auto,q_auto,f_auto/${user.avatarPublicId}`;
+
+    return avatarUrl;
   } catch (err) {
     console.error('Failed to upload user avatar', err);
     throw err;
@@ -255,7 +257,7 @@ const deleteUserAvatar = async (userId: number) => {
     user.avatarPublicId = null;
     await user.save();
 
-    return user.avatarPublicId;
+    return null;
   } catch (err) {
     console.error('Failed to delete user avatar', err);
     throw err;
