@@ -5,6 +5,7 @@ import { User } from '../models/usersModel';
 import { RegisterInput } from '../schemas/usersSchema.js';
 import { deleteCloudinaryFile } from '../helpers/deleteCloudinaryFile';
 import cloudinary from '../configs/cloudinary';
+import { SerializedUser, serializeUser } from '../serializer/userSerializer';
 
 dotenv.config();
 
@@ -93,7 +94,9 @@ const getAllUsers = async (options: { search?: string; page?: number; offset?: n
   });
   const data = result.filter(u => u.dataValues.id != currentUserId);
 
-  return await { users: data, total, page, pageSize: limit, totalPages: Math.ceil(total / limit) };
+  const formattedUsers: SerializedUser[] = data.map(user => serializeUser(user));
+
+  return await { users: formattedUsers, total, page, pageSize: limit, totalPages: Math.ceil(total / limit) };
 };
 
 const updateUser = async (
@@ -210,9 +213,7 @@ const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
           folder: process.env.CLOUDINARY_AVATARS_FOLDER_NAME,
           resource_type: 'image',
           public_id: `user_${userId}_${Date.now()}`,
-          transformation: [
-            { quality: 'auto', fetch_format: 'auto' }
-          ]
+          transformation: [{ quality: 'auto', fetch_format: 'auto' }],
         },
         (error, result) => {
           if (error) reject(error);
@@ -231,7 +232,7 @@ const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
     user.avatarPublicId = result.public_id;
     await user.save();
 
-    return user.avatarPublicId;
+    return `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,g_auto,q_auto,f_auto/${user.avatarPublicId}`;
   } catch (err) {
     console.error('Failed to upload user avatar', err);
     throw err;
@@ -239,7 +240,7 @@ const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
 };
 
 const deleteUserAvatar = async (userId: number) => {
-   try {
+  try {
     const user = await User.findByPk(userId);
 
     if (!user) {
@@ -255,11 +256,11 @@ const deleteUserAvatar = async (userId: number) => {
     await user.save();
 
     return user.avatarPublicId;
-   } catch (err) {
-      console.error('Failed to delete user avatar', err);
-      throw err;
-   }
-} 
+  } catch (err) {
+    console.error('Failed to delete user avatar', err);
+    throw err;
+  }
+};
 
 export default {
   createUser,
