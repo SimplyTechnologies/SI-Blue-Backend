@@ -5,9 +5,6 @@ import favoritesService from '../services/favorite';
 import { SerializedVehicle, serializeVehicleFromService } from '../serializer/vehicleSerializer';
 import { ResponseHandler } from '../handlers/errorHandler';
 import { sendEmail } from '../helpers/sendEmail';
-import { join } from 'path';
-import { readFileSync } from 'fs';
-import { compile } from 'handlebars';
 import config from '../configs/config';
 import { loadEmailTemplate } from '../services/emailTemplate';
 
