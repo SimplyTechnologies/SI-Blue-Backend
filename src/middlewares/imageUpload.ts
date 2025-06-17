@@ -1,7 +1,7 @@
 // upload.ts
 import multer, { FileFilterCallback } from 'multer';
 import { Request } from 'express';
-// import imageType from 'image-type';
+import imageType from 'image-type';
 
 const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -24,8 +24,8 @@ export const upload = multer({
 export async function validateFileBuffer(file: Express.Multer.File): Promise<void> {
   if (!file.buffer) throw new Error('File buffer is missing');
 
-  // const fileType = await imageType(file.buffer);
-  // if (!fileType || !allowedMimeTypes.includes(fileType.mime)) {
-  //   throw new Error('Uploaded file is not a valid JPG, PNG, or WebP image');
-  // }
+  const fileType = await imageType(file.buffer);
+  if (!fileType || !allowedMimeTypes.includes(fileType.mime)) {
+    throw new Error('Uploaded file is not a valid JPG, PNG, or WebP image');
+  }
 }

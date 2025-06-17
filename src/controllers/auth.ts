@@ -5,8 +5,9 @@ import bcrypt from 'bcrypt';
 
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
-
-import { compile } from 'handlebars';
+import Handlebars from 'handlebars';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 import { userService } from '../services';
 import { generateAccessToken, generateRefreshToken } from '../helpers/tokenUtils.js';
@@ -18,9 +19,12 @@ import { sendEmail } from '../helpers/sendEmail';
 import { SerializedUser, serializeUser } from '../serializer/userSerializer';
 import { ResponseHandler } from '../handlers/errorHandler';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const resetPasswordTemplatePath = join(__dirname, '../templates/resetPassword.html');
 const resetPasswordTemplateSource = readFileSync(resetPasswordTemplatePath, 'utf8');
-const resetPasswordTemplate = compile(resetPasswordTemplateSource);
+const resetPasswordTemplate = Handlebars.compile(resetPasswordTemplateSource);
 
 const roles = ['user', 'superadmin'];
 
