@@ -4,6 +4,9 @@ import { customerService, vehicleService } from '../services';
 import favoritesService from '../services/favorite';
 import { SerializedVehicle, serializeVehicleFromService } from '../serializer/vehicleSerializer';
 import { ResponseHandler } from '../handlers/errorHandler';
+import { sendEmail } from '../helpers/sendEmail';
+import config from '../configs/config';
+import { loadEmailTemplate } from '../services/emailTemplate';
 
 declare global {
   namespace Express {
@@ -326,8 +329,15 @@ const unassignVehicle = async (req: Request, res: Response) => {
       return ResponseHandler.notFound(res, 'Customer not found');
     }
 
+    const customerEmail = customer.email;
+
     if (unassignAll) {
       await vehicleService.unassignVehicle(undefined, customerId);
+      const html = loadEmailTemplate('unassignAll.html', {
+        FRONTEND_URL: config.frontendUrl,
+        NAME: customer.firstName,
+      });
+      await sendEmail(customerEmail, 'Vehicles Unassignment Email', html);
       return ResponseHandler.success(res, 'All vehicles unassigned successfully');
     }
 
@@ -341,6 +351,15 @@ const unassignVehicle = async (req: Request, res: Response) => {
     }
 
     await vehicleService.unassignVehicle(vehicleId);
+    const html = loadEmailTemplate('unassignment.html', {
+      FRONTEND_URL: config.frontendUrl,
+      MAKE: vehicle.model?.make?.name,
+      MODEL: vehicle.model?.name,
+      VIN: vehicle.vin,
+      YEAR: vehicle.year,
+      NAME: customer.firstName,
+    });
+    await sendEmail(customerEmail, 'Vehicle Unassignment Email', html);
     return ResponseHandler.success(res, 'Vehicle unassigned successfully');
   } catch (error) {
     console.error('Error unassigning vehicle:', error);

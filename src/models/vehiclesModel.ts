@@ -1,6 +1,7 @@
 import { DataTypes, Model, Sequelize, Optional } from 'sequelize';
 import { User } from './usersModel';
 import { CarModel } from './carModelsModel';
+import { Make } from './carMakesModel';
 
 export interface LocationData {
   street: string;
@@ -24,6 +25,7 @@ interface VehicleAttributes {
   assignedDate?: Date | null;
   favorite?: User[];
   model?: CarModel;
+  make?: Make
 }
 
 interface VehicleCreationAttributes extends Optional<VehicleAttributes, 'id'> {}
