@@ -13,7 +13,7 @@ export const generateRefreshToken = (user: User, remember: boolean) => {
   return jwt.sign({ id: user.id }, REFRESH_SECRET, { expiresIn: remember ? '30d' : '1d' });
 };
 export const generateTokenForAccountActivation = (user: User) => {
-  return jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn:  '3m' });
+  return jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn:  '1d' });
 };
 
 export const verifyRefreshToken = (token: string) => {

@@ -1,5 +1,7 @@
-import { UserAttributes } from "../models/usersModel";
+import dotenv from 'dotenv';
+import { UserAttributes } from '../models/usersModel';
 
+dotenv.config();
 interface SerializedUser {
   id: number;
   firstName: string;
@@ -10,6 +12,7 @@ interface SerializedUser {
   isActive: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  avatarUrl?: string | null;
 }
 
 interface SerializedAccountActivateData {
@@ -20,6 +23,10 @@ interface SerializedAccountActivateData {
 }
 
 export const serializeUser = (user: UserAttributes): SerializedUser => {
+  const avatarUrl = user.avatarPublicId
+    ? `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,g_auto,q_auto,f_auto/${user.avatarPublicId}`
+    : null;
+
   return {
     id: user.id,
     firstName: user.firstName,
@@ -30,6 +37,7 @@ export const serializeUser = (user: UserAttributes): SerializedUser => {
     isActive: user.isActive,
     createdAt: user.createdAt,
     updatedAt: user.createdAt,
+    avatarUrl,
   };
 };
 
@@ -38,7 +46,7 @@ export const serializeAccountActivateData = (user: UserAttributes): SerializedAc
     firstName: user.firstName,
     lastName: user.lastName,
     email: user.email,
-    isActive: user.isActive
+    isActive: user.isActive,
   };
 };
 

@@ -5,8 +5,9 @@ import bcrypt from 'bcrypt';
 
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
-
-import { compile } from 'handlebars';
+import Handlebars from 'handlebars';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 import { userService } from '../services';
 import { generateAccessToken, generateRefreshToken } from '../helpers/tokenUtils.js';
@@ -16,12 +17,14 @@ import { User } from '../models/usersModel';
 import { RegisterInput, UserRoleType } from '../schemas/usersSchema';
 import { sendEmail } from '../helpers/sendEmail';
 import { SerializedUser, serializeUser } from '../serializer/userSerializer';
-import { forceLogoutUser } from '../index.js';
 import { ResponseHandler } from '../handlers/errorHandler';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const resetPasswordTemplatePath = join(__dirname, '../templates/resetPassword.html');
 const resetPasswordTemplateSource = readFileSync(resetPasswordTemplatePath, 'utf8');
-const resetPasswordTemplate = compile(resetPasswordTemplateSource);
+const resetPasswordTemplate = Handlebars.compile(resetPasswordTemplateSource);
 
 const roles = ['user', 'superadmin'];
 
@@ -93,10 +96,9 @@ const forgotPassword = async (req: Request, res: Response) => {
       return ResponseHandler.notFound(res, 'No account found with this email address.');
     }
     await userService.updateUser(user.id, { tokenInvalidatedAt: new Date() });
-    const token = generateAccessToken(user as User, '3m');
+    const token = generateAccessToken(user as User, '10m');
     const html = resetPasswordTemplate({ FRONTEND_URL: config.frontendUrl, TOKEN: token });
     await sendEmail(email, 'Reset Password', html);
-    forceLogoutUser(user.id);
     ResponseHandler.success(res, 'Password reset email send successfully');
   } catch (err) {
     ResponseHandler.serverError(res, 'Failed to process request');
