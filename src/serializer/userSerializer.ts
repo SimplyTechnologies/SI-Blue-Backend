@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import { UserAttributes } from '../models/usersModel';
+import { getUserAvatarUrlFromId } from '../helpers/userAvatarUrlFromId';
 
 dotenv.config();
 interface SerializedUser {
@@ -23,9 +24,7 @@ interface SerializedAccountActivateData {
 }
 
 export const serializeUser = (user: UserAttributes): SerializedUser => {
-  const avatarUrl = user.avatarPublicId
-    ? `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,g_auto,q_auto,f_auto/${user.avatarPublicId}`
-    : null;
+  const avatarUrl = getUserAvatarUrlFromId(user.avatarPublicId);
 
   return {
     id: user.id,

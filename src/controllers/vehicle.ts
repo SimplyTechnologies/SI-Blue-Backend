@@ -38,7 +38,7 @@ const createVehicle = async (req: Request, res: Response) => {
       return ResponseHandler.badRequest(res, 'Vehicle data');
     }
 
-    await vehicleService.createVehicle(req.vehicle);
+    await vehicleService.createVehicle(req.vehicle, req.user?.id);
 
     ResponseHandler.created(res, 'Vehicle created successfully');
   } catch (error: unknown) {
@@ -287,7 +287,7 @@ export const deleteVehicle = async (req: Request, res: Response) => {
       return ResponseHandler.badRequest(res, `Vehicle can't be deleted`);
     }
 
-    await vehicleService.deleteVehicle(parseInt(id));
+    await vehicleService.deleteVehicle(parseInt(id), req.user?.id);
     ResponseHandler.success(res, 'Vehicle deleted successfully');
   } catch (error) {
     ResponseHandler.serverError(res, 'Failed to delete vehicle');
@@ -301,7 +301,7 @@ const updateVehicle = async (req: Request, res: Response) => {
     }
 
     const vehicleId = parseInt(req.params.id);
-    await vehicleService.updateVehicle(vehicleId, req.vehicle);
+    await vehicleService.updateVehicle(vehicleId, req.vehicle, req.user?.id);
 
     const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
       vehicleId,
@@ -334,7 +334,7 @@ const unassignVehicle = async (req: Request, res: Response) => {
     const customerEmail = customer.email;
 
     if (unassignAll) {
-      await vehicleService.unassignVehicle(undefined, customerId);
+      await vehicleService.unassignVehicle(req.user?.id, undefined, customerId);
       const html = loadEmailTemplate('unassignAll.html', {
         FRONTEND_URL: config.frontendUrl,
         NAME: customer.firstName,
@@ -352,7 +352,7 @@ const unassignVehicle = async (req: Request, res: Response) => {
       return ResponseHandler.notFound(res, 'Vehicle not found');
     }
 
-    await vehicleService.unassignVehicle(vehicleId);
+    await vehicleService.unassignVehicle(req.user?.id, vehicleId, undefined);
     const html = loadEmailTemplate('unassignment.html', {
       FRONTEND_URL: config.frontendUrl,
       MAKE: vehicle.model?.make?.name,
@@ -380,3 +380,4 @@ export default {
   updateVehicle,
   unassignVehicle,
 };
+

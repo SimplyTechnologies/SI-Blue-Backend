@@ -2,6 +2,7 @@ import { DataTypes, Model, Sequelize, Optional } from 'sequelize';
 import { User } from './usersModel';
 import { CarModel } from './carModelsModel';
 import { Make } from './carMakesModel';
+import { registerVehicleHooks } from './hooks/vehicle';
 
 export interface LocationData {
   street: string;
@@ -19,13 +20,12 @@ interface VehicleAttributes {
   year: number;
   vin: string;
   location: LocationData;
-  userId?: number;
   modelId: number;
   customerId?: number | null;
   assignedDate?: Date | null;
   favorite?: User[];
   model?: CarModel;
-  make?: Make
+  make?: Make;
 }
 
 interface VehicleCreationAttributes extends Optional<VehicleAttributes, 'id'> {}
@@ -35,7 +35,6 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
   public year!: number;
   public vin!: string;
   public location!: LocationData;
-  public userId!: number;
   public modelId!: number;
   public customerId!: number;
   public assignedDate?: Date;
@@ -50,6 +49,7 @@ class Vehicle extends Model<VehicleAttributes, VehicleCreationAttributes> implem
       otherKey: 'userId',
     });
   }
+  declare _previousDataValues: VehicleAttributes;
 }
 
 const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
@@ -124,6 +124,8 @@ const defineVehicleModel = (sequelize: Sequelize): typeof Vehicle => {
       ],
     },
   );
+
+  registerVehicleHooks();
 
   return Vehicle;
 };

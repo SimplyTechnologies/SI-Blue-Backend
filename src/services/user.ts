@@ -1,14 +1,14 @@
 import { col, fn, Op, where as sequelizeWhere } from 'sequelize';
 import { Readable } from 'stream';
-import dotenv from 'dotenv';
 import { User } from '../models/usersModel';
 import { RegisterInput } from '../schemas/usersSchema.js';
 import { deleteCloudinaryFile } from '../helpers/deleteCloudinaryFile';
 import cloudinary from '../configs/cloudinary';
 import { SerializedUser, serializeUser } from '../serializer/userSerializer';
 import { runInTransaction } from '../helpers/transactionHelpers';
+import { getUserAvatarUrlFromId } from '../helpers/userAvatarUrlFromId';
 
-dotenv.config();
+
 
 export interface InputUser {
   firstName: string;
@@ -214,7 +214,12 @@ const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
       await deleteCloudinaryFile(user.avatarPublicId);
     }
 
-    const avatarUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,g_auto,q_auto,f_auto/${user.avatarPublicId}`;
+    
+    user.avatarPublicId = result.public_id;
+    await user.save({transaction});
+
+    const avatarUrl = getUserAvatarUrlFromId(user.avatarPublicId);;
+
     return avatarUrl;
   });
 };

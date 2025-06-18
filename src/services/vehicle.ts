@@ -1,4 +1,4 @@
-import { Op } from 'sequelize';
+import { CreateOptions, DestroyOptions, Op, UpdateOptions } from 'sequelize';
 import { Make } from '../models/carMakesModel';
 import { Vehicle } from '../models/vehiclesModel';
 import { CarModel } from '../models/carModelsModel';
@@ -24,14 +24,17 @@ interface CreateVehicleData {
   createdAt?: Date;
 }
 
-const createVehicle = async (vehicleData: CreateVehicleData) => {
+const createVehicle = async (vehicleData: CreateVehicleData, userId?: number) => {
   try {
-    const savedVehicle = await Vehicle.create({
-      modelId: vehicleData.modelId,
-      year: vehicleData.year,
-      vin: vehicleData.vin,
-      location: vehicleData.location,
-    });
+    const savedVehicle = await Vehicle.create(
+      {
+        modelId: vehicleData.modelId,
+        year: vehicleData.year,
+        vin: vehicleData.vin,
+        location: vehicleData.location,
+      },
+      { userId } as CreateOptions,
+    );
     return savedVehicle.dataValues;
   } catch (err: any) {
     console.log('Failed to create vehicle', err);
@@ -126,38 +129,37 @@ const getVehicleById = async (id: number, userId?: number) => {
     throw err;
   }
 };
-import { runInTransaction } from '../helpers/transactionHelpers';
+const updateVehicleByCustomerId = async (customerId: number, vehicleId: number, userId?: number) => {
+  try {
+    if (!customerId || !vehicleId) {
+      throw new Error('Customer ID or vehicle ID missing');
+    }
 
-const updateVehicleByCustomerId = async (customerId: number, vehicleId: number) => {
-  if (!customerId || !vehicleId) {
-    throw new Error('Customer ID or vehicle ID missing');
-  }
-
-  return await runInTransaction(async transaction => {
     const customer = await customerService.findCustomerById(customerId);
     if (!customer) {
       throw new Error('Customer data missing');
     }
 
-    const vehicle = await Vehicle.findByPk(vehicleId, { transaction });
+    const vehicle = await Vehicle.findByPk(vehicleId);
     if (!vehicle) {
       throw new Error('Vehicle data missing');
     }
 
-    const [updatedCount] = await Vehicle.update(
-      { customerId, assignedDate: new Date() },
-      {
-        where: { id: vehicleId },
-        transaction,
-      },
-    );
+    const [updatedCount] = await Vehicle.update({ customerId, assignedDate: new Date() }, {
+      where: { id: vehicleId },
+      individualHooks: true,
+      userId: userId,
+    } as UpdateOptions);
 
     if (updatedCount === 0) {
       throw new Error('Vehicle update failed - no rows affected');
     }
 
     return updatedCount;
-  });
+  } catch (err: any) {
+    console.error('Error in updateVehicleByCustomerId:', err);
+    throw err;
+  }
 };
 
 const getAllVehicleLocationsAndCounts = async () => {
@@ -203,20 +205,25 @@ const getAllVehicleLocationsAndCounts = async () => {
   return { vehicleLocations, totalCount, totalSoldVehicles, totalCustomerCount };
 };
 
-const deleteVehicle = async (id: number) => {
-  return await runInTransaction(async transaction => {
-    const vehicle = await Vehicle.findByPk(id, { transaction });
-    if (!vehicle) {
-      throw new Error('Vehicle not found');
+const deleteVehicle = async (id: number, userId?: number) => {
+  try {
+    const vehicle = await Vehicle.findByPk(id);
+    if (vehicle) {
+      return await vehicle.destroy({ userId } as DestroyOptions);
     }
-    await vehicle.destroy({ transaction });
-    return true;
-  });
+  } catch (err) {
+    console.error('Fail to delete vehicle', err);
+    throw err;
+  }
 };
 
-const updateVehicle = async (id: number, vehicleData: CreateVehicleData) => {
+const updateVehicle = async (id: number, vehicleData: CreateVehicleData, userId?: number) => {
   try {
-    const [updatedCount] = await Vehicle.update({ ...vehicleData, assignedDate: new Date() }, { where: { id: id } });
+    const [updatedCount] = await Vehicle.update({ ...vehicleData, assignedDate: new Date() }, {
+      where: { id: id },
+      individualHooks: true,
+      userId,
+    } as UpdateOptions);
     if (updatedCount === 0) {
       throw new Error('Vehicle update failed - no rows affected');
     }
@@ -228,14 +235,14 @@ const updateVehicle = async (id: number, vehicleData: CreateVehicleData) => {
   }
 };
 
-const unassignVehicle = async (vehicleId?: number, customerId?: number) => {
- 
-  return await runInTransaction(async transaction => {
+const unassignVehicle = async (userId?: number, vehicleId?: number, customerId?: number) => {
+  try {
     if (customerId && !vehicleId) {
-      const [updatedCount] = await Vehicle.update(
-        { customerId: null, assignedDate: null },
-        { where: { customerId }, transaction },
-      );
+      const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, {
+        where: { customerId },
+        individualHooks: true,
+        userId,
+      } as UpdateOptions);
       if (updatedCount === 0) {
         throw new Error('No vehicles were unassigned');
       }
@@ -243,21 +250,26 @@ const unassignVehicle = async (vehicleId?: number, customerId?: number) => {
     }
 
     if (!vehicleId) {
-      throw new Error('Vehicle ID is required when unassign a single vehicle');
+      throw new Error('Vehicle ID is required when unassigning a single vehicle');
     }
 
-    const [updatedCount] = await Vehicle.update(
-      { customerId: null, assignedDate: null },
-      { where: { id: vehicleId }, transaction },
-    );
+    const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, {
+      where: { id: vehicleId },
+      individualHooks: true,
+      userId: userId,
+    } as UpdateOptions);
 
     if (updatedCount === 0) {
       throw new Error('Vehicle update failed - no rows affected');
     }
 
     return updatedCount;
-  });
+  } catch (err) {
+    console.error('Failed to unassign vehicle', err);
+    throw err;
+  }
 };
+
 
 const getVehiclesByCustomerId = async (customerId: number) => {
   const vehicles = await Vehicle.findAll({
