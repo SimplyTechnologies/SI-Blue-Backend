@@ -23,6 +23,7 @@ export interface UserActivityRawAttributes extends UserActivityAttributes {
     lastName: string;
     avatarPublicId: string;
   };
+  createdAt: Date;
 }
 
 export const serializeUserActivity = (userActivity: UserActivityRawAttributes): SerializedUserActivity => {
