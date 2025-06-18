@@ -10,6 +10,7 @@ import { InputUser } from '../services/user';
 import { loadEmailTemplate } from '../services/emailTemplate';
 import { SerializedAccountActivateData, SerializedUser, serializeUser, serializeAccountActivateData } from '../serializer/userSerializer';
 import { ResponseHandler } from '../handlers/errorHandler';
+import connectToDB from '../configs/database';
 
 declare global {
   namespace Express {
@@ -141,6 +142,7 @@ const updateUser = async (req: Request, res: Response) => {
 };
 
 const deleteInactiveUser = async (req: Request, res: Response) => {
+  const sequelize = await connectToDB()
   try {
     const { id } = req.params;
     if(!id) {
@@ -152,7 +154,7 @@ const deleteInactiveUser = async (req: Request, res: Response) => {
      return ResponseHandler.notFound(res, 'User not found')
     }
 
-    const deleted = await userService.softDeleteUser(user.id);
+    const deleted = await userService.softDeleteUser(user.id, sequelize);
 
     if (!deleted) {
      return ResponseHandler.serverError(res, 'Internal server error')

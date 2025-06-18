@@ -1,4 +1,4 @@
-import { col, fn, Op, where as sequelizeWhere } from 'sequelize';
+import { col, fn, Op, Sequelize, where as sequelizeWhere, Transaction } from 'sequelize';
 import { User } from '../models/usersModel';
 import { RegisterInput } from '../schemas/usersSchema.js';
 export interface InputUser {
@@ -125,26 +125,30 @@ const getUserByEmail = async (email: string, includeDeleted: boolean = false) =>
   }
 };
 
-const softDeleteUser = async (userId: number) => {
+const softDeleteUser = async (userId: number, sequelize :Sequelize) => {
+  const transaction = await sequelize.transaction()
   try {
     if (!userId) {
       throw new Error('User id missing');
     }
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {transaction});
     if (!user) {
       throw Error('User not found');
     }
     user.isActive = false;
     user.password = null;
     user.tokenInvalidatedAt = new Date();
-    await user.save();
-    const deletedRows = await User.destroy({ where: { id: userId } });
+    await user.save({transaction});
+    const deletedRows = await User.destroy({ where: { id: userId }, transaction });
+    await transaction.commit()
     return deletedRows > 0;
   } catch (err) {
     console.error('Error soft deleting user:', err);
+    await transaction.rollback()
     throw err;
   }
 };
+
 
 const restoreUser = async (userId: number) => {
   try {

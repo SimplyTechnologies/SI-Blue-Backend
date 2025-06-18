@@ -5,7 +5,7 @@ import { authenticateToken, requireAdmin } from '../middlewares/authMiddleware';
 
 const router = Router();
 
-router.post('/add-user', authenticateToken, requireAdmin, pendingUserDataValidateUserData, userController.addNewUser);
+router.post('/add-user', authenticateToken, requireAdmin, pendingUserDataValidateUserData, userController.addNewUserz);
 
 router.put('/update-user', authenticateToken, userController.updateUser);
 
