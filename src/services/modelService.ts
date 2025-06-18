@@ -1,22 +1,23 @@
+import { runInTransaction } from '../helpers/transactionHelpers';
 import { CarModel } from '../models/carModelsModel';
 import { InferCreationAttributes } from 'sequelize';
 
 type CarModelCreationAttributes = InferCreationAttributes<CarModel>;
 
 const createModel = async (modelData: Omit<CarModelCreationAttributes, 'id'>) => {
-  try {
+  return await runInTransaction(async transaction => {
     if (!modelData.name || !modelData.makeId) {
       throw new Error('Name and MakeId are required');
     }
-    const created = await CarModel.create({
-      name: modelData.name,
-      makeId: modelData.makeId,
-    });
+    const created = await CarModel.create(
+      {
+        name: modelData.name,
+        makeId: modelData.makeId,
+      },
+      { transaction },
+    );
     return created.dataValues;
-  } catch (err) {
-    console.error('Failed to create car model', err);
-    throw err;
-  }
+  });
 };
 
 const getModelById = async (id: number) => {
@@ -146,3 +147,4 @@ export default {
 //   getModelByName,
 //   getModelsByMakeId,
 // };
+

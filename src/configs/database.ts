@@ -65,5 +65,13 @@ const connectToDB = async () => {
 
   return sequelize;
 };
+let sequelizeInstance: Sequelize | null = null;
+
+export const getSequelizeInstance = async (): Promise<Sequelize> => {
+  if (!sequelizeInstance) {
+    sequelizeInstance = await connectToDB();
+  }
+  return sequelizeInstance;
+};
 
 export default connectToDB;

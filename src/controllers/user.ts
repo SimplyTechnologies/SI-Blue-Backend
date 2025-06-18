@@ -142,7 +142,7 @@ const updateUser = async (req: Request, res: Response) => {
 };
 
 const deleteInactiveUser = async (req: Request, res: Response) => {
-  const sequelize = await connectToDB()
+ 
   try {
     const { id } = req.params;
     if(!id) {
@@ -154,7 +154,7 @@ const deleteInactiveUser = async (req: Request, res: Response) => {
      return ResponseHandler.notFound(res, 'User not found')
     }
 
-    const deleted = await userService.softDeleteUser(user.id,sequelize);
+    const deleted = await userService.softDeleteUser(user.id);
 
     if (!deleted) {
      return ResponseHandler.serverError(res, 'Internal server error')

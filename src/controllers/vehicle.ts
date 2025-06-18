@@ -319,7 +319,9 @@ const updateVehicle = async (req: Request, res: Response) => {
 
 const unassignVehicle = async (req: Request, res: Response) => {
   try {
+    
     const { vehicleId, customerId, unassignAll } = req.body;
+    console.log(vehicleId, customerId)
     if (!customerId) {
       return ResponseHandler.badRequest(res, 'Customer ID is required');
     }
