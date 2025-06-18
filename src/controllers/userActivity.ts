@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ResponseHandler } from '../handlers/errorHandler';
 import userActivityService from '../services/userActivityService';
+import { serializeUserActivity, UserActivityRawAttributes } from '../serializer/userActivitySerializer';
 
 const getUserActivity = async (req: Request, res: Response) => {
   try {
@@ -12,8 +13,10 @@ const getUserActivity = async (req: Request, res: Response) => {
       offset: limit,
     });
 
+    const userActivity = rows.map((row) => serializeUserActivity(row as UserActivityRawAttributes));
+
     ResponseHandler.success(res, 'Customers data retrieved successfully', {
-      userActivity: rows,
+      userActivity,
       previousId: pageNum === 1 ? null : pageNum - 1,
       nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
     });

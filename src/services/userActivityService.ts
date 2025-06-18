@@ -12,6 +12,8 @@ const getUserActivity = async (options: { page?: number; offset?: number }) => {
     {
       model: User,
       as: 'user',
+      paranoid: false,
+      attributes: ['email', 'firstName', 'lastName', 'avatarPublicId'],
     },
   ];
 
