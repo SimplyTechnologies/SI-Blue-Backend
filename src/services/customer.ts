@@ -1,4 +1,4 @@
-import { col, fn, Op, where as sequelizeWhere } from 'sequelize';
+import { col, DestroyOptions, fn, Op, where as sequelizeWhere } from 'sequelize';
 import { Make } from '../models/carMakesModel';
 import { Vehicle } from '../models/vehiclesModel';
 import { Customer } from '../models/customersModel';
@@ -71,6 +71,20 @@ const getCustomerByEmail = async (email: string) => {
   }
 };
 
+const getCustomerById = async (id: number) => {
+  try {
+    if (!id) {
+      throw new Error('Id is required');
+    }
+    const customer = await Customer.findByPk(id);
+    if (!customer) return null;
+    return customer.dataValues;
+  } catch (err) {
+    console.error('Failed to get customer by Id', err);
+    throw err;
+  }
+};
+
 const getCustomers = async (options: { search?: string; page?: number; offset?: number }) => {
   const { search, page = 1, offset = 25 } = options;
   const limit = offset;
@@ -139,10 +153,10 @@ const getCustomers = async (options: { search?: string; page?: number; offset?: 
   };
 };
 
-const deleteCustomer = async (id: number) => {
+const deleteCustomer = async (id: number, userId?: number) => {
   const customer = await Customer.findByPk(id);
   if (customer) {
-    return await customer.destroy();
+    return await customer.destroy({ userId } as DestroyOptions);
   }
 };
 
@@ -153,4 +167,5 @@ export default {
   searchDatabase,
   findCustomerById,
   deleteCustomer,
+  getCustomerById,
 };

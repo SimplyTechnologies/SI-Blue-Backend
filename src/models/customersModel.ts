@@ -1,4 +1,5 @@
 import { DataTypes, Model, Sequelize, Optional } from 'sequelize';
+import { registerCustomerHooks } from './hooks/customer';
 
 export interface CustomerAttributes {
   id: number;
@@ -22,6 +23,8 @@ export class Customer extends Model<CustomerAttributes, CustomerCreationAttribut
   public createdAt?: Date;
   public updatedAt?: Date;
   public deletedAt?: Date;
+
+  declare _previousDataValues: CustomerAttributes;
 }
 
 export const defineCustomerModel = (sequelize: Sequelize): typeof Customer => {
@@ -60,6 +63,8 @@ export const defineCustomerModel = (sequelize: Sequelize): typeof Customer => {
       underscored: false,
     },
   );
+
+  registerCustomerHooks();
 
   return Customer;
 };

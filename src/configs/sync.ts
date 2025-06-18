@@ -5,6 +5,7 @@ import { defineMakeModel, Make } from '../models/carMakesModel.js';
 import { defineCarModel, CarModel } from '../models/carModelsModel.js';
 import { defineCustomerModel, Customer } from '../models/customersModel.js';
 import { defineVehicleModel, Vehicle } from '../models/vehiclesModel.js';
+import { defineUserActivityModel, UserActivity } from '../models/userActivity';
 
 const syncDatabase = async (): Promise<Sequelize> => {
   try {
@@ -22,6 +23,7 @@ const syncDatabase = async (): Promise<Sequelize> => {
     defineUserModel(sequelize);
     defineVehicleModel(sequelize);
     defineCustomerModel(sequelize);
+    defineUserActivityModel(sequelize);
 
     console.log('Setting up associations...');
 
@@ -65,6 +67,16 @@ const syncDatabase = async (): Promise<Sequelize> => {
       as: 'favorite',
     });
 
+    User.hasMany(UserActivity, {
+      foreignKey: 'userId',
+      as: 'activities',
+    });
+
+    UserActivity.belongsTo(User, {
+      foreignKey: 'userId',
+      as: 'user',
+    });
+
     console.log('Creating tables...');
     try {
       console.log('All tables have been successfully created or altered!');
@@ -92,3 +104,4 @@ const syncDatabase = async (): Promise<Sequelize> => {
 };
 
 export { syncDatabase };
+
