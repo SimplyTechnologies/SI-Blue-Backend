@@ -222,6 +222,7 @@ const updateVehicle = async (id: number, vehicleData: CreateVehicleData, userId?
   try {
     const [updatedCount] = await Vehicle.update({ ...vehicleData, assignedDate: new Date() }, {
       where: { id: id },
+      individualHooks: true,
       userId,
     } as UpdateOptions);
     if (updatedCount === 0) {
@@ -240,7 +241,8 @@ const unassignVehicle = async (userId?: number, vehicleId?: number, customerId?:
     if (customerId && !vehicleId) {
       const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, {
         where: { customerId },
-        userId: userId,
+        individualHooks: true,
+        userId,
       } as UpdateOptions);
       if (updatedCount === 0) {
         throw new Error('No vehicles were unassigned');

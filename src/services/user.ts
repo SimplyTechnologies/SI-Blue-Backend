@@ -6,6 +6,7 @@ import { RegisterInput } from '../schemas/usersSchema.js';
 import { deleteCloudinaryFile } from '../helpers/deleteCloudinaryFile';
 import cloudinary from '../configs/cloudinary';
 import { SerializedUser, serializeUser } from '../serializer/userSerializer';
+import { getUserAvatarUrlFromId } from '../helpers/userAvatarUrlFromId';
 
 dotenv.config();
 
@@ -232,7 +233,7 @@ const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
     user.avatarPublicId = result.public_id;
     await user.save();
 
-    const avatarUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/c_fill,g_auto,q_auto,f_auto/${user.avatarPublicId}`;
+    const avatarUrl = getUserAvatarUrlFromId(user.avatarPublicId);;
 
     return avatarUrl;
   } catch (err) {
