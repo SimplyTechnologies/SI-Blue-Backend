@@ -1,5 +1,6 @@
-import { favoritesService } from "../services";
-
+import { VehicleAttributes } from '../models/vehiclesModel';
+import { LocationData } from '../schemas/vehiclesSchema';
+import { customerService, favoritesService, makeService, modelService, vehicleService } from '../services';
 
 interface Make {
   id: number;
@@ -42,6 +43,27 @@ interface SerializedVehicle {
   } | null;
 }
 
+interface SerializedVehicleForActivity {
+  id: number;
+  year: number;
+  vin: string;
+  location: LocationData;
+  customer: {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+  } | null;
+  model: {
+    id: number;
+    name: string;
+  } | null;
+  make: {
+    id: number;
+    name: string;
+  } | null;
+}
 
 const getUserFavoriteIds = async (userId?: string | number): Promise<Set<number>> => {
   if (!userId) {
@@ -56,7 +78,6 @@ const getUserFavoriteIds = async (userId?: string | number): Promise<Set<number>
     return new Set();
   }
 };
-
 
 const serializeVehicle = (vehicle: RawVehicle, favoriteVehicleIds: Set<number>): SerializedVehicle => {
   return {
@@ -84,24 +105,19 @@ const serializeVehicle = (vehicle: RawVehicle, favoriteVehicleIds: Set<number>):
   };
 };
 
-const serializeSingleVehicle = async (
-  vehicle: RawVehicle, 
-  userId?: number
-) => {
+const serializeSingleVehicle = async (vehicle: RawVehicle, userId?: number) => {
   const favoriteVehicleIds = await getUserFavoriteIds(userId);
   return serializeVehicle(vehicle, favoriteVehicleIds);
 };
 
-
-
 export const serializeVehicleFromService = async (
   vehicleId: number,
-  vehicleService: any, 
-  userId?: number
+  vehicleService: any,
+  userId?: number,
 ): Promise<SerializedVehicle | null> => {
   try {
     const vehicle: RawVehicle = await vehicleService.getVehicleById(vehicleId);
-    
+
     if (!vehicle) {
       return null;
     }
@@ -113,4 +129,37 @@ export const serializeVehicleFromService = async (
   }
 };
 
+export const serializeVehicleForUserActivity = async (
+  vehicle: VehicleAttributes,
+): Promise<SerializedVehicleForActivity | null> => {
+  try {
+    if (!vehicle?.id) return null;
+
+    const model = await modelService.getModelById(vehicle.id);
+    let make = null;
+    let customer = null;
+
+    if (model?.id) {
+      make = await makeService.getMakeById(model.makeId);
+    }
+
+    if (vehicle.customerId) {
+      customer = await customerService.getCustomerById(vehicle.customerId);
+    }
+
+    const formattedVehicle = {
+      ...vehicle,
+      make: make || null,
+      model: model ? { id: model.id, name: model.name } : null,
+      customer: customer,
+    };
+
+    return formattedVehicle;
+  } catch (error) {
+    console.error('Error serializing vehicle:', error);
+    throw error;
+  }
+};
+
 export type { SerializedVehicle, RawVehicle };
+

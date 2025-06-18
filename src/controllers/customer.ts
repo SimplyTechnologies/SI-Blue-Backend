@@ -17,7 +17,7 @@ const createCustomer = async (req: Request, res: Response) => {
         return ResponseHandler.notFound(res, 'Customer not found');
       }
 
-      const updatedCount: number = await vehicleService.updateVehicleByCustomerId(customerId, vehicleId);
+      const updatedCount: number = await vehicleService.updateVehicleByCustomerId(customerId, vehicleId, req.user?.id);
       if (updatedCount === 0) {
         return ResponseHandler.serverError(res, 'Failed to update vehicle');
       }
@@ -56,7 +56,7 @@ const createCustomer = async (req: Request, res: Response) => {
       throw new Error('Customer Id missing');
     }
 
-    await vehicleService.updateVehicleByCustomerId(newCustomer.id, vehicleId);
+    await vehicleService.updateVehicleByCustomerId(newCustomer.id, vehicleId, req.user?.id);
 
     const formattedVehicle: SerializedVehicle | null = await serializeVehicleFromService(
       vehicleId,
@@ -151,7 +151,7 @@ const deleteCustomer = async (req: Request, res: Response) => {
     if (vehicles.length > 0) {
       return ResponseHandler.conflict(res, `Customer can't be deleted`);
     }
-    await customerService.deleteCustomer(parseInt(id));
+    await customerService.deleteCustomer(parseInt(id), req.user?.id);
     res.status(204).send();
   } catch (error) {
     console.error(error);
