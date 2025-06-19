@@ -1,6 +1,5 @@
 import { Op } from 'sequelize';
 import { Make } from '../models/carMakesModel';
-import { CarModel } from '../models/carModelsModel';
 
 const getAllMakes = async () => {
   try {
