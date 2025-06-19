@@ -13,6 +13,7 @@ const sequelizeRoot = new Sequelize(
     dialectOptions: {
       ssl: {
         require: true,
+        rejectUnauthorized: false,
       },
     },
   },
@@ -53,6 +54,7 @@ const connectToDB = async () => {
       dialectOptions: {
         ssl: {
           require: true,
+          rejectUnauthorized: false,
         },
       },
     },
