@@ -92,8 +92,10 @@ const getCustomers = async (options: { search?: string; page?: number; offset?: 
 
   let where = {};
   if (search) {
+    const decodedSearch = decodeURIComponent(search);
+    
     where = sequelizeWhere(fn('concat', col('firstName'), ' ', col('lastName')), {
-      [Op.iLike]: `%${search}%`,
+      [Op.iLike]: `%${decodedSearch}%`,
     });
   }
 
