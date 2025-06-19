@@ -42,3 +42,4 @@ export type SearchVehiclesParams = {
   offset?: number;
   userId?: string;
 };
+

@@ -49,7 +49,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
     if (err instanceof Error && err.message === 'jwt expired') {
       return ResponseHandler.unauthorized(res, 'Token expired');
     }
-    ResponseHandler.serverError(res, 'Failed to authenticate token')
+    ResponseHandler.serverError(res, 'Failed to authenticate token');
   }
 };
 
@@ -60,7 +60,7 @@ export const authenticateRefreshToken = (req: Request, res: Response, next: Next
     if (err) return next(err);
 
     if (!decodedJWT) {
-      return ResponseHandler.forbidden(res, 'Invalid refresh token')
+      return ResponseHandler.forbidden(res, 'Invalid refresh token');
     }
 
     const user = await userService.getUserById(decodedJWT.id);
@@ -80,15 +80,15 @@ export const authenticateRefreshToken = (req: Request, res: Response, next: Next
   })(req, res, next);
 };
 
-export const requireRole = (userRole:string) => {
+export const requireRole = (userRole: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-     return  ResponseHandler.unauthorized(res, 'Authentication required')
+      return ResponseHandler.unauthorized(res, 'Authentication required');
     }
-    const { role } = req.user  as DbUser;
+    const { role } = req.user as DbUser;
 
     if (role != userRole) {
-      return ResponseHandler.forbidden(res, 'Insufficient permission')
+      return ResponseHandler.forbidden(res, 'Insufficient permission');
     }
 
     next();
@@ -102,18 +102,22 @@ export const validateRegistration = async (req: Request, res: Response, next: Ne
     const result = RegisterSchema.safeParse(req.body);
 
     if (!result.success) {
-      return ResponseHandler.badRequest(res,'Validation failed',result.error.errors.map(err => err.message) )
+      return ResponseHandler.badRequest(
+        res,
+        'Validation failed',
+        result.error.errors.map(err => err.message),
+      );
     }
 
     const { email, password, ...userData } = result.data;
 
     const existingUser = await userService.getUserByEmail(email);
     if (existingUser) {
-      return ResponseHandler.badRequest(res, 'User already exists')
+      return ResponseHandler.badRequest(res, 'User already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    req.registeredUser =  {
+    req.registeredUser = {
       ...userData,
       email,
       password: hashedPassword,
@@ -122,7 +126,7 @@ export const validateRegistration = async (req: Request, res: Response, next: Ne
     next();
   } catch (error) {
     console.error('Registration validation error:', error);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -137,21 +141,18 @@ export const validateLogin = async (req: Request, res: Response, next: NextFunct
 
     const user = await userService.getUserByEmail(email);
 
-
-
     if (!user) {
-      return ResponseHandler.unauthorized(res,'Invalid email or password' );
+      return ResponseHandler.unauthorized(res, 'Invalid email or password');
     }
 
     if (!user.isActive) {
-      return ResponseHandler.unauthorized(res,'Invalid email or password' );
+      return ResponseHandler.unauthorized(res, 'Invalid email or password');
     }
-
 
     const isValidPassword = await bcrypt.compare(password, user.password as string);
 
     if (!isValidPassword) {
-      return ResponseHandler.unauthorized(res,'Invalid email or password' );
+      return ResponseHandler.unauthorized(res, 'Invalid email or password');
     }
 
     req.user = user as DbUser;
@@ -159,7 +160,7 @@ export const validateLogin = async (req: Request, res: Response, next: NextFunct
     next();
   } catch (error) {
     console.error('Login validation error:', error);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -168,7 +169,11 @@ export const validateAccountActivation = async (req: Request, res: Response, nex
     const result = AccountActivationSchema.safeParse(req.body);
 
     if (!result.success) {
-      return ResponseHandler.badRequest(res, 'Validation failed',result.error.errors.map(err => err.message) )
+      return ResponseHandler.badRequest(
+        res,
+        'Validation failed',
+        result.error.errors.map(err => err.message),
+      );
     }
 
     const { password, token } = result.data;
@@ -178,17 +183,17 @@ export const validateAccountActivation = async (req: Request, res: Response, nex
       const userId = decodedJWT.id as number;
 
       if (!decodedJWT) {
-        return ResponseHandler.forbidden(res, 'Invalid activation token')
+        return ResponseHandler.forbidden(res, 'Invalid activation token');
       }
 
       const existingUser = await userService.getUserById(userId);
 
       if (!existingUser) {
-        return ResponseHandler.notFound(res, 'User not found')
+        return ResponseHandler.notFound(res, 'User not found');
       }
 
       if (existingUser.isActive) {
-        return ResponseHandler.badRequest(res, 'Account already active. Try logging in.')
+        return ResponseHandler.badRequest(res, 'Account already active. Try logging in.');
       }
 
       const hashedPassword = await bcrypt.hash(password, 12);
@@ -201,13 +206,13 @@ export const validateAccountActivation = async (req: Request, res: Response, nex
       next();
     } catch (err) {
       if (err instanceof Error && err.message === 'jwt expired') {
-        return ResponseHandler.unauthorized(res, 'Activation link expired')
+        return ResponseHandler.unauthorized(res, 'Activation link expired');
       }
-      ResponseHandler.serverError(res, 'Internal server error')
+      ResponseHandler.serverError(res, 'Internal server error');
     }
   } catch (error) {
     console.error('Account Activation error:', error);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 

@@ -8,9 +8,14 @@ import config from '../configs/config';
 import { sendEmail } from '../helpers/sendEmail';
 import { InputUser } from '../services/user';
 import { loadEmailTemplate } from '../services/emailTemplate';
-import { SerializedAccountActivateData, SerializedUser, serializeUser, serializeAccountActivateData } from '../serializer/userSerializer';
+import {
+  SerializedAccountActivateData,
+  SerializedUser,
+  serializeUser,
+  serializeAccountActivateData,
+} from '../serializer/userSerializer';
 import { ResponseHandler } from '../handlers/errorHandler';
-import connectToDB from '../configs/database';
+import { validateFileBuffer } from '../middlewares/avatarUpload';
 
 declare global {
   namespace Express {
@@ -36,17 +41,17 @@ const addNewUser = async (req: Request, res: Response) => {
       });
 
       await sendEmail(restoredUser.email, emailSubject, emailHtml);
-      return ResponseHandler.success(res, 'Account restored and activation email sent')
+      return ResponseHandler.success(res, 'Account restored and activation email sent');
     }
 
     const pendingUser = req.pendingUser as InputUser;
 
     if (!pendingUser) {
-      return ResponseHandler.badRequest(res,'User data missing' )
+      return ResponseHandler.badRequest(res, 'User data missing');
     }
 
     if (!pendingUser.email) {
-      return ResponseHandler.badRequest(res, 'Email is required'  )
+      return ResponseHandler.badRequest(res, 'Email is required');
     }
 
     const newUser = { ...pendingUser, isActive: false };
@@ -63,14 +68,14 @@ const addNewUser = async (req: Request, res: Response) => {
 
     await sendEmail(pendingUser.email, emailSubject, emailHtml);
 
-    ResponseHandler.success(res,'Account activation email sent' )
+    ResponseHandler.success(res, 'Account activation email sent');
   } catch (error) {
     console.error('Error in addNewUser:', error);
 
     if (error instanceof Error) {
       return ResponseHandler.badRequest(res, error.message);
     }
-    ResponseHandler.serverError(res, 'Failed to send activation email')
+    ResponseHandler.serverError(res, 'Failed to send activation email');
   }
 };
 
@@ -78,42 +83,43 @@ const getUserById = async (req: Request, res: Response) => {
   try {
     const { token } = req.params;
     if (!token) {
-      return ResponseHandler.notFound(res,'token not found' )
+      return ResponseHandler.notFound(res, 'token not found');
     }
 
     const decoded = jwt.verify(token, config.jwt.secret as string) as User;
     const user = await userService.getUserById(decoded.id);
 
     if (!user) {
-      return ResponseHandler.notFound(res,'User not found' )
+      return ResponseHandler.notFound(res, 'User not found');
     }
 
     const formattedUser: SerializedAccountActivateData | null = serializeAccountActivateData(user);
 
-    ResponseHandler.success(res, 'User retrieved successfully', {user: formattedUser})
+    ResponseHandler.success(res, 'User retrieved successfully', { user: formattedUser });
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.log(err.message);
     } else console.log('An unknown error occurred ');
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
 const getUsers = async (req: Request, res: Response) => {
   try {
-    const currentUserId = req.user?.id as number
+    const currentUserId = req.user?.id as number;
     const { search, page, offset } = req.query;
     const pageNum = page ? Math.max(Number(page), 1) : 1;
     const limit = offset ? Number(offset) : 25;
-    const result = await userService.getAllUsers({
-      search: search as string,
-      page: pageNum,
-      offset: limit
-    }, currentUserId);
+    const result = await userService.getAllUsers(
+      {
+        search: search as string,
+        page: pageNum,
+        offset: limit,
+      },
+      currentUserId,
+    );
 
-
-
-    ResponseHandler.success(res, 'Users retrieved successfully', result)
+    ResponseHandler.success(res, 'Users retrieved successfully', result);
   } catch (err) {
     console.log(err);
   }
@@ -123,55 +129,92 @@ const updateUser = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-
-     return ResponseHandler.unauthorized(res, 'Unauthorized')
+      return ResponseHandler.unauthorized(res, 'Unauthorized');
     }
     const updatedUser = await userService.updateUser(userId, req.body);
 
     if (!updatedUser) {
-     return ResponseHandler.notFound(res, 'User not found')
+      return ResponseHandler.notFound(res, 'User not found');
     }
 
     const formattedUser: SerializedUser | null = serializeUser(updatedUser);
 
-    ResponseHandler.success(res, 'User updated successfully', {user: formattedUser})
+    ResponseHandler.success(res, 'User updated successfully', { user: formattedUser });
   } catch (err) {
     console.error(err);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
 const deleteInactiveUser = async (req: Request, res: Response) => {
- 
   try {
     const { id } = req.params;
-    if(!id) {
-     return ResponseHandler.badRequest(res, 'id missing')
+    if (!id) {
+      return ResponseHandler.badRequest(res, 'id missing');
     }
     const user = (await userService.getUserById(parseInt(id))) as User;
 
     if (!user) {
-     return ResponseHandler.notFound(res, 'User not found')
+      return ResponseHandler.notFound(res, 'User not found');
     }
 
     const deleted = await userService.softDeleteUser(user.id);
 
     if (!deleted) {
-     return ResponseHandler.serverError(res, 'Internal server error')
+      return ResponseHandler.serverError(res, 'Internal server error');
     }
-    const emailSubject = `Your Account with ${config.productInfo} Has Been Deleted`
+    const emailSubject = `Your Account with ${config.productInfo} Has Been Deleted`;
     const emailHtml = loadEmailTemplate('deleteAccount.html', {
       firstName: user.firstName,
       productInfo: config.productInfo,
-
     });
 
     await sendEmail(user.email, emailSubject, emailHtml);
- 
-    ResponseHandler.success(res, 'User deleted successfully')
+
+    ResponseHandler.success(res, 'User deleted successfully');
   } catch (err) {
     console.error('Error in deleteInactiveUser:', err);
-  ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
+  }
+};
+export const uploadAvatar = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return ResponseHandler.serverError(res, 'No file uploaded');
+    }
+
+    try {
+      await validateFileBuffer(req.file);
+    } catch (err) {
+      return ResponseHandler.badRequest(res, (err as Error).message);
+    }
+
+    const userId = parseInt(req.params.id);
+
+    if (isNaN(userId)) {
+      return ResponseHandler.badRequest(res, 'Invalid user ID');
+    }
+
+    const avatarUrl = await userService.uploadUserAvatar(userId, req.file.buffer);
+    ResponseHandler.success(res, 'Avatar successfully uploaded', { avatarUrl });
+  } catch (err) {
+    console.error('Error in updating avatar:', err);
+    ResponseHandler.serverError(res, 'Internal server error');
+  }
+};
+
+const deleteAvatar = async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.id);
+
+    if (isNaN(userId)) {
+      return ResponseHandler.badRequest(res, 'Invalid user ID');
+    }
+    const avatarUrl = await userService.deleteUserAvatar(userId);
+    ResponseHandler.success(res, 'Avatar successfully deleted', { avatarUrl });
+  } catch (err) {
+    console.error('Error in updating avatar:', err);
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -181,4 +224,6 @@ export default {
   getUsers,
   updateUser,
   deleteInactiveUser,
+  deleteAvatar,
+  uploadAvatar,
 };

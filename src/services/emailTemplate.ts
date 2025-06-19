@@ -22,3 +22,4 @@ export const loadEmailTemplate = (templateName: string, variables: any): string 
     throw new Error('Failed to load email template');
   }
 };
+

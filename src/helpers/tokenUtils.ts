@@ -12,8 +12,9 @@ export const generateAccessToken = (user: User, expiresIn?: StringValue) => {
 export const generateRefreshToken = (user: User, remember: boolean) => {
   return jwt.sign({ id: user.id }, REFRESH_SECRET, { expiresIn: remember ? '30d' : '1d' });
 };
+
 export const generateTokenForAccountActivation = (user: User) => {
-  return jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn:  '1d' });
+  return jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1d' });
 };
 
 export const verifyRefreshToken = (token: string) => {
@@ -22,4 +23,5 @@ export const verifyRefreshToken = (token: string) => {
 
 export const verifyAccessToken = (token: string) => {
   return jwt.verify(token, JWT_SECRET);
-}
+};
+

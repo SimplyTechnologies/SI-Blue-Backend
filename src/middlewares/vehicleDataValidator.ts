@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import vehicleService from '../services/vehicle.js';
 import { ResponseHandler } from '../handlers/errorHandler.js';
 
-
 declare global {
   namespace Express {
     interface Request {
@@ -10,7 +9,7 @@ declare global {
         modelId: number;
         year: number;
         vin: string;
-        createdAt?:Date;
+        createdAt?: Date;
         location: {
           country: string;
           city: string;
@@ -54,25 +53,25 @@ export const validateInputVehicle = async (req: Request, res: Response, next: Ne
     const existedCar = await vehicleService.getVehicleByVin(vin);
 
     if (existedCar) {
-      return ResponseHandler.badRequest(res, 'Vehicle already exists')
+      return ResponseHandler.badRequest(res, 'Vehicle already exists');
     }
 
     const validation = validateInput(req.body);
     if (!validation.isValid) {
-     return ResponseHandler.badRequest(res, 'Validation failed', validation.message)
+      return ResponseHandler.badRequest(res, 'Validation failed', validation.message);
     }
 
     req.vehicle = {
       modelId,
       year,
       vin,
-      location
+      location,
     };
 
     next();
   } catch (error: any) {
     console.error('Vehicle validation middleware error:', error);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -85,12 +84,12 @@ export const validateInputVehicleUpdate = async (req: Request, res: Response, ne
     const vehicle = await vehicleService.getVehicleById(parseInt(id));
 
     if (!vehicle) {
-      return ResponseHandler.notFound(res, 'Vehicle not found')
+      return ResponseHandler.notFound(res, 'Vehicle not found');
     }
 
     const validation = validateInput(req.body);
     if (!validation.isValid) {
-      return ResponseHandler.badRequest(res, 'Validation failed', validation.message)
+      return ResponseHandler.badRequest(res, 'Validation failed', validation.message);
     }
 
     req.vehicle = {
@@ -104,6 +103,7 @@ export const validateInputVehicleUpdate = async (req: Request, res: Response, ne
     next();
   } catch (error: any) {
     console.error('Vehicle validation middleware error:', error);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
+

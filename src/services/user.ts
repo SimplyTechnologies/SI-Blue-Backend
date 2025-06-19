@@ -8,8 +8,6 @@ import { SerializedUser, serializeUser } from '../serializer/userSerializer';
 import { runInTransaction } from '../helpers/transactionHelpers';
 import { getUserAvatarUrlFromId } from '../helpers/userAvatarUrlFromId';
 
-
-
 export interface InputUser {
   firstName: string;
   lastName: string;
@@ -214,11 +212,10 @@ const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
       await deleteCloudinaryFile(user.avatarPublicId);
     }
 
-    
     user.avatarPublicId = result.public_id;
-    await user.save({transaction});
+    await user.save({ transaction });
 
-    const avatarUrl = getUserAvatarUrlFromId(user.avatarPublicId);;
+    const avatarUrl = getUserAvatarUrlFromId(user.avatarPublicId);
 
     return avatarUrl;
   });

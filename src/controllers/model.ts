@@ -6,7 +6,7 @@ const getModelsByMakeId = async (req: Request, res: Response) => {
   try {
     const makeId = Number(req.query.makeId);
     if (!makeId) {
-      return ResponseHandler.badRequest(res, 'MakeID is required')
+      return ResponseHandler.badRequest(res, 'MakeID is required');
     }
     const models = await modelService.getModelsByMakeId(makeId);
 
@@ -16,10 +16,11 @@ const getModelsByMakeId = async (req: Request, res: Response) => {
     }));
     ResponseHandler.success(res, 'Models fetched successfully', modelsWithoutMakeId);
   } catch (err) {
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
 export default {
   getModelsByMakeId,
 };
+

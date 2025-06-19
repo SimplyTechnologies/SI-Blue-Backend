@@ -68,3 +68,4 @@ export const getVehicleInfo = async (vin: string) => {
     throw new Error('An unknown error occurred while decoding VIN');
   }
 };
+
