@@ -16,11 +16,9 @@ const getMakeById = async (id: number) => {
     if (!id) {
       throw new Error('Id is required');
     }
-    const make = await CarModel.findByPk(id);
-    if (!make) {
-      return null;
-    }
-    return make;
+    const make = await Make.findByPk(id);
+    if (!make) return null;
+    return make.dataValues;
   } catch (err) {
     console.error('Failed to get make by Id', err);
     throw err;

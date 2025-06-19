@@ -139,7 +139,7 @@ export const serializeVehicleForUserActivity = async (
     let make = null;
     let customer = null;
 
-    if (model?.id) {
+    if (model?.makeId) {
       make = await makeService.getMakeById(model.makeId);
     }
 
