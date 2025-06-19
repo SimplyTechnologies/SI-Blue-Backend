@@ -22,7 +22,6 @@ export interface UserActivityAttributes {
   actionType: ActionType;
   previousValue: string;
   currentValue: string;
-  createdAt: Date;
 }
 export interface UserCreationAttributes extends Optional<UserActivityAttributes, 'id'> {}
 
@@ -36,8 +35,8 @@ export class UserActivity
   public actionType!: ActionType;
   public previousValue!: string;
   public currentValue!: string;
-  public createdAt!: Date;
 
+  declare createdAt: Date;
   declare user?: User;
 }
 
@@ -71,10 +70,6 @@ export const defineUserActivityModel = (sequelize: Sequelize): typeof UserActivi
       },
       currentValue: {
         type: DataTypes.JSONB,
-        allowNull: false,
-      },
-      createdAt: {
-        type: DataTypes.DATE,
         allowNull: false,
       },
     },
