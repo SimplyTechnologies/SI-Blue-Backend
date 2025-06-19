@@ -4,15 +4,12 @@ import { validateCustomerRegistration } from '../middlewares/customerDataValidat
 import customerController from '../controllers/customer';
 
 const router = Router();
-router.use(authenticateToken)
 
+router.use(authenticateToken);
 
 router.post('/customer', validateCustomerRegistration, customerController.createCustomer);
-
 router.get('/search', customerController.getCustomer);
-
 router.get('/get-customers', customerController.getCustomers);
-
 router.delete('/:id', customerController.deleteCustomer);
 
 export default router;

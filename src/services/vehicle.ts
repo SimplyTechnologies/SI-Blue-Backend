@@ -6,6 +6,7 @@ import { Customer } from '../models/customersModel';
 import { SearchVehiclesParams } from '../types/vehicle';
 import { customerService, vehicleService } from '.';
 import { User } from '../models/usersModel';
+import { runInTransaction } from '../helpers/transactionHelpers';
 
 interface CreateVehicleData {
   modelId: number;
@@ -131,7 +132,7 @@ const getVehicleById = async (id: number, userId?: number) => {
 };
 
 const updateVehicleByCustomerId = async (customerId: number, vehicleId: number, userId?: number) => {
-  try {
+  return await runInTransaction(async transaction => {
     if (!customerId || !vehicleId) {
       throw new Error('Customer ID or vehicle ID missing');
     }
@@ -141,26 +142,30 @@ const updateVehicleByCustomerId = async (customerId: number, vehicleId: number, 
       throw new Error('Customer data missing');
     }
 
-    const vehicle = await Vehicle.findByPk(vehicleId);
+    const vehicle = await Vehicle.findByPk(vehicleId, { transaction });
     if (!vehicle) {
       throw new Error('Vehicle data missing');
     }
 
-    const [updatedCount] = await Vehicle.update({ customerId, assignedDate: new Date() }, {
-      where: { id: vehicleId },
-      individualHooks: true,
-      userId: userId,
-    } as UpdateOptions);
+    const [updatedCount] = await Vehicle.update(
+      {
+        customerId,
+        assignedDate: new Date(),
+      },
+      {
+        where: { id: vehicleId },
+        individualHooks: true,
+        userId: userId,
+        transaction,
+      } as UpdateOptions,
+    );
 
     if (updatedCount === 0) {
       throw new Error('Vehicle update failed - no rows affected');
     }
 
     return updatedCount;
-  } catch (err: any) {
-    console.error('Error in updateVehicleByCustomerId:', err);
-    throw err;
-  }
+  });
 };
 
 const getAllVehicleLocationsAndCounts = async () => {
@@ -207,15 +212,20 @@ const getAllVehicleLocationsAndCounts = async () => {
 };
 
 const deleteVehicle = async (id: number, userId?: number) => {
-  try {
-    const vehicle = await Vehicle.findByPk(id);
-    if (vehicle) {
-      return await vehicle.destroy({ userId } as DestroyOptions);
+  return await runInTransaction(async transaction => {
+    const vehicle = await Vehicle.findByPk(id, { transaction });
+
+    if (!vehicle) {
+      throw new Error('Vehicle not found');
     }
-  } catch (err) {
-    console.error('Fail to delete vehicle', err);
-    throw err;
-  }
+
+    await vehicle.destroy({
+      transaction,
+      userId,
+    } as DestroyOptions);
+
+    return { success: true, message: 'Vehicle deleted successfully' };
+  });
 };
 
 const updateVehicle = async (id: number, vehicleData: CreateVehicleData, userId?: number) => {
@@ -237,27 +247,31 @@ const updateVehicle = async (id: number, vehicleData: CreateVehicleData, userId?
 };
 
 const unassignVehicle = async (userId?: number, vehicleId?: number, customerId?: number) => {
-  try {
+  return await runInTransaction(async transaction => {
     if (customerId && !vehicleId) {
       const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, {
         where: { customerId },
         individualHooks: true,
         userId,
+        transaction,
       } as UpdateOptions);
+
       if (updatedCount === 0) {
         throw new Error('No vehicles were unassigned');
       }
+
       return updatedCount;
     }
 
     if (!vehicleId) {
-      throw new Error('Vehicle ID is required when unassigning a single vehicle');
+      throw new Error('Vehicle ID is required when unassign a single vehicle');
     }
 
     const [updatedCount] = await Vehicle.update({ customerId: null, assignedDate: null }, {
       where: { id: vehicleId },
       individualHooks: true,
-      userId: userId,
+      userId,
+      transaction,
     } as UpdateOptions);
 
     if (updatedCount === 0) {
@@ -265,10 +279,7 @@ const unassignVehicle = async (userId?: number, vehicleId?: number, customerId?:
     }
 
     return updatedCount;
-  } catch (err) {
-    console.error('Failed to unassign vehicle', err);
-    throw err;
-  }
+  });
 };
 
 const getVehiclesByCustomerId = async (customerId: number) => {

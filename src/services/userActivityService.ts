@@ -67,3 +67,4 @@ const getUserActivity = async (options: GetUserActivityOptions) => {
 export default {
   getUserActivity,
 };
+

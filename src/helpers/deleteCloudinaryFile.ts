@@ -1,4 +1,4 @@
-import cloudinary from "../configs/cloudinary";
+import cloudinary from '../configs/cloudinary';
 
 export const deleteCloudinaryFile = async (publicId: string) => {
   if (!publicId) return;

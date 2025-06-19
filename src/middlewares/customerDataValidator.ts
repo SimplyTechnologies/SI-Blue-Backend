@@ -17,7 +17,7 @@ export const validateCustomerByEmail = (req: Request, res: Response, next: NextF
   try {
     const email = req.query.email;
     if (!email || typeof email !== 'string') {
-      return ResponseHandler.badRequest(res, 'Email is missing or not a valid string')
+      return ResponseHandler.badRequest(res, 'Email is missing or not a valid string');
     }
 
     const EmailSchema = CustomerSchema.pick({ email: true });
@@ -26,7 +26,7 @@ export const validateCustomerByEmail = (req: Request, res: Response, next: NextF
     next();
   } catch (err) {
     console.error('Email validation error:', err);
-    ResponseHandler.badRequest(res, 'Invalid email format')
+    ResponseHandler.badRequest(res, 'Invalid email format');
   }
 };
 
@@ -35,17 +35,21 @@ export const validateCustomerRegistration = async (req: Request, res: Response, 
     const result = CustomerSchema.safeParse(req.body);
 
     if (!result.success) {
-      return ResponseHandler.badRequest(res, 'Validation failed',result.error.errors.map(err => err.message))
+      return ResponseHandler.badRequest(
+        res,
+        'Validation failed',
+        result.error.errors.map(err => err.message),
+      );
     }
 
     const { email, firstName, lastName, phoneNumber, vehicleId } = result.data;
     const vehicle = await vehicleService.getVehicleById(vehicleId);
-      if (vehicle?.customerId) {
-        return ResponseHandler.badRequest(res, 'Vehicle already assigned');
-      }
+    if (vehicle?.customerId) {
+      return ResponseHandler.badRequest(res, 'Vehicle already assigned');
+    }
 
     const existedCar = await vehicleService.getVehicleById(vehicleId);
-    
+
     if (!existedCar) {
       return ResponseHandler.badRequest(res, 'Vehicle not found');
     }
@@ -75,6 +79,6 @@ export const validateCustomerRegistration = async (req: Request, res: Response, 
     next();
   } catch (error) {
     console.error('Customer registration validation error:', error);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };

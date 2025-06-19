@@ -1,14 +1,12 @@
 import { col, fn, Op, where as sequelizeWhere } from 'sequelize';
 import { Readable } from 'stream';
-import dotenv from 'dotenv';
 import { User } from '../models/usersModel';
 import { RegisterInput } from '../schemas/usersSchema.js';
 import { deleteCloudinaryFile } from '../helpers/deleteCloudinaryFile';
 import cloudinary from '../configs/cloudinary';
 import { SerializedUser, serializeUser } from '../serializer/userSerializer';
+import { runInTransaction } from '../helpers/transactionHelpers';
 import { getUserAvatarUrlFromId } from '../helpers/userAvatarUrlFromId';
-
-dotenv.config();
 
 export interface InputUser {
   firstName: string;
@@ -135,49 +133,36 @@ const getUserByEmail = async (email: string, includeDeleted: boolean = false) =>
     throw err;
   }
 };
+const softDeleteUser = async (userId: number): Promise<boolean> => {
+  return runInTransaction(async transaction => {
+    if (!userId) throw new Error('User id missing');
 
-const softDeleteUser = async (userId: number) => {
-  try {
-    if (!userId) {
-      throw new Error('User id missing');
-    }
-    const user = await User.findByPk(userId);
-    if (!user) {
-      throw Error('User not found');
-    }
+    const user = await User.findByPk(userId, { transaction });
+    if (!user) throw new Error('User not found');
+
     user.isActive = false;
     user.password = null;
     user.tokenInvalidatedAt = new Date();
-    await user.save();
-    const deletedRows = await User.destroy({ where: { id: userId } });
+    await user.save({ transaction });
+
+    const deletedRows = await User.destroy({ where: { id: userId }, transaction });
     return deletedRows > 0;
-  } catch (err) {
-    console.error('Error soft deleting user:', err);
-    throw err;
-  }
+  });
 };
 
 const restoreUser = async (userId: number) => {
-  try {
-    if (!userId) {
-      throw new Error('User id missing');
-    }
-    const user = await User.findByPk(userId, { paranoid: false });
-    if (!user) {
-      throw new Error('User not found');
-    }
+  return runInTransaction(async transaction => {
+    if (!userId) throw new Error('User id missing');
 
-    if (!user.deletedAt) {
-      throw new Error('User is not deleted');
-    }
+    const user = await User.findByPk(userId, { paranoid: false, transaction });
+    if (!user) throw new Error('User not found');
 
-    await user.restore();
+    if (!user.deletedAt) throw new Error('User is not deleted');
+
+    await user.restore({ transaction });
 
     return true;
-  } catch (err) {
-    console.error('Error restoring user:', err);
-    throw err;
-  }
+  });
 };
 
 const updateUserPasswordActiveStatus = async (updatedUser: User) => {
@@ -199,15 +184,11 @@ const updateUserPasswordActiveStatus = async (updatedUser: User) => {
     throw err;
   }
 };
-
 const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
-  try {
-    const user = await User.findByPk(userId);
+  return runInTransaction(async transaction => {
+    const user = await User.findByPk(userId, { transaction });
+    if (!user) throw new Error('User not found');
 
-    if (!user) {
-      throw Error('User not found');
-    }
-    // Upload to Cloudinary
     const result: any = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
@@ -225,44 +206,32 @@ const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
       Readable.from(fileBuffer).pipe(stream);
     });
 
-    // Delete old avatar
+    user.avatarPublicId = result.public_id;
+    await user.save({ transaction });
     if (user.avatarPublicId) {
       await deleteCloudinaryFile(user.avatarPublicId);
     }
 
     user.avatarPublicId = result.public_id;
-    await user.save();
+    await user.save({ transaction });
 
-    const avatarUrl = getUserAvatarUrlFromId(user.avatarPublicId);;
+    const avatarUrl = getUserAvatarUrlFromId(user.avatarPublicId);
 
     return avatarUrl;
-  } catch (err) {
-    console.error('Failed to upload user avatar', err);
-    throw err;
-  }
+  });
 };
 
 const deleteUserAvatar = async (userId: number) => {
-  try {
-    const user = await User.findByPk(userId);
-
-    if (!user) {
-      throw Error('User not found');
-    }
-    if (!user.avatarPublicId) {
-      throw Error('Avatar not found');
-    }
-
+  return runInTransaction(async transaction => {
+    const user = await User.findByPk(userId, { transaction });
+    if (!user) throw new Error('User not found');
+    if (!user.avatarPublicId) throw new Error('Avatar not found');
     await deleteCloudinaryFile(user.avatarPublicId);
 
     user.avatarPublicId = null;
-    await user.save();
-
+    await user.save({ transaction });
     return null;
-  } catch (err) {
-    console.error('Failed to delete user avatar', err);
-    throw err;
-  }
+  });
 };
 
 export default {

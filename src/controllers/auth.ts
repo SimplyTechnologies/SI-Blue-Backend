@@ -76,7 +76,7 @@ const refreshToken = (req: Request, res: Response) => {
     const user = req.user as User;
 
     if (!user) {
-      return ResponseHandler.unauthorized(res, 'Unauthorized')
+      return ResponseHandler.unauthorized(res, 'Unauthorized');
     }
 
     const accessToken = generateAccessToken(user);
@@ -171,4 +171,5 @@ export default {
   forgotPassword,
   resetPassword,
   activateAccount,
-}
+};
+

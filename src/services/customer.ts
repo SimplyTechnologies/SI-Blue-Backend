@@ -4,11 +4,14 @@ import { Vehicle } from '../models/vehiclesModel';
 import { Customer } from '../models/customersModel';
 import { CarModel } from '../models/carModelsModel';
 import { CustomerSchema } from '../schemas/customersSchema';
-
+import { runInTransaction } from '../helpers/transactionHelpers';
 const createCustomer = async (customerData: CustomerSchema) => {
-  try {
+  return runInTransaction(async transaction => {
     if (!customerData) {
       throw new Error('Customer data are required');
+    }
+    if (!customerData.vehicleId) {
+      throw new Error('Vehicle not found');
     }
     const createdCustomer = {
       vehicleId: customerData.vehicleId,
@@ -17,12 +20,9 @@ const createCustomer = async (customerData: CustomerSchema) => {
       phoneNumber: customerData.phoneNumber,
       email: customerData.email,
     };
-    const returnedCustomer = await Customer.create(createdCustomer);
+    const returnedCustomer = await Customer.create(createdCustomer, { transaction });
     return returnedCustomer.dataValues;
-  } catch (err) {
-    console.error('Failed to create customer', err);
-    throw err;
-  }
+  });
 };
 
 const findCustomerById = async (id: number) => {

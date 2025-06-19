@@ -10,21 +10,19 @@ export const createFavorite = async (req: Request, res: Response) => {
     const vehicleId = req.body.vehicleId;
 
     if (!userId || !vehicleId) {
-      return ResponseHandler.badRequest(res, 'UserId and vehicleId are required')
-
+      return ResponseHandler.badRequest(res, 'UserId and vehicleId are required');
     }
 
     const vehicle = await vehicleService.getVehicleById(vehicleId);
     if (!vehicle) {
-      return ResponseHandler.notFound(res, 'Vehicle not found')
+      return ResponseHandler.notFound(res, 'Vehicle not found');
     }
 
     const favorite = await favoritesService.createFavorite(userId, vehicleId);
-    ResponseHandler.created(res, 'Favorite created successfully', favorite)
-
+    ResponseHandler.created(res, 'Favorite created successfully', favorite);
   } catch (error) {
     console.error('Error creating favorite:', error);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -32,7 +30,7 @@ export const getFavoritesByUserId = async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.userId);
     if (!userId) {
-      return ResponseHandler.badRequest(res, 'UserId is required')
+      return ResponseHandler.badRequest(res, 'UserId is required');
     }
     const favorites = await favoritesService.getFavoritesByUserId(userId);
 
@@ -57,10 +55,10 @@ export const getFavoritesByUserId = async (req: Request, res: Response) => {
             }
           : null,
     }));
-    ResponseHandler.success(res, 'Retrieve favorite successfully', result)
+    ResponseHandler.success(res, 'Retrieve favorite successfully', result);
   } catch (error) {
     console.error('Error retrieving favorites:', error);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
 
@@ -70,14 +68,15 @@ export const deleteFavoriteById = async (req: Request, res: Response) => {
     const { vehicleId } = req.params;
 
     if (!userId || !vehicleId) {
-      return ResponseHandler.badRequest(res, 'UserId and vehicleId are required')
+      return ResponseHandler.badRequest(res, 'UserId and vehicleId are required');
     }
 
     await favoritesService.deleteFavoriteById(userId, Number(vehicleId));
 
-    ResponseHandler.success(res, 'Favorite removed successfully')
+    ResponseHandler.success(res, 'Favorite removed successfully');
   } catch (error) {
     console.error('Error deleting favorite:', error);
-    ResponseHandler.serverError(res, 'Internal server error')
+    ResponseHandler.serverError(res, 'Internal server error');
   }
 };
+

@@ -36,3 +36,4 @@ const getUserActivity = async (req: Request, res: Response) => {
 export default {
   getUserActivity,
 };
+

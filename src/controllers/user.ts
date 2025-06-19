@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { userService } from '../services';
+
 import { Request, Response } from 'express';
 import { User } from '../models/usersModel';
 import { generateTokenForAccountActivation } from '../helpers/tokenUtils';
@@ -169,13 +170,13 @@ const deleteInactiveUser = async (req: Request, res: Response) => {
     });
 
     await sendEmail(user.email, emailSubject, emailHtml);
+
     ResponseHandler.success(res, 'User deleted successfully');
   } catch (err) {
     console.error('Error in deleteInactiveUser:', err);
     ResponseHandler.serverError(res, 'Internal server error');
   }
 };
-
 export const uploadAvatar = async (req: Request, res: Response) => {
   try {
     if (!req.file) {
@@ -206,16 +207,16 @@ const deleteAvatar = async (req: Request, res: Response) => {
   try {
     const userId = parseInt(req.params.id);
 
-  if (isNaN(userId)) {
-    return ResponseHandler.badRequest(res, 'Invalid user ID');
-  }
+    if (isNaN(userId)) {
+      return ResponseHandler.badRequest(res, 'Invalid user ID');
+    }
     const avatarUrl = await userService.deleteUserAvatar(userId);
     ResponseHandler.success(res, 'Avatar successfully deleted', { avatarUrl });
   } catch (err) {
     console.error('Error in updating avatar:', err);
     ResponseHandler.serverError(res, 'Internal server error');
   }
-}
+};
 
 export default {
   getUserById,
@@ -223,6 +224,6 @@ export default {
   getUsers,
   updateUser,
   deleteInactiveUser,
-  uploadAvatar,
   deleteAvatar,
+  uploadAvatar,
 };
