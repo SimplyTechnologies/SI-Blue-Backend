@@ -10,12 +10,7 @@ const sequelizeRoot = new Sequelize(
     port: config.database.port as number,
     logging: false,
     dialect: 'postgres',
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
-    },
+    ssl: true,
   },
 );
 
@@ -51,12 +46,7 @@ const connectToDB = async () => {
       port: config.database.port as number,
       logging: false,
       dialect: 'postgres',
-      dialectOptions: {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false,
-        },
-      },
+      ssl: true,
     },
   );
 
