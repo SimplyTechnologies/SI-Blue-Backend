@@ -72,10 +72,6 @@ export const defineUserActivityModel = (sequelize: Sequelize): typeof UserActivi
         type: DataTypes.JSONB,
         allowNull: false,
       },
-      createdAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-      },
     },
     {
       sequelize,
