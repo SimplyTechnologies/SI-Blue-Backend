@@ -45,6 +45,11 @@ const connectToDB = async () => {
       port: config.database.port as number,
       logging: false,
       dialect: 'postgres',
+      dialectOptions: {
+        ssl: {
+          require: true,
+        },
+      },
     },
   );
 
