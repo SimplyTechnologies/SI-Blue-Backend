@@ -38,10 +38,14 @@ const getUserActivity = async (options: GetUserActivityOptions) => {
   }
   const dateConditions: any = {};
   if (from) {
-    dateConditions[Op.gte] = new Date(from);
+    const fromDate = new Date(from);
+    fromDate.setHours(0, 0, 0, 0);
+    dateConditions[Op.gte] = fromDate;
   }
   if (to) {
-    dateConditions[Op.lte] = new Date(to);
+    const toDate = new Date(to);
+    toDate.setHours(23, 59, 59, 999);
+    dateConditions[Op.lte] = toDate;
   }
 
   if (dateConditions[Op.gte] && dateConditions[Op.lte]) {
@@ -67,4 +71,3 @@ const getUserActivity = async (options: GetUserActivityOptions) => {
 export default {
   getUserActivity,
 };
-
