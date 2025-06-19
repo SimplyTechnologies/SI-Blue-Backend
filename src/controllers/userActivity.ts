@@ -5,15 +5,22 @@ import { serializeUserActivity, UserActivityRawAttributes } from '../serializer/
 
 const getUserActivity = async (req: Request, res: Response) => {
   try {
-    const { page, offset } = req.query;
+    const { page, offset, search, from, to } = req.query;
     const pageNum = page ? Math.max(Number(page), 1) : 1;
     const limit = offset ? Number(offset) : 25;
+    const searchTerm = search ? String(search) : undefined;
+    const fromDate = from ? String(from) : undefined;
+    const toDate = to ? String(to) : undefined;
+
     const { rows, count } = await userActivityService.getUserActivity({
       page: pageNum,
       offset: limit,
+      search: searchTerm,
+      from: fromDate,
+      to: toDate,
     });
 
-    const userActivity = rows.map((row) => serializeUserActivity(row as UserActivityRawAttributes));
+    const userActivity = rows.map(row => serializeUserActivity(row as UserActivityRawAttributes));
 
     ResponseHandler.success(res, 'Customers data retrieved successfully', {
       userActivity,
@@ -21,6 +28,7 @@ const getUserActivity = async (req: Request, res: Response) => {
       nextId: Math.ceil(count / limit) > pageNum ? pageNum + 1 : null,
     });
   } catch (err) {
+    console.error('Error retrieving user activity:', err);
     ResponseHandler.serverError(res, 'Internal server error');
   }
 };
@@ -28,4 +36,3 @@ const getUserActivity = async (req: Request, res: Response) => {
 export default {
   getUserActivity,
 };
-
