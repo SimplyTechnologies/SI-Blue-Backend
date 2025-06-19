@@ -135,7 +135,7 @@ export const serializeVehicleForUserActivity = async (
   try {
     if (!vehicle?.id) return null;
 
-    const model = await modelService.getModelById(vehicle.id);
+    const model = await modelService.getModelById(vehicle.modelId);
     let make = null;
     let customer = null;
 
