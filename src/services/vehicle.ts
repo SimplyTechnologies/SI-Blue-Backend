@@ -59,10 +59,11 @@ const getVehicles = async ({ search, makeId, modelIds, sold, limit, offset }: Se
   ];
 
   if (search) {
+    const decodedSearch = decodeURIComponent(search);
     where[Op.or] = [
-      { vin: { [Op.iLike]: `%${search}%` } },
-      { '$model.name$': { [Op.iLike]: `%${search}%` } },
-      { '$model.make.name$': { [Op.iLike]: `%${search}%` } },
+      { vin: { [Op.iLike]: `%${decodedSearch}%` } },
+      { '$model.name$': { [Op.iLike]: `%${decodedSearch}%` } },
+      { '$model.make.name$': { [Op.iLike]: `%${decodedSearch}%` } },
     ];
   }
   if (modelIds && modelIds.length > 0) {
