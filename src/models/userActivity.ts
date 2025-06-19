@@ -1,5 +1,7 @@
 import { DataTypes, Model, Sequelize, Optional } from 'sequelize';
 import { User } from './usersModel';
+import { CustomerAttributes } from './customersModel';
+import { SerializedVehicleForActivity } from '../serializer/vehicleSerializer';
 
 const ModelType = {
   VEHICLE: 'vehicle',
@@ -15,13 +17,14 @@ const ActionType = {
 export type ModelType = (typeof ModelType)[keyof typeof ModelType];
 export type ActionType = (typeof ActionType)[keyof typeof ActionType];
 
+export type ValueType = CustomerAttributes | SerializedVehicleForActivity | null;
 export interface UserActivityAttributes {
   id: number;
   userId: number;
   modelType: ModelType;
   actionType: ActionType;
-  previousValue: string;
-  currentValue: string;
+  previousValue: ValueType;
+  currentValue: ValueType;
 }
 export interface UserCreationAttributes extends Optional<UserActivityAttributes, 'id'> {}
 
@@ -33,8 +36,8 @@ export class UserActivity
   public userId!: number;
   public modelType!: ModelType;
   public actionType!: ActionType;
-  public previousValue!: string;
-  public currentValue!: string;
+  public previousValue!: ValueType;
+  public currentValue!: ValueType;
 
   declare createdAt: Date;
   declare user?: User;
@@ -65,12 +68,12 @@ export const defineUserActivityModel = (sequelize: Sequelize): typeof UserActivi
         allowNull: false,
       },
       previousValue: {
-        type: DataTypes.JSONB,
-        allowNull: false,
+        type: DataTypes.JSON,
+        allowNull: true,
       },
       currentValue: {
-        type: DataTypes.JSONB,
-        allowNull: false,
+        type: DataTypes.JSON,
+        allowNull: true,
       },
     },
     {

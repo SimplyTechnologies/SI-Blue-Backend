@@ -25,12 +25,12 @@ module.exports = {
         allowNull: false,
       },
       previousValue: {
-        type: DataTypes.JSONB,
-        allowNull: false,
+        type: DataTypes.JSON,
+        allowNull: true,
       },
       currentValue: {
-        type: DataTypes.JSONB,
-        allowNull: false,
+        type: DataTypes.JSON,
+        allowNull: true,
       },
       createdAt: {
         type: DataTypes.DATE,
