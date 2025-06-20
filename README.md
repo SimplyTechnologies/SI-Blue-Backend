@@ -20,30 +20,36 @@ A robust backend system for managing vehicle-related data, built with **Node.js*
 - ✅ Environment-based configuration
 - ✅ Structured and scalable folder architecture
 
-
 ## 🧱 Tech Stack
 
 The **SI-Blue-Backend** is built on a modern and scalable backend stack designed for high performance, security, and maintainability.
 
-### 🟦 Language  
+### 🟦 Language
+
 **TypeScript** – A statically typed superset of JavaScript that improves code quality, scalability, and developer experience.
 
-### 🧠 Runtime  
+### 🧠 Runtime
+
 **Node.js** – A non-blocking, event-driven runtime optimized for building efficient and scalable network applications.
 
-### 🚀 Framework  
+### 🚀 Framework
+
 **Express.js** – A minimalist and flexible framework ideal for building RESTful APIs with full control over the request/response lifecycle.
 
-### 🗄️ Database  
-**PostgreSQL** – A robust, open-source relational database known for ACID compliance, extensibility, and JSONB support.
+### 🗄️ Database
 
-### 🔗 ORM  
+**PostgreSQL** – A robust, open-source relational database known for ACID compliance, extensibility.
+
+### 🔗 ORM
+
 **Sequelize** – A promise-based ORM that provides a clean, model-driven approach to database access and migrations.
 
-### 🔐 Authentication  
-**Passport.js** – Powers a secure, JWT-based authentication system with support for HttpOnly cookies to protect against XSS attacks.
+### 🔐 Authentication
 
-### ⚙️ Configuration  
+**Passport.js** – Implements a secure authentication system using JWTs.
+
+### ⚙️ Configuration
+
 **dotenv** – Manages environment-specific settings securely through `.env` files for different stages (development, testing, production).
 
 ---
@@ -73,13 +79,13 @@ This project follows the **MVC pattern** to ensure a clean and maintainable code
 - **MVC Pattern** – Ensures modular, scalable architecture
 - **Singleton Pattern** – Maintains a single database connection instance
 - **Service Layer Pattern** – Isolates and organizes business logic for reuse and testing
-- **Middleware Pattern** – Manages cross-cutting concerns like authentication, logging, and validation
+- **Middleware Pattern** – Manages cross-cutting concerns like authentication and validation
 
 ## 📁 Project Structure
 
 ```
 src/
-├── configs/           # App-wide configuration (e.g. DB, auth, email)
+├── configs/           # App-wide configuration
 ├── controllers/       # Request handlers
 ├── data/              # Static or seed data
 ├── handlers/          # Custom error/response handlers
@@ -91,8 +97,8 @@ src/
 ├── schemas/           # Zod schemas for validation
 ├── seeders/           # Sequelize seed files
 ├── serializer/        # Response transformers
-├── services/          # Business logic (e.g., email, auth)
-├── templates/         # Email templates (Handlebars)
+├── services/          # Business logic
+├── templates/         # Email templates
 ├── types/             # Custom TypeScript types
 └── index.ts           # App entry point
 ```
@@ -150,3 +156,4 @@ Thanks to open source tools and libraries that power this project:
 Express.js, Sequelize, Passport, Zod, SendGrid, Cloudinary, Multer, JWT, and TypeScript, among others.
 
 Special thanks to **Simply Technologies** for organizing the internship and providing the opportunity to build this project.
+
