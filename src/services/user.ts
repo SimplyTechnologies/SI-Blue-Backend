@@ -207,12 +207,13 @@ const uploadUserAvatar = async (userId: number, fileBuffer: Buffer) => {
 
       Readable.from(fileBuffer).pipe(stream);
     });
-
-    user.avatarPublicId = result.public_id;
-    await user.save({ transaction });
     if (user.avatarPublicId) {
       await deleteCloudinaryFile(user.avatarPublicId);
     }
+
+    user.avatarPublicId = result.public_id;
+
+    await user.save({ transaction });
 
     user.avatarPublicId = result.public_id;
     await user.save({ transaction });
