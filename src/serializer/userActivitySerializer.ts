@@ -1,5 +1,5 @@
 import { getUserAvatarUrlFromId } from '../helpers/userAvatarUrlFromId';
-import { ActionType, ModelType, UserActivityAttributes } from '../models/userActivity';
+import { ActionType, ModelType, UserActivityAttributes, ValueType } from '../models/userActivity';
 
 interface SerializedUserActivity {
   id: number;
@@ -11,8 +11,8 @@ interface SerializedUserActivity {
   };
   modelType: ModelType;
   actionType: ActionType;
-  previousValue: string;
-  currentValue: string;
+  previousValue: ValueType;
+  currentValue: ValueType;
   createdAt: Date;
 }
 

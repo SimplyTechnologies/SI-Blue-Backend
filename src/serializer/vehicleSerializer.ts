@@ -150,6 +150,7 @@ export const serializeVehicleForUserActivity = async (
 
     const formattedVehicle = {
       ...vehicle,
+      customerId: vehicle.customerId || null,
       make: make || null,
       model: model ? { id: model.id, name: model.name } : null,
       customer: customer,
