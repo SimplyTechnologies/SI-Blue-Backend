@@ -43,7 +43,7 @@ interface SerializedVehicle {
   } | null;
 }
 
-interface SerializedVehicleForActivity {
+export interface SerializedVehicleForActivity {
   id: number;
   year: number;
   vin: string;
@@ -55,6 +55,7 @@ interface SerializedVehicleForActivity {
     lastName: string;
     phoneNumber: string;
   } | null;
+  customerId: number | null;
   model: {
     id: number;
     name: string;

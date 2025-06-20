@@ -35,8 +35,8 @@ export const registerVehicleHooks = () => {
       userId: userId,
       modelType: 'vehicle',
       actionType: 'CREATE',
-      previousValue: JSON.stringify(formattedPrevVehicle),
-      currentValue: JSON.stringify(formattedCurrentVehicle),
+      previousValue: formattedPrevVehicle,
+      currentValue: formattedCurrentVehicle,
     });
   });
 
@@ -54,8 +54,8 @@ export const registerVehicleHooks = () => {
       userId: userId,
       modelType: 'vehicle',
       actionType: 'UPDATE',
-      previousValue: JSON.stringify(formattedPrevVehicle),
-      currentValue: JSON.stringify(formattedCurrentVehicle),
+      previousValue: formattedPrevVehicle,
+      currentValue: formattedCurrentVehicle,
     });
   });
 
@@ -71,8 +71,8 @@ export const registerVehicleHooks = () => {
       userId: userId,
       modelType: 'vehicle',
       actionType: 'DELETE',
-      previousValue: JSON.stringify(formattedPrevVehicle),
-      currentValue: JSON.stringify(formattedCurrentVehicle),
+      previousValue: formattedPrevVehicle,
+      currentValue: formattedCurrentVehicle,
     });
   });
 };

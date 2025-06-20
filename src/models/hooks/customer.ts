@@ -23,8 +23,8 @@ export const registerCustomerHooks = () => {
       userId: userId,
       modelType: 'customer',
       actionType: 'DELETE',
-      previousValue: JSON.stringify(prevCustomer),
-      currentValue: JSON.stringify(currentCustomer),
+      previousValue: prevCustomer,
+      currentValue: currentCustomer,
     });
   });
 };
